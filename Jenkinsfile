@@ -124,7 +124,8 @@ def uploadArtifactory() {
             "files": [{
                 "pattern": "${env.WORKSPACE}/packages/*.nupkg",
                 "target": "oss-stg-nuget/materialx/${env.Version}/",
-                "recursive": "false"
+                "recursive": "false",
+                "props":"git.branch=${env.BRANCH_NAME};git.hash=${env.GITCOMMIT}"
             }]
         }"""
         server.upload(uploadSpec)
