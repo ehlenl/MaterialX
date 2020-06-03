@@ -57,7 +57,7 @@ for(int i=0; i< axisNode.size(); i++) {
                             bat "git clean -fdx"
                             bat '''
                             set cmake=C:\\Users\\svc_airbuild\\.jenny\\tools\\cmake\\3.7.1\\bin\\cmake
-                            %cmake% -S . -B_mtlxbuild -G "Visual Studio 14 2015 Win64" -DCMAKE_INSTALL_PREFIX=%WORKSPACE%\\install -DMATERIALX_BUILD_PYTHON=OFF  -DMATERIALX_BUILD_RENDER=OFF -DMATERIALX_DEBUG_POSTFIX=d -DMATERIALX_INSTALL_INCLUDE_PATH=inc -DMATERIALX_INSTALL_LIB_PATH=libs -DMATERIALX_INSTALL_STDLIB_PATH=content/libraries
+                            %cmake% -S . -B_mtlxbuild -G "Visual Studio 14 2015 Win64" -DCMAKE_INSTALL_PREFIX=%WORKSPACE%\\install -DMATERIALX_BUILD_PYTHON=OFF  -DMATERIALX_BUILD_RENDER=OFF -DMATERIALX_BUILD_TESTS=OFF -DMATERIALX_DEBUG_POSTFIX=d -DMATERIALX_INSTALL_INCLUDE_PATH=inc -DMATERIALX_INSTALL_LIB_PATH=libs -DMATERIALX_INSTALL_STDLIB_PATH=content/libraries
                             %cmake% --build _mtlxbuild --config Debug
                             %cmake% --build _mtlxbuild --target install
                             %cmake% --build _mtlxbuild --config RelWithDebInfo
@@ -66,7 +66,7 @@ for(int i=0; i< axisNode.size(); i++) {
                         } else {
                             sh "git clean -fdx"
                             sh '''
-                            cmake -S . -B_mtlxbuild -G "Xcode" -DCMAKE_INSTALL_PREFIX=$WORKSPACE/install -DMATERIALX_BUILD_PYTHON=OFF -DMATERIALX_BUILD_RENDER=OFF -DMATERIALX_DEBUG_POSTFIX=d -DMATERIALX_INSTALL_INCLUDE_PATH=inc -DMATERIALX_INSTALL_LIB_PATH=libs -DMATERIALX_INSTALL_STDLIB_PATH=content/libraries
+                            cmake -S . -B_mtlxbuild -G "Xcode" -DCMAKE_INSTALL_PREFIX=$WORKSPACE/install -DMATERIALX_BUILD_PYTHON=OFF -DMATERIALX_BUILD_RENDER=OFF -DMATERIALX_BUILD_TESTS=OFF -DMATERIALX_DEBUG_POSTFIX=d -DMATERIALX_INSTALL_INCLUDE_PATH=inc -DMATERIALX_INSTALL_LIB_PATH=libs -DMATERIALX_INSTALL_STDLIB_PATH=content/libraries
                             cmake --build _mtlxbuild --config Debug
                             cmake --build _mtlxbuild --target install
                             cmake --build _mtlxbuild --config RelWithDebInfo
