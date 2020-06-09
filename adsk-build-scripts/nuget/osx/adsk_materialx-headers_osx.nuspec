@@ -13,5 +13,6 @@
   </metadata>
  	<files>
     <file src="$installdir$/inc/**" target="inc" />
+    <file src="$installdir$/cmake/**" target="cmake" />
 	</files>
 </package>
