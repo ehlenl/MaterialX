@@ -83,6 +83,7 @@ for(int i=0; i< axisNode.size(); i++) {
                                 nuget pack adsk-build-scripts\\nuget\\win\\adsk_materialx-lib_win_debug_intel64.nuspec -Version %Version% -OutputDirectory %WORKSPACE%\\packages -Prop installdir=%WORKSPACE%\\install -Prop materialx=${materialx_version} -Prop win_compiler=${win_compiler}
                                 nuget pack adsk-build-scripts\\nuget\\win\\adsk_materialx-lib_win_release_intel64.nuspec -Version %Version% -OutputDirectory %WORKSPACE%\\packages -Prop installdir=%WORKSPACE%\\install -Prop materialx=${materialx_version} -Prop win_compiler=${win_compiler}
                                 nuget pack adsk-build-scripts\\nuget\\win\\adsk_materialx-content.nuspec -Version %Version% -OutputDirectory %WORKSPACE%\\packages -Prop installdir=%WORKSPACE%\\install -Prop materialx=${materialx_version} -Prop win_compiler=${win_compiler}
+                                nuget pack adsk-build-scripts\\nuget\\win\\adsk_materialx-sdk_win_intel64.nuspec -Version %Version% -OutputDirectory %WORKSPACE%\\packages -Prop installdir=%WORKSPACE%\\install -Prop materialx=${materialx_version} -Prop win_compiler=${win_compiler}
                                 """
                             } else {
                                 sh """
@@ -90,6 +91,7 @@ for(int i=0; i< axisNode.size(); i++) {
                                 nuget pack adsk-build-scripts/nuget/osx/adsk_materialx-lib_osx_debug_intel64.nuspec -Version $Version -OutputDirectory $WORKSPACE/packages -Prop installdir=$WORKSPACE/install -Prop materialx=${materialx_version} -Prop osx_compiler=${osx_compiler} -Prop osx_target=${osx_target}
                                 nuget pack adsk-build-scripts/nuget/osx/adsk_materialx-lib_osx_release_intel64.nuspec -Version $Version -OutputDirectory $WORKSPACE/packages -Prop installdir=$WORKSPACE/install -Prop materialx=${materialx_version} -Prop osx_compiler=${osx_compiler} -Prop osx_target=${osx_target}
                                 nuget pack adsk-build-scripts/nuget/osx/adsk_materialx-content.nuspec -Version $Version -OutputDirectory $WORKSPACE/packages -Prop installdir=$WORKSPACE/install -Prop materialx=${materialx_version} -Prop osx_compiler=${osx_compiler} -Prop osx_target=${osx_target}
+                                nuget pack adsk-build-scripts/nuget/osx/adsk_materialx-sdk_osx_intel64.nuspec -Version $Version -OutputDirectory $WORKSPACE/packages -Prop installdir=$WORKSPACE/install -Prop materialx=${materialx_version} -Prop osx_compiler=${osx_compiler} -Prop osx_target=${osx_target}
                                 """
                             }
                         }

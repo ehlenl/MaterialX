@@ -17,6 +17,10 @@ cmake -S . -B_mtlxbuild -G "Visual Studio 14 2015 Win64"
 -DMATERIALX_INSTALL_STDLIB_PATH=content/libraries
 ```
 
+# Package Types:
+We have packages following the Autodesk package guidelines but these are not compatible with standard Open Source Install SDK packages that use CMAKE for configuration.
+Therefore, a *sdk_{os}_{platform} is also available.
+
 Slack: #viz-material-interop
 Contacts(s): 
 ashwin.bhat@autodesk.com
