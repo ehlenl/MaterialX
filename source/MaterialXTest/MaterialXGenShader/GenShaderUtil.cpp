@@ -6,7 +6,8 @@
 #include <MaterialXTest/Catch/catch.hpp>
 #include <MaterialXTest/MaterialXGenShader/GenShaderUtil.h>
 
-#include <MaterialXCore/Util.h>
+#include <MaterialXCore/MaterialNode.h>
+//#include <MaterialXCore/Util.h>
 #include <MaterialXCore/Unit.h>
 
 #include <MaterialXFormat/File.h>
@@ -66,7 +67,7 @@ void checkImplementations(mx::GenContext& context,
 
     mx::FileSearchPath searchPath; 
     searchPath.append(mx::FilePath::getCurrentPath() / mx::FilePath("libraries"));
-    loadLibraries({ "stdlib", "pbrlib" }, searchPath, doc);
+    loadLibraries({ "adsk", "stdlib", "pbrlib" }, searchPath, doc);
 
     std::string generatorId = shadergen.getLanguage() + "_" + shadergen.getTarget();
     std::string fileName = generatorId + "_implementation_check.txt";
@@ -487,7 +488,7 @@ void ShaderGeneratorTester::setupDependentLibraries()
     _dependLib = mx::createDocument();
 
     // Load the standard libraries.
-    const mx::FilePathVec libraries = { "stdlib", "pbrlib", "lights" };
+    const mx::FilePathVec libraries = { "adsk", "stdlib", "pbrlib", "lights" };
 
     loadLibraries(libraries, _libSearchPath, _dependLib, &_skipLibraryFiles);
 
@@ -658,6 +659,11 @@ void ShaderGeneratorTester::validate(const mx::GenOptions& generateOptions, cons
     copyOptions.skipConflictingElements = true;
     for (const auto& doc : _documents)
     {
+        // For each new file clear the implementation cache.
+        // Since the new file might contain implementations with names
+        // colliding with implementations in previous test cases.
+        context.clearNodeImplementations();
+
         // Set user data
         context.clearUserData();
         for (auto it : _userData)
@@ -761,11 +767,11 @@ void ShaderGeneratorTester::validate(const mx::GenOptions& generateOptions, cons
             // Handle material node checking. For now only check first surface shader if any
             if (outputNode && outputNode->getType() == mx::MATERIAL_TYPE_STRING)
             {
-                std::vector<mx::NodePtr> shaderNodes = getShaderNodes(outputNode, mx::SURFACE_SHADER_TYPE_STRING);
+                std::unordered_set<mx::NodePtr> shaderNodes = getShaderNodes(outputNode, mx::SURFACE_SHADER_TYPE_STRING);
                 if (!shaderNodes.empty())
                 {
-                    nodeDef = shaderNodes[0]->getNodeDef();
-                    targetElement = shaderNodes[0];
+                    nodeDef = (*shaderNodes.begin())->getNodeDef();
+                    targetElement = *shaderNodes.begin();
                 }
             }
 
@@ -786,17 +792,20 @@ void ShaderGeneratorTester::validate(const mx::GenOptions& generateOptions, cons
                 mx::InterfaceElementPtr impl = nodeDef->getImplementation(_shaderGenerator->getTarget(), _shaderGenerator->getLanguage());
                 if (impl)
                 {
+                    _logFile << "------------ Run validation with element: " << namePath << "------------" << std::endl;
+
+                    mx::StringVec sourceCode;
+                    bool generatedCode = generateCode(context, elementName, targetElement, _logFile, _testStages, sourceCode);
+
                     // Record implementations tested
                     if (options.checkImplCount)
                     {
+                        context.getNodeImplementationNames(_usedImplementations);
                         mx::NodeGraphPtr nodeGraph = impl->asA<mx::NodeGraph>();
                         mx::InterfaceElementPtr nodeGraphImpl = nodeGraph ? nodeGraph->getImplementation() : nullptr;
                         _usedImplementations.insert(nodeGraphImpl ? nodeGraphImpl->getName() : impl->getName());
                     }
 
-                    _logFile << "------------ Run validation with element: " << namePath << "------------" << std::endl;
-                    mx::StringVec sourceCode;
-                    bool generatedCode = generateCode(context, elementName, targetElement, _logFile, _testStages, sourceCode);
                     if (!generatedCode)
                     {
                         _logFile << ">> Failed to generate code for nodedef: " << nodeDefName << std::endl;

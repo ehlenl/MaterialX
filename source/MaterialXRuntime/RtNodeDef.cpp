@@ -98,7 +98,7 @@ void RtNodeDef::setVersion(const RtToken& version)
 
 bool RtNodeDef::getIsDefaultVersion() const
 {
-    RtTypedValue* v = prim()->addMetadata(IS_DEFAULT_VERSION, RtType::TOKEN);
+    RtTypedValue* v = prim()->addMetadata(IS_DEFAULT_VERSION, RtType::BOOLEAN);
     return v ? v->getValue().asBool() : false;
 }
 
@@ -107,6 +107,14 @@ void RtNodeDef::setIsDefaultVersion(bool isDefault)
     RtTypedValue* v = prim()->addMetadata(IS_DEFAULT_VERSION, RtType::BOOLEAN);
     v->getValue().asBool() = isDefault;
 }
+
+bool RtNodeDef::isVersionCompatible(const RtToken& version) const
+{
+    // Test if either the version matches or if no version passed in if this is the default version.
+    return ((version == getVersion()) ||
+            (version.str().empty() && getIsDefaultVersion()));
+}
+
 
 RtInput RtNodeDef::createInput(const RtToken& name, const RtToken& type, uint32_t flags)
 {

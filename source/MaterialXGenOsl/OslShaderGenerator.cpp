@@ -18,6 +18,7 @@
 #include <MaterialXGenShader/Nodes/BlurNode.h>
 #include <MaterialXGenShader/Nodes/SourceCodeNode.h>
 #include <MaterialXGenShader/Nodes/LayerNode.h>
+#include <MaterialXGenShader/Nodes/ThinFilmNode.h>
 
 namespace MaterialX
 {
@@ -190,6 +191,12 @@ OslShaderGenerator::OslShaderGenerator() :
 
     // <!-- <layer> -->
     registerImplementation("IM_layer_bsdf_" + OslShaderGenerator::LANGUAGE, LayerNode::create);
+
+    // <!-- <thin_film_brdf> -->
+    registerImplementation("IM_thin_film_brdf_" + OslShaderGenerator::LANGUAGE, ThinFilmNode::create);
+    // <!-- <dielectric_brdf> -->
+    registerImplementation("IM_dielectric_brdf_" + OslShaderGenerator::LANGUAGE, ThinFilmSupport::create);
+
 }
 
 ShaderPtr OslShaderGenerator::generate(const string& name, ElementPtr element, GenContext& context) const
@@ -215,14 +222,6 @@ ShaderPtr OslShaderGenerator::generate(const string& name, ElementPtr element, G
     emitLine("#define GGX_DIRECTIONAL_ALBEDO_METHOD " + std::to_string(int(context.getOptions().directionalAlbedoMethod)), stage, false);
     emitLine("#define GGX_DIRECTIONAL_ALBEDO_TABLE \"" + albedoTableFilePath + "\"", stage, false);
     emitLineBreak(stage);
-
-    // Emit sampling code if needed
-    if (graph.hasClassification(ShaderNode::Classification::CONVOLUTION2D))
-    {
-        // Emit sampling functions
-        emitInclude("stdlib/" + OslShaderGenerator::LANGUAGE + "/lib/mx_sampling.osl", context, stage);
-        emitLineBreak(stage);
-    }
 
     // Set the include file to use for uv transformations,
     // depending on the vertical flip flag.

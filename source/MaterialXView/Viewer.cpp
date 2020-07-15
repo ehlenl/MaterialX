@@ -15,6 +15,7 @@
 #include <MaterialXGenOsl/OslShaderGenerator.h>
 #include <MaterialXGenMdl/MdlShaderGenerator.h>
 
+#include <MaterialXCore/MaterialNode.h>
 #include <MaterialXFormat/Environ.h>
 #include <MaterialXFormat/Util.h>
 
@@ -1022,10 +1023,10 @@ void Viewer::loadDocument(const mx::FilePath& filename, mx::DocumentPtr librarie
             mx::NodePtr node = elem->asA<mx::Node>();
             if (node && node->getType() == mx::MATERIAL_TYPE_STRING)
             {
-                std::vector<mx::NodePtr> shaderNodes = getShaderNodes(node, mx::SURFACE_SHADER_TYPE_STRING);
+                std::unordered_set<mx::NodePtr> shaderNodes = getShaderNodes(node, mx::SURFACE_SHADER_TYPE_STRING);
                 if (!shaderNodes.empty())
                 {
-                    renderableElem = shaderNodes[0];
+                    renderableElem = *shaderNodes.begin();
                 }
                 materials.push_back(node);
             }
@@ -1107,7 +1108,15 @@ void Viewer::loadDocument(const mx::FilePath& filename, mx::DocumentPtr librarie
                     else
                     {
                         // Generate a shader for the new material.
-                        mat->generateShader(_genContext);
+                        try
+                        {
+                            mat->generateShader(_genContext);
+                        }
+                        catch (std::exception& e)
+                        {
+                            new ng::MessageDialog(this, ng::MessageDialog::Type::Warning, "Failed to generate shader", e.what());
+                            continue;
+                        }
                         if (udimElement == elem)
                         {
                             udimMaterial = mat;
@@ -1117,7 +1126,15 @@ void Viewer::loadDocument(const mx::FilePath& filename, mx::DocumentPtr librarie
                 else
                 {
                     // Generate a shader for the new material.
-                    mat->generateShader(_genContext);
+                    try
+                    {
+                        mat->generateShader(_genContext);
+                    }
+                    catch (std::exception& e)
+                    {
+                        mat->copyShader(_wireMaterial);
+                        new ng::MessageDialog(this, ng::MessageDialog::Type::Warning, "Failed to generate shader", e.what());
+                    }
                 }
 
                 // Apply geometric assignments specified in the document, if any.
@@ -1263,8 +1280,8 @@ void Viewer::loadShaderSource()
         mx::TypedElementPtr elem = material ? material->getElement() : nullptr;
         if (elem)
         {
-            std::string elementName = elem->getName();
-            std::string baseName = _searchPath[0] / elementName;
+            const std::string path = mx::getEnviron("MATERIALX_VIEW_OUTPUT_PATH");
+            const std::string baseName = (path.empty() ? _searchPath[0] : mx::FilePath(path)) / elem->getName();
             std::string vertexShaderFile = baseName + "_vs.glsl";
             std::string pixelShaderFile = baseName + "_ps.glsl";
             bool hasTransparency = false;
@@ -1618,12 +1635,20 @@ void Viewer::renderFrame()
             continue;
         }
 
+        if (material->getShader()->name() == "__WIRE_SHADER__")
+        {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
         material->bindShader();
         material->bindViewInformation(world, view, proj);
         material->bindLights(_genContext, _lightHandler, _imageHandler, lightingState, shadowState);
         material->bindImages(_imageHandler, _searchPath);
         material->drawPartition(geom);
         material->unbindImages(_imageHandler);
+        if (material->getShader()->name() == "__WIRE_SHADER__")
+        {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
     }
 
     // Transparent pass

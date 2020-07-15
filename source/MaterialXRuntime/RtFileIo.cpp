@@ -32,7 +32,7 @@ namespace
 {
     // Lists of known metadata which are handled explicitly by import/export.
     static const RtTokenSet nodedefMetadata     = { RtToken("name"), RtToken("type"), RtToken("node") };
-    static const RtTokenSet attrMetadata        = { RtToken("name"), RtToken("type"), RtToken("value"), RtToken("nodename"), RtToken("output"), RtToken("colorspace"), RtToken("unit"), RtToken("unittype") };
+    static const RtTokenSet attrMetadata        = { RtToken("name"), RtToken("type"), RtToken("value"), RtToken("nodename"), RtToken("output") };
     static const RtTokenSet nodeMetadata        = { RtToken("name"), RtToken("type"), RtToken("node") };
     static const RtTokenSet nodegraphMetadata   = { RtToken("name") };
     static const RtTokenSet genericMetadata     = { RtToken("name"), RtToken("kind") };
@@ -389,6 +389,14 @@ namespace
                             const RtToken inputType(elem->getType());
                             RtInput input = schema.createInput(socketName, inputType);
                             socket = schema.getInputSocket(input.getName());
+
+                            // Set the input value
+                            const string& valueStr = elem->getValueString();
+                            if (!valueStr.empty())
+                            {
+                                const RtToken portType(elem->getType());
+                                RtValue::fromString(portType, valueStr, input.getValue());
+                            }
                         }
 
                         RtInput input(findInputOrThrow(inputName, node)->hnd());
@@ -784,9 +792,10 @@ namespace
                                 valueElem->setInterfaceName(source.getName());
                             }
                         }
-                        else
+                        const string& inputValueString = input.getValueString(); 
+                        if (!inputValueString.empty())
                         {
-                            valueElem->setValueString(input.getValueString());
+                            valueElem->setValueString(inputValueString);
                         }
                     }
                     else
@@ -797,8 +806,13 @@ namespace
                             RtOutput source = input.getConnection();
                             if (source.isSocket())
                             {
-                                // This is a connection to the internal socket of a graph
+                                // This is a connection to the internal socket of a graph                                
                                 valueElem->setInterfaceName(source.getName());
+                                const string& inputValueString = input.getValueString();
+                                if (!inputValueString.empty())
+                                {
+                                    valueElem->setValueString(inputValueString);
+                                }
                             }
                             else
                             {
@@ -925,7 +939,7 @@ namespace
 
         RtNodeGraph nodegraph(src->hnd());
 
-        if (!writeOptions || writeOptions->writeNodeGraphInputs)
+        if (writeOptions && writeOptions->writeNodeGraphInputs)
         {
             // Write inputs/parameters.
             RtObjTypePredicate<RtInput> inputsFilter;
@@ -1165,6 +1179,10 @@ namespace
             {
                 writeNodeGraph(prim, doc, writeOptions);
             }
+            else if (typeName == RtBackdrop::typeName())
+            {
+                //writeBackdrop(prim, doc)
+            }
             else if (typeName != RtLook::typeName() &&
                      typeName != RtLookGroup::typeName() &&
                      typeName != RtMaterialAssign::typeName() &&
@@ -1227,10 +1245,13 @@ namespace
         // TODO: Want to change this to keep this in <implementation>
         // elements but requires a spec change plus support in the runtime
         // for implementation associations.
+        RtNodeDef nodedef(prim->hnd());
         RtToken nodeDefName = prim->getName();
         RtSchemaPredicate<RtNodeGraph> filter;
         for (RtPrim child : stage->getRootPrim()->getChildren(filter))
         {
+            // The association between a nodedef and a nodegraph is by name. No
+            // version check is required as nodegraphs are not versioned.
             RtNodeGraph nodeGraph(child);
             if (nodeGraph.getDefinition() == nodeDefName)
             {
@@ -1277,7 +1298,7 @@ RtReadOptions::RtReadOptions() :
 
 RtWriteOptions::RtWriteOptions() :
     writeIncludes(true),
-    writeNodeGraphInputs(true),
+    writeNodeGraphInputs(false),
     writeFilter(nullptr),
     materialWriteOp(NONE),
     desiredMajorVersion(MATERIALX_MAJOR_VERSION),

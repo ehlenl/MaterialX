@@ -37,6 +37,7 @@
 #include <MaterialXGenShader/Nodes/BlurNode.h>
 #include <MaterialXGenShader/Nodes/HwImageNode.h>
 #include <MaterialXGenShader/Nodes/LayerNode.h>
+#include <MaterialXGenShader/Nodes/ThinFilmNode.h>
 
 namespace MaterialX
 {
@@ -240,8 +241,6 @@ GlslShaderGenerator::GlslShaderGenerator() :
     registerImplementation("IM_surface_" + GlslShaderGenerator::LANGUAGE, SurfaceNodeGlsl::create);
     // <!-- <light> -->
     registerImplementation("IM_light_" + GlslShaderGenerator::LANGUAGE, LightNodeGlsl::create);
-    // <!-- <layer> -->
-    registerImplementation("IM_layer_bsdf_" + GlslShaderGenerator::LANGUAGE, LayerNode::create);
 
     // <!-- <point_light> -->
     registerImplementation("IM_point_light_" + GlslShaderGenerator::LANGUAGE, LightShaderNodeGlsl::create);
@@ -279,6 +278,14 @@ GlslShaderGenerator::GlslShaderGenerator() :
     registerImplementation("IM_image_vector2_" + GlslShaderGenerator::LANGUAGE, HwImageNode::create);
     registerImplementation("IM_image_vector3_" + GlslShaderGenerator::LANGUAGE, HwImageNode::create);
     registerImplementation("IM_image_vector4_" + GlslShaderGenerator::LANGUAGE, HwImageNode::create);
+
+    // <!-- <layer> -->
+    registerImplementation("IM_layer_bsdf_" + GlslShaderGenerator::LANGUAGE, LayerNode::create);
+
+    // <!-- <thin_film_brdf> -->
+    registerImplementation("IM_thin_film_brdf_" + GlslShaderGenerator::LANGUAGE, ThinFilmNode::create);
+    // <!-- <dielectric_brdf> -->
+    registerImplementation("IM_dielectric_brdf_" + GlslShaderGenerator::LANGUAGE, ThinFilmSupport::create);
 
     _lightSamplingNodes.push_back(ShaderNode::create(nullptr, "numActiveLightSources", NumLightsNodeGlsl::create()));
     _lightSamplingNodes.push_back(ShaderNode::create(nullptr, "sampleLightSource", LightSamplerNodeGlsl::create()));
@@ -503,13 +510,6 @@ void GlslShaderGenerator::emitPixelStage(const ShaderGraph& graph, GenContext& c
     // Emit common math functions
     emitInclude("pbrlib/" + GlslShaderGenerator::LANGUAGE + "/lib/mx_math.glsl", context, stage);
     emitLineBreak(stage);
-
-    // Emit texture sampling code
-    if (graph.hasClassification(ShaderNode::Classification::CONVOLUTION2D))
-    {
-        emitInclude("stdlib/" + GlslShaderGenerator::LANGUAGE + "/lib/mx_sampling.glsl", context, stage);
-        emitLineBreak(stage);
-    }
 
     // Emit lighting and shadowing code
     if (lighting)
@@ -777,6 +777,7 @@ ShaderNodeImplPtr GlslShaderGenerator::createCompoundImplementation(const NodeGr
     return HwShaderGenerator::createCompoundImplementation(impl);
 }
 
+
 const string GlslImplementation::SPACE = "space";
 const string GlslImplementation::TO_SPACE = "tospace";
 const string GlslImplementation::FROM_SPACE = "fromspace";
@@ -811,4 +812,5 @@ bool GlslImplementation::isEditable(const ShaderInput& input) const
 {
     return IMMUTABLE_INPUTS.count(input.getName()) == 0;
 }
+
 }

@@ -314,6 +314,9 @@ TEST_CASE("Runtime: Types", "[runtime]")
     mx::RtValue intValue = integerType->createValue(rootPrim);
     integerType->fromStringValue("12345", intValue);
     REQUIRE(intValue.asInt() == 12345);
+    std::string value;
+    integerType->toStringValue(intValue, value);
+    REQUIRE(value == "12345");
 
     // Make sure we can't use a name already take
     REQUIRE_THROWS(mx::RtTypeDef::registerType(mx::RtType::COLOR3, mx::RtTypeDef::BASETYPE_FLOAT, fooFuncs));
@@ -785,34 +788,60 @@ TEST_CASE("Runtime: NodeGraphs", "[runtime]")
     const mx::RtToken MATH_GROUP("math");
     const mx::RtToken ADDGRAPH_VERSION("3.4");
     const mx::RtToken ADDGRAPH_TARGET("mytarget");
+    bool isDefaultVersion = false;
     stage->renamePrim(graph1.getPath(), NG_ADDGRAPH);
-    mx::RtPrim addgraphPrim = stage->createNodeDef(graph1, ND_ADDGRAPH, ADDGRAPH, MATH_GROUP);
+    mx::RtPrim addgraphPrim = stage->createNodeDef(graph1, ND_ADDGRAPH, ADDGRAPH, ADDGRAPH_VERSION, isDefaultVersion, MATH_GROUP);
     mx::RtNodeDef addgraphDef(addgraphPrim);    
 
-    REQUIRE(addgraphDef.isMasterPrim());
     REQUIRE(graph1.getDefinition() == ND_ADDGRAPH);
+    REQUIRE(graph1.getVersion() == ADDGRAPH_VERSION);
+    REQUIRE(addgraphDef.isMasterPrim());
     REQUIRE(addgraphDef.numInputs() == 2);
     REQUIRE(addgraphDef.numOutputs() == 1);
     REQUIRE(addgraphDef.getOutput().getName() == OUT);
     REQUIRE(addgraphDef.getName() == ND_ADDGRAPH);
     REQUIRE(addgraphDef.getNode() == ADDGRAPH);
     REQUIRE(addgraphDef.getNodeGroup() == MATH_GROUP);
-    addgraphDef.setVersion(ADDGRAPH_VERSION);
     REQUIRE(addgraphDef.getVersion() == ADDGRAPH_VERSION);
+    REQUIRE_FALSE(addgraphDef.getIsDefaultVersion());
     addgraphDef.setTarget(ADDGRAPH_TARGET);
+    REQUIRE(addgraphDef.getTarget() == ADDGRAPH_TARGET);
 
-    // Check instance creation. Metadata like version should be copied
-    // but not target or node.
+    // Check implementation search based on nodegraph.
+    mx::RtPrim addGraphImpl = stage->getImplementation(addgraphDef);
+    // Exact version check
+    {
+        REQUIRE(addGraphImpl.getPath() == graph1.getPath());
+    }
+    // Bad version check
+    {
+        graph1.setVersion(mx::RtToken("badVersion")); 
+        addGraphImpl = stage->getImplementation(addgraphDef);
+        REQUIRE_FALSE(addGraphImpl.isValid());
+        graph1.setVersion(ADDGRAPH_VERSION);
+    }
+
+    // Check instance creation:
     mx::RtPrim agPrim = stage->createPrim("addgraph1", ND_ADDGRAPH);
     REQUIRE(agPrim.isValid());
     mx::RtNode agNode(agPrim);
-    mx::RtTypedValue* agVersion = agNode.getMetadata(mx::RtNodeDef::VERSION);
-    REQUIRE(agVersion->getValueString() == ADDGRAPH_VERSION);
-    mx::RtTypedValue* agTarget= agNode.getMetadata(mx::RtNodeDef::TARGET);
-    REQUIRE(!agTarget);
-    mx::RtTypedValue* agNodeValue = agNode.getMetadata(mx::RtNodeDef::NODE);
-    REQUIRE(!agNodeValue);
+    {
+        // 1. Metadata like version should be copiedbut not target or node.
+        mx::RtTypedValue* agVersion = agNode.getMetadata(mx::RtNodeDef::VERSION);
+        REQUIRE(agVersion->getValueString() == ADDGRAPH_VERSION);
+        mx::RtTypedValue* agTarget = agNode.getMetadata(mx::RtNodeDef::TARGET);
+        REQUIRE(!agTarget);
+        mx::RtTypedValue* agNodeValue = agNode.getMetadata(mx::RtNodeDef::NODE);
+        REQUIRE(!agNodeValue);
+    }
 
+    // 2. The assocaited nodedef can be found.
+    {
+        mx::RtPrim agNodeDefinition = agNode.getNodeDef();
+        REQUIRE(agNodeDefinition.getPath() == addgraphDef.getPath());
+    }
+
+    // Check export to MTLX document:
     mx::RtFileIo stageIo(stage);
     mx::RtTokenVec names;
     names.push_back(ND_ADDGRAPH);
@@ -820,64 +849,76 @@ TEST_CASE("Runtime: NodeGraphs", "[runtime]")
 
     mx::DocumentPtr doc = mx::createDocument();
     mx::readFromXmlFile(doc, "ND_addgraph.mtlx");
+    doc->validate();
     mx::NodeDefPtr nodeDef = doc->getNodeDef(ND_ADDGRAPH.str());
-    REQUIRE(nodeDef);
-    REQUIRE(nodeDef->getVersionString() == ADDGRAPH_VERSION.str());
-    REQUIRE(nodeDef->getTarget() == ADDGRAPH_TARGET.str());
-    std::vector<mx::InputPtr> inputs = nodeDef->getInputs();
-    bool inputCheck = 
-        (inputs.size() == 2) &&
-        (inputs[0]->getName() == "a") &&
-        (inputs[0]->getType() == "float") &&
-        (inputs[0]->getValueString() == "0.3") &&
-        (inputs[1]->getName() == "b") &&
-        (inputs[1]->getType() == "float") &&
-        (inputs[1]->getValueString() == "0.1");
-    REQUIRE(inputCheck);
-    mx::OutputPtr out = nodeDef->getOutput("out");
-    bool outputCheck = out && 
-        (out->getName() == "out") &&
-        (out->getType() == "float") &&
-        (out->getValueString() == "0");
-    REQUIRE(outputCheck);
-    mx::NodeGraphPtr nodeGraph = doc->getNodeGraph(NG_ADDGRAPH.str());
-    REQUIRE((nodeGraph && nodeGraph->getOutputs().size() == 1));
-    for (mx::TreeIterator it = nodeGraph->traverseTree().begin(); it != mx::TreeIterator::end(); ++it)
     {
-        mx::ValueElementPtr input = it.getElement()->asA<mx::ValueElement>();
-        if (input)
+        // 1. Check nodedef
+        REQUIRE(nodeDef);
+        REQUIRE(nodeDef->getVersionString() == ADDGRAPH_VERSION.str());
+        REQUIRE(nodeDef->getTarget() == ADDGRAPH_TARGET.str());
+        std::vector<mx::InputPtr> inputs = nodeDef->getInputs();
+        bool inputCheck =
+            (inputs.size() == 2) &&
+            (inputs[0]->getName() == "a") &&
+            (inputs[0]->getType() == "float") &&
+            (inputs[0]->getValueString() == "0.3") &&
+            (inputs[1]->getName() == "b") &&
+            (inputs[1]->getType() == "float") &&
+            (inputs[1]->getValueString() == "0.1");
+        REQUIRE(inputCheck);
+        mx::OutputPtr out = nodeDef->getOutput("out");
+        bool outputCheck = out &&
+            (out->getName() == "out") &&
+            (out->getType() == "float") &&
+            (out->getValueString() == "0");
+        REQUIRE(outputCheck);
+    }
+
+    // 2. Check the nodegraph for the nodedef
+    {
+        mx::InterfaceElementPtr inter = nodeDef->getImplementation();
+        mx::NodeGraphPtr nodeGraph = inter->asA<mx::NodeGraph>();
+        REQUIRE((nodeGraph && nodeGraph->getOutputs().size() == 1));
+        for (mx::TreeIterator it = nodeGraph->traverseTree().begin(); it != mx::TreeIterator::end(); ++it)
         {
-            if (input->getName() == "in1" && input->getAttribute("nodename").empty())
+            mx::ValueElementPtr input = it.getElement()->asA<mx::ValueElement>();
+            if (input)
             {
-                REQUIRE((input->getInterfaceName() == "a"));
-            }
-            else if (input->getName() == "in2")
-            {
-                if (input->getParent())
+                if (input->getName() == "in1" && input->getAttribute("nodename").empty())
                 {
-                    bool interfaceNameMatched = true;
-                    if (input->getParent()->getName() == "add2")
-                        interfaceNameMatched = (input->getInterfaceName() == "a");
-                    else
-                        interfaceNameMatched = (input->getInterfaceName() == "b");
-                    REQUIRE(interfaceNameMatched);
+                    REQUIRE((input->getInterfaceName() == "a"));
+                }
+                else if (input->getName() == "in2")
+                {
+                    if (input->getParent())
+                    {
+                        bool interfaceNameMatched = true;
+                        if (input->getParent()->getName() == "add2")
+                            interfaceNameMatched = (input->getInterfaceName() == "a");
+                        else
+                            interfaceNameMatched = (input->getInterfaceName() == "b");
+                        REQUIRE(interfaceNameMatched);
+                    }
                 }
             }
         }
     }
 
-    // Check instance creation
-    stageIo.write("addgraph_example.mtlx");
-    doc = mx::createDocument();
-    mx::readFromXmlFile(doc, "addgraph_example.mtlx");
-    mx::ElementPtr agInstance = doc->getChild("addgraph1");
-    REQUIRE(agInstance);
-    bool instanceVersionSaved = agInstance->getAttribute(mx::RtNodeDef::VERSION.str()) == ADDGRAPH_VERSION;
-    REQUIRE(instanceVersionSaved);
-    bool instanceTargetNotSaved = agInstance->getAttribute(mx::RtNodeDef::TARGET.str()) == mx::EMPTY_STRING;
-    REQUIRE(instanceTargetNotSaved);
-    bool instanceNodeNotSaved = agInstance->getAttribute(mx::RtNodeDef::NODE.str()) == mx::EMPTY_STRING;
-    REQUIRE(instanceNodeNotSaved);
+    // 3. Check instance creation
+    {
+        stageIo.write("addgraph_example.mtlx");
+        doc = mx::createDocument();
+        mx::readFromXmlFile(doc, "addgraph_example.mtlx");
+        doc->validate();
+        mx::ElementPtr agInstance = doc->getChild("addgraph1");
+        REQUIRE(agInstance);
+        bool instanceVersionSaved = agInstance->getAttribute(mx::RtNodeDef::VERSION.str()) == ADDGRAPH_VERSION;
+        REQUIRE(instanceVersionSaved);
+        bool instanceTargetNotSaved = agInstance->getAttribute(mx::RtNodeDef::TARGET.str()) == mx::EMPTY_STRING;
+        REQUIRE(instanceTargetNotSaved);
+        bool instanceNodeNotSaved = agInstance->getAttribute(mx::RtNodeDef::NODE.str()) == mx::EMPTY_STRING;
+        REQUIRE(instanceNodeNotSaved);
+    }
 }
 
 TEST_CASE("Runtime: FileIo", "[runtime]")
@@ -2426,6 +2467,108 @@ TEST_CASE("Runtime: logging", "[runtime]")
     REQUIRE("Error: Test" == logger->result);
     api.log(mx::RtLogger::MessageType::INFO, testMsg);
     REQUIRE("Info: Test" == logger->result);
+}
+
+TEST_CASE("Runtime: duplicate name", "[runtime]")
+{
+    mx::RtScopedApiHandle api;
+
+    mx::RtStagePtr stage = api->createStage(ROOT);
+
+    // Create a new nodedef for an add node.
+    mx::RtNodeDef addFloat = stage->createPrim("/ND_add_float", mx::RtNodeDef::typeName());
+    addFloat.setNode(ADD);
+    addFloat.createInput(IN1, mx::RtType::FLOAT);
+    addFloat.createInput(IN2, mx::RtType::FLOAT);
+    addFloat.createOutput(OUT, mx::RtType::FLOAT);
+    addFloat.registerMasterPrim();
+
+    // Create a nodegraph object.
+    mx::RtNodeGraph graph1 = stage->createPrim("/graph1", mx::RtNodeGraph::typeName());
+    REQUIRE(graph1.isValid());
+
+    // Create add node in the graph.
+    mx::RtNode add1Node = stage->createPrim("/graph1/add1", addFloat.getName());
+    REQUIRE(graph1.getNode(add1Node.getName()));
+
+    // Add an interface to the graph.
+    mx::RtInput Ainput = graph1.createInput(A, mx::RtType::FLOAT);
+    graph1.createOutput(OUT, mx::RtType::FLOAT);
+    REQUIRE(graph1.getPrim().getAttribute(A));
+    REQUIRE(graph1.getPrim().getAttribute(OUT));
+    REQUIRE(graph1.getInput(A));
+    REQUIRE(graph1.getOutput(OUT));
+    REQUIRE(graph1.getInputSocket(A));
+    REQUIRE(graph1.getOutputSocket(OUT));
+
+    mx::RtToken add1("add1");
+    mx::RtToken add2("add2");
+    mx::RtToken add3("add3");
+    mx::RtToken add4("add4");
+    mx::RtToken add5("add5");
+
+    auto duplicateCount = [graph1](const mx::RtToken& name)
+    {
+        unsigned int count = 0;
+        for (auto inputIttr = graph1.getInputs(); !inputIttr.isDone(); ++inputIttr)
+        {
+            auto input = *inputIttr;
+            if (input.getName() == name)
+            {
+                count++;
+            }
+        }
+        for (auto outputIttr = graph1.getOutputs(); !outputIttr.isDone(); ++outputIttr)
+        {
+            auto output = *outputIttr;
+            if (output.getName() == name)
+            {
+                count++;
+            }
+        }
+        for (auto nodeIttr = graph1.getNodes(); !nodeIttr.isDone(); ++nodeIttr)
+        {
+            auto node = *nodeIttr;
+            if (node.getName() == name)
+            {
+                count++;
+            }
+        }
+
+        return count;
+    };
+
+    // Test renaming the input to the name of the node
+    REQUIRE(graph1.renameInput(A, add1) == add2);
+    REQUIRE(!graph1.getInput(A));
+    REQUIRE(!graph1.getInputSocket(A));
+    REQUIRE(!graph1.getInput(add1));
+    REQUIRE(!graph1.getInputSocket(add1));
+    REQUIRE(graph1.getInput(add2));
+    REQUIRE(graph1.getInputSocket(add2));
+    REQUIRE(duplicateCount(add2) == 1);
+
+    // Test renaming the output to the name of the node
+    REQUIRE(graph1.renameOutput(OUT, add1) == add3);
+    REQUIRE(!graph1.getOutput(OUT));
+    REQUIRE(!graph1.getOutputSocket(OUT));
+    REQUIRE(!graph1.getOutput(add1));
+    REQUIRE(!graph1.getOutputSocket(add1));
+    REQUIRE(graph1.getOutput(add3));
+    REQUIRE(graph1.getOutputSocket(add3));
+    REQUIRE(duplicateCount(add3) == 1);
+
+    // Add an interface to the graph with the same name as the add node.
+    mx::RtInput input2 = graph1.createInput(add1, mx::RtType::FLOAT);
+    REQUIRE(graph1.getInput(add4));
+    REQUIRE(graph1.getInputSocket(add4));
+    REQUIRE(duplicateCount(add4) == 1);
+
+    // Add an output to the graph with the same name as the add node.
+    mx::RtOutput output2 = graph1.createOutput(add1, mx::RtType::FLOAT);
+    REQUIRE(graph1.getOutput(add5));
+    REQUIRE(graph1.getOutputSocket(add5));
+    REQUIRE(duplicateCount(add5) == 1);
 }
 
 #endif // MATERIALX_BUILD_RUNTIME
