@@ -119,6 +119,7 @@ namespace HW
     const string SHADOW_MATRIX                    = "u_shadowMatrix";
     const string VERTEX_DATA_INSTANCE             = "vd";
     const string LIGHT_DATA_INSTANCE              = "u_lightData";
+    const string LIGHT_DATA_MAX_LIGHT_SOURCES     = "MAX_LIGHT_SOURCES";
 
     const string VERTEX_INPUTS                    = "VertexInputs";
     const string VERTEX_DATA                      = "VertexData";
@@ -291,8 +292,8 @@ ShaderPtr HwShaderGenerator::createShader(const string& name, ElementPtr element
     }
 
     // Add uniforms for the directional albedo table.
-    if (context.getOptions().directionalAlbedoMethod == DIRECTIONAL_ALBEDO_TABLE ||
-        context.getOptions().writeDirectionalAlbedoTable)
+    if (context.getOptions().hwDirectionalAlbedoMethod == DIRECTIONAL_ALBEDO_TABLE ||
+        context.getOptions().hwWriteAlbedoTable)
     {
         psPrivateUniforms->add(Type::FILENAME, HW::T_ALBEDO_TABLE);
         psPrivateUniforms->add(Type::INTEGER, HW::T_ALBEDO_TABLE_SIZE, Value::createValue<int>(64));

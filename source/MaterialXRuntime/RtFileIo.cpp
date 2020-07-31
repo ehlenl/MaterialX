@@ -89,7 +89,7 @@ namespace
 
     PvtOutput* findOutputOrThrow(const RtToken& name, PvtPrim* prim)
     {
-        PvtOutput* output = prim->getOutput(name);
+        PvtOutput* output = name.str().empty() ? prim->getOutput() : prim->getOutput(name);
         if (!output)
         {
             throw ExceptionRuntimeError("Node '" + prim->getName().str() + "' has no output named '" + name.str() + "'");
@@ -158,22 +158,6 @@ namespace
             {
                 RtValue::fromString(attrType, valueStr, attr.getValue());
             }
-            const string& colorSpace = elem->getColorSpace();
-            if (!colorSpace.empty())
-            {
-                attr.setColorSpace(RtToken(elem->getColorSpace()));
-            }
-            const string& unitStr = elem->getUnit();
-            if (!unitStr.empty())
-            {
-                attr.setUnit(RtToken(unitStr));
-            }
-            const string& unitTypeStr = elem->getUnitType();
-            if (!unitTypeStr.empty())
-            {
-                attr.setUnitType(RtToken(unitTypeStr));
-            }
-
             readMetadata(elem, PvtObject::ptr<PvtObject>(attr), attrMetadata);
         }
     }
@@ -204,7 +188,7 @@ namespace
                             outputName = output.getName();
                         }
                     }
-                    PvtOutput* output = findOutputOrThrow(outputName != EMPTY_TOKEN ? outputName : PvtAttribute::DEFAULT_OUTPUT_NAME, connectedNode);
+                    PvtOutput* output = findOutputOrThrow(outputName, connectedNode);
                     output->connect(input);
                 }
             }
@@ -278,7 +262,7 @@ namespace
         for (RtPrim masterPrim : RtApi::get().getMasterPrims(nodedefFilter))
         {
             RtNodeDef candidate(masterPrim);
-            if (candidate.getNode() == nodeName &&
+            if (candidate.getNamespacedNode() == nodeName && 
                 matchingSignature(PvtObject::ptr<PvtPrim>(masterPrim), nodeType, nodePorts))
             {
                 return candidate.getName();
@@ -321,21 +305,7 @@ namespace
                 const RtToken portType(elem->getType());
                 RtValue::fromString(portType, valueStr, input->getValue());
             }
-            const string& colorSpace = elem->getColorSpace();
-            if (!colorSpace.empty())
-            {
-                input->setColorSpace(RtToken(elem->getColorSpace()));
-            }
-            const string& unitStr = elem->getUnit();
-            if (!unitStr.empty())
-            {
-                input->setUnit(RtToken(unitStr));
-            }
-            const string& unitTypeStr = elem->getUnitType();
-            if (!unitTypeStr.empty())
-            {
-                input->setUnitType(RtToken(unitTypeStr));
-            }
+            readMetadata(elem, input, attrMetadata);
         }
 
         return node;
@@ -426,7 +396,7 @@ namespace
                 PvtPrim* connectedNode = findPrimOrThrow(RtToken(connectedNodeName), nodegraph, mapper);
 
                 const RtToken outputName(elem->getOutputString());
-                RtOutput output(findOutputOrThrow(outputName != EMPTY_TOKEN ? outputName : PvtAttribute::DEFAULT_OUTPUT_NAME, connectedNode)->hnd());
+                RtOutput output(findOutputOrThrow(outputName, connectedNode)->hnd());
                 output.connect(socket);
             }
         }
@@ -731,20 +701,6 @@ namespace
             }
 
             destPort->setValueString(attr->getValueString());
-
-            if (attr->getColorSpace())
-            {
-                destPort->setColorSpace(attr->getColorSpace().str());
-            }
-            if (attr->getUnit())
-            {
-                destPort->setUnit(attr->getUnit().str());
-            }
-            if (attr->getUnitType())
-            {
-                destPort->setUnitType(attr->getUnitType().str());
-            }
-
             writeMetadata(attr, destPort, attrMetadata);
         }
     }
@@ -768,7 +724,7 @@ namespace
             outputType = attr.getType();
         }
 
-        NodePtr destNode = dest->addNode(nodedef.getNode(), node.getName(), numOutputs > 1 ? "multioutput" : outputType);
+        NodePtr destNode = dest->addNode(nodedef.getNamespacedNode(), node.getName(), numOutputs > 1 ? "multioutput" : outputType);
 
         for (RtAttribute attrDef : nodedef.getPrim().getAttributes())
         {
@@ -838,21 +794,7 @@ namespace
                         }
                     }
 
-                    const RtToken colorspace = input.getColorSpace();
-                    if (colorspace != EMPTY_TOKEN)
-                    {
-                        valueElem->setColorSpace(colorspace.str());
-                    }
-                    const RtToken unit = input.getUnit();
-                    if (unit != EMPTY_TOKEN)
-                    {
-                        valueElem->setUnit(unit.str());
-                    }
-                    const RtToken unitType = input.getUnitType();
-                    if (unitType != EMPTY_TOKEN)
-                    {
-                        valueElem->setUnitType(unitType.str());
-                    }
+                    writeMetadata(PvtObject::ptr<PvtObject>(attr), valueElem, attrMetadata);
                 }
             }
             else if(numOutputs > 1)
@@ -1218,16 +1160,6 @@ namespace
         }
     }
 
-    void writeUnitDefinitions(DocumentPtr doc)
-    {
-        RtApi& api = RtApi::get();
-        UnitConverterRegistryPtr unitDefinitions = api.getUnitDefinitions();
-        if (unitDefinitions)
-        {
-            unitDefinitions->write(doc);
-        }
-    }
-
     void writeMasterPrim(DocumentPtr document, PvtStage* stage, PvtPrim* prim, const RtWriteOptions* writeOptions)
     {
         if (!prim || prim->isDisposed())
@@ -1291,8 +1223,7 @@ namespace
 RtReadOptions::RtReadOptions() :
     readFilter(nullptr),
     readLookInformation(false),
-    applyFutureUpdates(true),
-    validateDocument(true)
+    applyFutureUpdates(true)
 {
 }
 
@@ -1320,30 +1251,8 @@ void RtFileIo::read(const FilePath& documentPath, const FileSearchPath& searchPa
         }
         readFromXmlFile(document, documentPath, searchPaths, &xmlReadOptions);
 
-        bool validateDocument = readOptions ? readOptions->validateDocument : true;
-        if (validateDocument)
-        {
-            string errorMessage;
-            DocumentPtr validationDocument = createDocument();
-            writeUnitDefinitions(validationDocument);
-            CopyOptions cops;
-            cops.skipConflictingElements = true;
-            validationDocument->copyContentFrom(document, &cops);
-            if (validationDocument->validate(&errorMessage))
-            {
-                PvtStage* stage = PvtStage::ptr(_stage);
-                readDocument(document, stage, readOptions);
-            }
-            else
-            {
-                throw ExceptionRuntimeError("Failed validation: " + errorMessage);
-            }
-        }
-        else
-        {
-            PvtStage* stage = PvtStage::ptr(_stage);
-            readDocument(document, stage, readOptions);
-        }
+        PvtStage* stage = PvtStage::ptr(_stage);
+        readDocument(document, stage, readOptions);
     }
     catch (Exception& e)
     {
@@ -1365,30 +1274,8 @@ void RtFileIo::read(std::istream& stream, const RtReadOptions* readOptions)
         }
         readFromXmlStream(document, stream, &xmlReadOptions);
 
-        bool validateDocument = readOptions ? readOptions->validateDocument : true;
-        if (validateDocument)
-        {
-            string errorMessage;
-            DocumentPtr validationDocument = createDocument();
-            writeUnitDefinitions(validationDocument);
-            CopyOptions cops;
-            cops.skipConflictingElements = true;
-            validationDocument->copyContentFrom(document, &cops);
-            if (validationDocument->validate(&errorMessage))
-            {
-                PvtStage* stage = PvtStage::ptr(_stage);
-                readDocument(document, stage, readOptions);
-            }
-            else
-            {
-                throw ExceptionRuntimeError("Failed validation: " + errorMessage);
-            }
-        }
-        else
-        {
-            PvtStage* stage = PvtStage::ptr(_stage);
-            readDocument(document, stage, readOptions);
-        }
+        PvtStage* stage = PvtStage::ptr(_stage);
+        readDocument(document, stage, readOptions);
     }
     catch (Exception& e)
     {
