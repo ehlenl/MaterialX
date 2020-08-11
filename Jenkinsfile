@@ -36,17 +36,17 @@ for(int i=0; i< axisNode.size(); i++) {
                         checkout([$class: 'GitSCM', branches: scm.branches, doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: false]], submoduleCfg: [], userRemoteConfigs: scm.userRemoteConfigs])
                         if(axisNodeValue.contains("GEC-vs2017")) {
                             if(! branch.contains("PR-")) {
-                                map = readProperties file: "adsk-build-scripts\\adsk_contrib\\engops.properties"
+                                map = readProperties file: "adsk-build-scripts\\adsk-contrib\\engops.properties"
                             } else {
                                 echo "This is a PR branch"
-                                map = readProperties file: "adsk-build-scripts\\adsk_contrib\\dev.properties"
+                                map = readProperties file: "adsk-build-scripts\\adsk-contrib\\dev.properties"
                             }
                         } else {
                             if(! branch.contains("PR-")) {
-                                map = readProperties file: "adsk-build-scripts/adsk_contrib/engops.properties"
+                                map = readProperties file: "adsk-build-scripts/adsk-contrib/engops.properties"
                             } else {
                                 echo "This is a PR branch"
-                                map = readProperties file: "adsk-build-scripts/adsk_contrib/dev.properties"
+                                map = readProperties file: "adsk-build-scripts/adsk-contrib/dev.properties"
                             }
                         }
                         properties = map.collect { key, value -> return key+'='+value }
