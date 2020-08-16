@@ -13,19 +13,11 @@ for(int i=0; i< axisNode.size(); i++) {
             def branch = "${env.BRANCH_NAME}"
             def WorkDir
             def WorkDirComp
-            if(axisNodeValue.contains("GEC-vs2017")) {
-                if(! branch.contains("PR-")) {
-                    WorkDir="D:\\Stage\\workspace\\${env.COMPONENT}\\" + env.BRANCH_NAME.replace("/", "\\")
-                } else {
-                    WorkDir="D:\\Stage\\workspace\\${env.COMPONENT}\\PR"
-                }
+            if(axisNodeValue.contains("GEC-vs")) {
+                WorkDir="D:\\Stage\\workspace\\${env.COMPONENT}\\" + env.BRANCH_NAME.replace("/", "\\")
                 WorkDirComp = WorkDir + "\\${env.COMPONENT}"
             } else {
-                if(! branch.contains("PR-")) {
-                    WorkDir="/Stage/workspace/${env.COMPONENT}/${env.BRANCH_NAME}"
-                } else {
-                    WorkDir="/Stage/workspace/${env.COMPONENT}/PR"
-                }
+                WorkDir="/Stage/workspace/${env.COMPONENT}/${env.BRANCH_NAME}"
                 WorkDirComp = WorkDir + "/${env.COMPONENT}"
             }
             try {
@@ -34,26 +26,29 @@ for(int i=0; i< axisNode.size(); i++) {
                         println "Node=${env.NODE_NAME}"
                     
                         checkout([$class: 'GitSCM', branches: scm.branches, doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: false]], submoduleCfg: [], userRemoteConfigs: scm.userRemoteConfigs])
-                        if(axisNodeValue.contains("GEC-vs2017")) {
-                            if(! branch.contains("PR-")) {
-                                map = readProperties file: "adsk-build-scripts\\adsk-contrib\\engops.properties"
+                        if(axisNodeValue.contains("GEC-vs")) {
+                            if(branch.contains("release")) {
+                                map = readProperties file: "adsk-build-scripts\\adsk-contrib\\release.properties"
                             } else {
-                                echo "This is a PR branch"
+                                echo "This is a non-release branch"
                                 map = readProperties file: "adsk-build-scripts\\adsk-contrib\\dev.properties"
                             }
                         } else {
-                            if(! branch.contains("PR-")) {
-                                map = readProperties file: "adsk-build-scripts/adsk-contrib/engops.properties"
+                            if(branch.contains("release")) {
+                                map = readProperties file: "adsk-build-scripts/adsk-contrib/release.properties"
                             } else {
-                                echo "This is a PR branch"
+                                echo "This is a non-release branch"
                                 map = readProperties file: "adsk-build-scripts/adsk-contrib/dev.properties"
                             }
                         }
                         properties = map.collect { key, value -> return key+'='+value }
+                        
+                        def sha = getCommitSha(axisNodeValue,WorkDirComp).trim()
+                        properties.add("GITCOMMIT=${sha}")
                     }
                     stage("Build") {
                         println (properties)
-                        if(axisNodeValue.contains("GEC-vs2017")) {
+                        if(axisNodeValue.contains("GEC-vs")) {
                             bat "git clean -fdx"
                             bat '''
                             set cmake=C:\\Users\\svc_airbuild\\.jenny\\tools\\cmake\\3.7.1\\bin\\cmake
@@ -77,7 +72,14 @@ for(int i=0; i< axisNode.size(); i++) {
 
                     stage("Create Nuget Packages") {
                         withEnv(properties) {
-                            if(axisNodeValue.contains("GEC-vs2017")) {
+                            if(branch.contains("release")) {
+                                properties.add("NUGET_VERSION=${env.Version}")
+                            } else {
+                                properties.add("NUGET_VERSION=1.0.0-${env.GITCOMMIT}")
+                            }
+                        }
+                        withEnv(properties) {
+                            if(axisNodeValue.contains("GEC-vs")) {
                                 bat """
                                 nuget pack adsk-build-scripts\\nuget\\win\\adsk_materialx-headers_win.nuspec -Version %Version% -OutputDirectory %WORKSPACE%\\packages -Prop installdir=%WORKSPACE%\\install -Prop materialx=${materialx_version} -Prop win_compiler=${win_compiler}
                                 nuget pack adsk-build-scripts\\nuget\\win\\adsk_materialx-lib_win_debug_intel64.nuspec -Version %Version% -OutputDirectory %WORKSPACE%\\packages -Prop installdir=%WORKSPACE%\\install -Prop materialx=${materialx_version} -Prop win_compiler=${win_compiler}
@@ -98,11 +100,7 @@ for(int i=0; i< axisNode.size(); i++) {
                     }
                     stage("Upload Artifactory") {
                         withEnv(properties) {
-                            if(!"${env.BRANCH_NAME}".contains("PR-")) {
-                                uploadArtifactory()
-                            } else {
-                                echo "Artifacts not posted for PR branches"
-                            }
+                            uploadArtifactory()
                         }
                     }
                 }
@@ -117,6 +115,44 @@ for(int i=0; i< axisNode.size(); i++) {
 stage("Build") {
     parallel tasks
 }
+stage ("Update Version") {
+    node("GEC-vs2017") {
+        if(!currentBuild.currentResult.contains("FAILURE")) {
+            if ("${env.BRANCH_NAME}".contains("release")){
+                checkout scm
+                withEnv(["file=adsk-build-scripts\\adsk-contrib\\release.properties"]) {
+                    withEnv(["branch=${env.BRANCH_NAME}"]) {
+                    bat '''
+                        git checkout %branch%
+                        git pull
+                        pushd adsk-build-scripts
+                        python versioning.py -u -b release
+                        popd
+                        git commit %file% -m "Update build version"
+                        git push origin %branch%
+                    '''
+                    }
+                }
+            }
+        }
+    }
+}
+
+def getCommitSha(axisNodeValue,WorkDirComp){
+    if(axisNodeValue.contains("GEC-vs")) {
+        def sha = bat(
+              returnStdout: true,
+              script: """
+                    @echo off
+                    git rev-parse --short HEAD
+                """
+            ).trim()
+        return sha
+    } else {
+        return sh(returnStdout: true, script: 'git rev-parse --short HEAD')
+    }
+}
+
 
 def uploadArtifactory() {
     echo "INFO: Upload to Artifactory"
@@ -125,7 +161,7 @@ def uploadArtifactory() {
         def uploadSpec = """{
             "files": [{
                 "pattern": "${env.WORKSPACE}/packages/*.nupkg",
-                "target": "oss-stg-nuget/materialx/${env.Version}/",
+                "target": "team-gfx-nuget/materialx/${env.Version}/",
                 "recursive": "false",
                 "props":"git.branch=${env.BRANCH_NAME};git.hash=${env.GITCOMMIT}"
             }]
