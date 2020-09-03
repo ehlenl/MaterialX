@@ -81,20 +81,22 @@ for(int i=0; i< axisNode.size(); i++) {
                         withEnv(properties) {
                             if(axisNodeValue.contains("GEC-vs")) {
                                 bat """
-                                nuget pack adsk-build-scripts\\nuget\\win\\adsk_materialx-headers_win.nuspec -Version %Version% -OutputDirectory %WORKSPACE%\\packages -Prop installdir=%WORKSPACE%\\install -Prop materialx=${materialx_version} -Prop win_compiler=${win_compiler}
-                                nuget pack adsk-build-scripts\\nuget\\win\\adsk_materialx-lib_win_debug_intel64.nuspec -Version %Version% -OutputDirectory %WORKSPACE%\\packages -Prop installdir=%WORKSPACE%\\install -Prop materialx=${materialx_version} -Prop win_compiler=${win_compiler}
-                                nuget pack adsk-build-scripts\\nuget\\win\\adsk_materialx-lib_win_release_intel64.nuspec -Version %Version% -OutputDirectory %WORKSPACE%\\packages -Prop installdir=%WORKSPACE%\\install -Prop materialx=${materialx_version} -Prop win_compiler=${win_compiler}
-                                nuget pack adsk-build-scripts\\nuget\\win\\adsk_materialx-content.nuspec -Version %Version% -OutputDirectory %WORKSPACE%\\packages -Prop installdir=%WORKSPACE%\\install -Prop materialx=${materialx_version} -Prop win_compiler=${win_compiler}
-                                nuget pack adsk-build-scripts\\nuget\\win\\adsk_materialx-sdk_win_intel64.nuspec -Version %Version% -OutputDirectory %WORKSPACE%\\packages -Prop installdir=%WORKSPACE%\\install -Prop materialx=${materialx_version} -Prop win_compiler=${win_compiler}
+                                nuget pack adsk-build-scripts\\nuget\\win\\adsk_materialx-headers_win.nuspec -Version %NUGET_VERSION% -OutputDirectory %WORKSPACE%\\packages -Prop installdir=%WORKSPACE%\\install -Prop materialx=${materialx_version} -Prop win_compiler=${win_compiler}
+                                nuget pack adsk-build-scripts\\nuget\\win\\adsk_materialx-lib_win_debug_intel64.nuspec -Version %NUGET_VERSION% -OutputDirectory %WORKSPACE%\\packages -Prop installdir=%WORKSPACE%\\install -Prop materialx=${materialx_version} -Prop win_compiler=${win_compiler}
+                                nuget pack adsk-build-scripts\\nuget\\win\\adsk_materialx-lib_win_release_intel64.nuspec -Version %NUGET_VERSION% -OutputDirectory %WORKSPACE%\\packages -Prop installdir=%WORKSPACE%\\install -Prop materialx=${materialx_version} -Prop win_compiler=${win_compiler}
+                                nuget pack adsk-build-scripts\\nuget\\win\\adsk_materialx-content.nuspec -Version %NUGET_VERSION% -OutputDirectory %WORKSPACE%\\packages -Prop installdir=%WORKSPACE%\\install -Prop materialx=${materialx_version} -Prop win_compiler=${win_compiler}
+                                nuget pack adsk-build-scripts\\nuget\\win\\adsk_materialx-sdk_win_intel64.nuspec -Version %NUGET_VERSION% -OutputDirectory %WORKSPACE%\\packages -Prop installdir=%WORKSPACE%\\install -Prop materialx=${materialx_version} -Prop win_compiler=${win_compiler}
                                 """
+                                zip zipFile: "${env.WORKSPACE}/packages/adsk_materialx-sdk_win_intel64.${env.NUGET_VERSION}.zip", dir: "${env.WORKSPACE}/install", glob: '**/*'
                             } else {
                                 sh """
-                                nuget pack adsk-build-scripts/nuget/osx/adsk_materialx-headers_osx.nuspec -Version $Version -OutputDirectory $WORKSPACE/packages -Prop installdir=$WORKSPACE/install -Prop materialx=${materialx_version} -Prop osx_compiler=${osx_compiler} -Prop osx_target=${osx_target}
-                                nuget pack adsk-build-scripts/nuget/osx/adsk_materialx-lib_osx_debug_intel64.nuspec -Version $Version -OutputDirectory $WORKSPACE/packages -Prop installdir=$WORKSPACE/install -Prop materialx=${materialx_version} -Prop osx_compiler=${osx_compiler} -Prop osx_target=${osx_target}
-                                nuget pack adsk-build-scripts/nuget/osx/adsk_materialx-lib_osx_release_intel64.nuspec -Version $Version -OutputDirectory $WORKSPACE/packages -Prop installdir=$WORKSPACE/install -Prop materialx=${materialx_version} -Prop osx_compiler=${osx_compiler} -Prop osx_target=${osx_target}
-                                nuget pack adsk-build-scripts/nuget/osx/adsk_materialx-content.nuspec -Version $Version -OutputDirectory $WORKSPACE/packages -Prop installdir=$WORKSPACE/install -Prop materialx=${materialx_version} -Prop osx_compiler=${osx_compiler} -Prop osx_target=${osx_target}
-                                nuget pack adsk-build-scripts/nuget/osx/adsk_materialx-sdk_osx_intel64.nuspec -Version $Version -OutputDirectory $WORKSPACE/packages -Prop installdir=$WORKSPACE/install -Prop materialx=${materialx_version} -Prop osx_compiler=${osx_compiler} -Prop osx_target=${osx_target}
+                                nuget pack adsk-build-scripts/nuget/osx/adsk_materialx-headers_osx.nuspec -Version $NUGET_VERSION -OutputDirectory $WORKSPACE/packages -Prop installdir=$WORKSPACE/install -Prop materialx=${materialx_version} -Prop osx_compiler=${osx_compiler} -Prop osx_target=${osx_target}
+                                nuget pack adsk-build-scripts/nuget/osx/adsk_materialx-lib_osx_debug_intel64.nuspec -Version $NUGET_VERSION -OutputDirectory $WORKSPACE/packages -Prop installdir=$WORKSPACE/install -Prop materialx=${materialx_version} -Prop osx_compiler=${osx_compiler} -Prop osx_target=${osx_target}
+                                nuget pack adsk-build-scripts/nuget/osx/adsk_materialx-lib_osx_release_intel64.nuspec -Version $NUGET_VERSION -OutputDirectory $WORKSPACE/packages -Prop installdir=$WORKSPACE/install -Prop materialx=${materialx_version} -Prop osx_compiler=${osx_compiler} -Prop osx_target=${osx_target}
+                                nuget pack adsk-build-scripts/nuget/osx/adsk_materialx-content.nuspec -Version $NUGET_VERSION -OutputDirectory $WORKSPACE/packages -Prop installdir=$WORKSPACE/install -Prop materialx=${materialx_version} -Prop osx_compiler=${osx_compiler} -Prop osx_target=${osx_target}
+                                nuget pack adsk-build-scripts/nuget/osx/adsk_materialx-sdk_osx_intel64.nuspec -Version $NUGET_VERSION -OutputDirectory $WORKSPACE/packages -Prop installdir=$WORKSPACE/install -Prop materialx=${materialx_version} -Prop osx_compiler=${osx_compiler} -Prop osx_target=${osx_target}
                                 """
+                                zip zipFile: "${env.WORKSPACE}/packages/adsk_materialx-sdk_osx_intel64.${env.NUGET_VERSION}.zip", dir: "${env.WORKSPACE}/install", glob: '**/*'
                             }
                         }
                     }
@@ -155,13 +157,26 @@ def getCommitSha(axisNodeValue,WorkDirComp){
 
 
 def uploadArtifactory() {
-    echo "INFO: Upload to Artifactory"
+    echo "INFO: Upload to Artifactory (Nuget)"
     withCredentials([usernamePassword(credentialsId: "832c4de4-8264-4b99-856e-e1d2b5dc2ffc", passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
     def server = Artifactory.newServer url: 'https://art-bobcat.autodesk.com/artifactory/', username: "${USERNAME}", password: "${PASSWORD}"
         def uploadSpec = """{
             "files": [{
                 "pattern": "${env.WORKSPACE}/packages/*.nupkg",
-                "target": "team-gfx-nuget/materialx/${env.Version}/",
+                "target": "team-gfx-nuget/materialx/${env.NUGET_VERSION}/",
+                "recursive": "false",
+                "props":"git.branch=${env.BRANCH_NAME};git.hash=${env.GITCOMMIT}"
+            }]
+        }"""
+        server.upload(uploadSpec)
+    }
+    echo "INFO: Upload to Artifactory (Zip)"
+    withCredentials([usernamePassword(credentialsId: "832c4de4-8264-4b99-856e-e1d2b5dc2ffc", passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+    server = Artifactory.newServer url: 'https://art-bobcat.autodesk.com/artifactory/', username: "${USERNAME}", password: "${PASSWORD}"
+         uploadSpec = """{
+            "files": [{
+                "pattern": "${env.WORKSPACE}/packages/*.zip",
+                "target": "team-gfx-generic/materialx/${env.NUGET_VERSION}/",
                 "recursive": "false",
                 "props":"git.branch=${env.BRANCH_NAME};git.hash=${env.GITCOMMIT}"
             }]
