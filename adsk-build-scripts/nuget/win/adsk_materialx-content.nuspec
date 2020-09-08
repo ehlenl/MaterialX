@@ -12,6 +12,6 @@
     <tags>adsk-materialx-content</tags>    
   </metadata>
   <files>
-	<file src="$installdir$\content\libraries\**" target="content\libraries" />
+	<file src="$installdir$\libraries\**" target="libraries" />
   </files>  
 </package>

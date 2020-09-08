@@ -12,7 +12,7 @@
     <tags>materialx-$materialX$</tags>
   </metadata>
  	<files>
-    <file src="$installdir$\content\libraries\**" target="libraries" />
+    <file src="$installdir$\libraries\**" target="libraries" />
     <file src="$installdir$\inc\**" target="inc" />
     <file src="$installdir$\cmake\**" target="cmake" />
     <file src="$installdir$\libs\**" target="libs" />
