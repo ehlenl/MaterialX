@@ -32,16 +32,30 @@ void loadDocuments(const FilePath& rootPath, const FileSearchPath& searchPath, c
                    const XmlReadOptions& readOptions, StringVec& errors);
 
 /// Load a given MaterialX library into a document
-void loadLibrary(const FilePath& file, DocumentPtr doc, const FileSearchPath* searchPath = nullptr, 
+void loadLibrary(const FilePath& file,
+                 DocumentPtr doc,
+                 const FileSearchPath& searchPath = FileSearchPath(), 
                  XmlReadOptions* readOptions = nullptr);
 
-/// Load all MaterialX files with given library names in given search paths.
-/// Note that all library files will have a URI set on them.
-StringSet loadLibraries(const FilePathVec& libraryNames,
+/// Load all MaterialX files within the given library folders into a document,
+/// using the given search path to locate the folders on the file system.
+StringSet loadLibraries(const FilePathVec& libraryFolders,
                         const FileSearchPath& searchPath,
                         DocumentPtr doc,
-                        const StringSet* excludeFiles = nullptr,
+                        const StringSet& excludeFiles = StringSet(),
                         XmlReadOptions* readOptions = nullptr);
+
+/// Set file name values to resolved values. 
+/// The resolve applies:
+///   - the Element's default string resolver
+///   - an optional relative to absoulte path conversion
+///   - an optional custom file name string resolver
+/// Note that all "fileprefix" attributes will be removed from the Document as they have
+/// been prepended to the resolved file name values.
+/// \param doc Document to modify.
+/// \param searchPath Optional search path for relative to absolute path conversion. Default value is an empty search path.
+/// \param customResolver Optional custom name resolver to apply. Default value is a null resolver.
+void resolveFileNames(DocumentPtr doc, const FileSearchPath& searchPath = FileSearchPath(), StringResolverPtr customResolver = nullptr);
 
 } // namespace MaterialX
 

@@ -14,6 +14,7 @@
 #include <MaterialXRuntime/RtFileIo.h>
 #include <MaterialXRuntime/RtLook.h>
 #include <MaterialXRuntime/RtCollection.h>
+#include <MaterialXRuntime/RtConnectableApi.h>
 
 #include <MaterialXRuntime/Private/PvtApi.h>
 #include <MaterialXRuntime/Private/PvtPrim.h>
@@ -50,15 +51,35 @@ void RtApi::initialize()
     registerTypedSchema<RtNodeDef>();
     registerTypedSchema<RtNodeGraph>();
     registerTypedSchema<RtBackdrop>();
-    registerTypedSchema<RtLookGroup>();
-    registerTypedSchema<RtLook>();
-    registerTypedSchema<RtMaterialAssign>();
-    registerTypedSchema<RtCollection>();
+    registerTypedSchema<RtBindElement>();
+    registerTypedSchema<RtLookGroup, RtLookGroupConnectableApi>();
+    registerTypedSchema<RtLook, RtLookConnectableApi>();
+    registerTypedSchema<RtMaterialAssign, RtMaterialAssignConnectableApi>();
+    registerTypedSchema<RtCollection, RtCollectionConnectableApi>();
+
+    // Register connectable API for nodegraph internal sockets.
+    // This is not a typed schemas so need explicit registration.
+    RtConnectableApi::registerApi(RtNodeGraph::SOCKETS_TYPE_INFO.getShortTypeName(), RtConnectableApiPtr(new RtConnectableApi));
 }
 
 void RtApi::shutdown()
 {
     _cast(_ptr)->reset();
+
+    // Unregister built in schemas
+    unregisterTypedSchema<RtGeneric>();
+    unregisterTypedSchema<RtNode>();
+    unregisterTypedSchema<RtNodeDef>();
+    unregisterTypedSchema<RtNodeGraph>();
+    unregisterTypedSchema<RtBackdrop>();
+    unregisterTypedSchema<RtBindElement>();
+    unregisterTypedSchema<RtLookGroup>();
+    unregisterTypedSchema<RtLook>();
+    unregisterTypedSchema<RtMaterialAssign>();
+    unregisterTypedSchema<RtCollection>();
+
+    // Unregister connectable API for nodegraph internal sockets.
+    RtConnectableApi::unregisterApi(RtNodeGraph::SOCKETS_TYPE_INFO.getShortTypeName());
 }
 
 void RtApi::registerLogger(RtLoggerPtr logger)
@@ -71,7 +92,7 @@ void RtApi::unregisterLogger(RtLoggerPtr logger)
     _cast(_ptr)->unregisterLogger(logger);
 }
 
-void RtApi::log(RtLogger::MessageType type, const RtToken& msg)
+void RtApi::log(RtLogger::MessageType type, const string& msg)
 {
     _cast(_ptr)->log(type, msg);
 }
@@ -86,39 +107,39 @@ void RtApi::unregisterCreateFunction(const RtToken& typeName)
     _cast(_ptr)->unregisterCreateFunction(typeName);
 }
 
-bool RtApi::hasCreateFunction(const RtToken& typeName)
+bool RtApi::hasCreateFunction(const RtToken& typeName) const
 {
     return _cast(_ptr)->hasCreateFunction(typeName);
 }
 
-RtPrimCreateFunc RtApi::getCreateFunction(const RtToken& typeName)
+RtPrimCreateFunc RtApi::getCreateFunction(const RtToken& typeName) const
 {
     return _cast(_ptr)->getCreateFunction(typeName);
 }
 
-void RtApi::registerMasterPrim(const RtPrim& prim)
+void RtApi::registerNodeDef(const RtPrim& prim)
 {
-    _cast(_ptr)->registerMasterPrim(prim);
+    _cast(_ptr)->registerNodeDef(prim);
 }
 
-void RtApi::unregisterMasterPrim(const RtToken& name)
+void RtApi::unregisterNodeDef(const RtToken& name)
 {
-    _cast(_ptr)->unregisterMasterPrim(name);
+    _cast(_ptr)->unregisterNodeDef(name);
 }
 
-bool RtApi::hasMasterPrim(const RtToken& name)
+bool RtApi::hasNodeDef(const RtToken& name) const
 {
-    return _cast(_ptr)->hasMasterPrim(name);
+    return _cast(_ptr)->hasNodeDef(name);
 }
 
-RtPrim RtApi::getMasterPrim(const RtToken& name)
+RtPrim RtApi::getNodeDef(const RtToken& name) const
 {
-    return _cast(_ptr)->getMasterPrim(name);
+    return _cast(_ptr)->getNodeDef(name);
 }
 
-RtPrimIterator RtApi::getMasterPrims(RtObjectPredicate predicate)
+RtPrimIterator RtApi::getNodeDefs() const
 {
-    return RtPrimIterator(_cast(_ptr)->_masterPrimRoot, predicate);
+    return _cast(_ptr)->getNodeDefs();
 }
 
 void RtApi::clearSearchPath()
@@ -171,9 +192,9 @@ void RtApi::createLibrary(const RtToken& name)
     _cast(_ptr)->createLibrary(name);
 }
 
-void RtApi::loadLibrary(const RtToken& name)
+void RtApi::loadLibrary(const RtToken& name, const RtReadOptions& options)
 {
-    _cast(_ptr)->loadLibrary(name);
+    _cast(_ptr)->loadLibrary(name, options);
 }
 
 void RtApi::unloadLibrary(const RtToken& name)

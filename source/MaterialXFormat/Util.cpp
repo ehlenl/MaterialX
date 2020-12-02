@@ -71,17 +71,17 @@ void loadDocuments(const FilePath& rootPath, const FileSearchPath& searchPath, c
     }
 }
 
-void loadLibrary(const FilePath& file, DocumentPtr doc, const FileSearchPath* searchPath, XmlReadOptions* readOptions)
+void loadLibrary(const FilePath& file, DocumentPtr doc, const FileSearchPath& searchPath, XmlReadOptions* readOptions)
 {
     DocumentPtr libDoc = createDocument();
-    readFromXmlFile(libDoc, file, searchPath ? *searchPath : FileSearchPath(), readOptions);
+    readFromXmlFile(libDoc, file, searchPath, readOptions);
     doc->importLibrary(libDoc);
 }
 
 StringSet loadLibraries(const FilePathVec& libraryFolders,
                         const FileSearchPath& searchPath,
                         DocumentPtr doc,
-                        const StringSet* excludeFiles,
+                        const StringSet& excludeFiles,
                         XmlReadOptions* readOptions)
 {
     // Append environment path to the specified search path.
@@ -98,12 +98,12 @@ StringSet loadLibraries(const FilePathVec& libraryFolders,
             {
                 for (const FilePath& filename : path.getFilesInDirectory(MTLX_EXTENSION))
                 {
-                    if (!excludeFiles || !excludeFiles->count(filename))
+                    if (!excludeFiles.count(filename))
                     {
                         const FilePath& file = path / filename;
                         if (loadedLibraries.count(file) == 0)
                         {
-                            loadLibrary(file, doc, &searchPath, readOptions);
+                            loadLibrary(file, doc, searchPath, readOptions);
                             loadedLibraries.insert(file.asString());
                         }
                     }
@@ -121,12 +121,12 @@ StringSet loadLibraries(const FilePathVec& libraryFolders,
             {
                 for (const FilePath& filename : path.getFilesInDirectory(MTLX_EXTENSION))
                 {
-                    if (!excludeFiles || !excludeFiles->count(filename))
+                    if (!excludeFiles.count(filename))
                     {
                         const FilePath& file = path / filename;
                         if (loadedLibraries.count(file) == 0)
                         {
-                            loadLibrary(file, doc, &searchPath, readOptions);
+                            loadLibrary(file, doc, searchPath, readOptions);
                             loadedLibraries.insert(file.asString());
                         }
                     }
@@ -136,5 +136,63 @@ StringSet loadLibraries(const FilePathVec& libraryFolders,
     }
     return loadedLibraries;
 }
+
+void resolveFileNames(DocumentPtr doc, const FileSearchPath& searchPath, StringResolverPtr customResolver)
+{
+    for (ElementPtr elem : doc->traverseTree())
+    {
+        ValueElementPtr valueElem = elem->asA<ValueElement>();
+        if (!valueElem || valueElem->getType() != FILENAME_TYPE_STRING)
+        {
+            continue;
+        }
+
+        FilePath unresolvedValue(valueElem->getValueString());
+        StringResolverPtr elementResolver = elem->createStringResolver();
+        // If the path is already absolute then don't allow an additional prefix
+        // as this would make the path invalid.
+        if (unresolvedValue.isAbsolute())
+        {
+            elementResolver->setFilePrefix(EMPTY_STRING);
+        }
+        string resolvedString = valueElem->getResolvedValueString(elementResolver);
+
+        // Convert relative to absolute pathing if the file is not alrady found
+        if (!searchPath.isEmpty())
+        {
+            FilePath resolvedValue(resolvedString);
+            if (!resolvedValue.isAbsolute())
+            {
+                for (size_t i = 0; i < searchPath.size(); i++)
+                {
+                    FilePath testPath = searchPath[i] / resolvedValue;
+                    if (testPath.exists())
+                    {
+                        resolvedString = testPath.asString();
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Apply any custom filename resolver
+        if (customResolver && customResolver->isResolvedType(FILENAME_TYPE_STRING))
+        {
+            resolvedString = customResolver->resolve(resolvedString, FILENAME_TYPE_STRING);
+        }
+
+        valueElem->setValueString(resolvedString);
+    }
+
+    // Remove any file prefix attributes
+    for (ElementPtr elem : doc->traverseTree())
+    {
+        if (elem->hasFilePrefix())
+        {
+            elem->removeAttribute(Element::FILE_PREFIX_ATTRIBUTE);
+        }
+    }
+}
+
 
 } // namespace MaterialX

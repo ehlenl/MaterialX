@@ -220,9 +220,6 @@ void documentFromXml(DocumentPtr doc,
                      const FileSearchPath& searchPath = FileSearchPath(),
                      const XmlReadOptions* readOptions = nullptr)
 {
-    ScopedUpdate update(doc);
-    doc->onRead();
-
     xml_node xmlRoot = xmlDoc.child(Document::CATEGORY.c_str());
     if (xmlRoot)
     {
@@ -230,7 +227,7 @@ void documentFromXml(DocumentPtr doc,
         elementFromXml(xmlRoot, doc, readOptions);
     }
 
-    bool applyFutureUpdates = readOptions ? readOptions->applyFutureUpdates : false;
+    bool applyFutureUpdates = readOptions ? readOptions->applyFutureUpdates : true;
     doc->upgradeVersion(applyFutureUpdates);
 }
 
@@ -242,7 +239,7 @@ void documentFromXml(DocumentPtr doc,
 
 XmlReadOptions::XmlReadOptions() :
     readXIncludeFunction(readFromXmlFile),
-    applyFutureUpdates(false)
+    applyFutureUpdates(true)
 {
 }
 
@@ -313,9 +310,6 @@ void readFromXmlString(DocumentPtr doc, const string& str, const XmlReadOptions*
 
 void writeToXmlStream(DocumentPtr doc, std::ostream& stream, const XmlWriteOptions* writeOptions)
 {
-    ScopedUpdate update(doc);
-    doc->onWrite();
-
     xml_document xmlDoc;
     xml_node xmlRoot = xmlDoc.append_child("materialx");
     elementToXml(doc, xmlRoot, writeOptions);
@@ -337,9 +331,12 @@ string writeToXmlString(DocumentPtr doc, const XmlWriteOptions* writeOptions)
 
 void prependXInclude(DocumentPtr doc, const FilePath& filename)
 {
-    ElementPtr elem = doc->addChildOfCategory("xinclude");
-    elem->setSourceUri(filename.asString());
-    doc->setChildIndex(elem->getName(), 0);
+    if (!filename.isEmpty())
+    {
+        ElementPtr elem = doc->addChildOfCategory("xinclude");
+        elem->setSourceUri(filename.asString());
+        doc->setChildIndex(elem->getName(), 0);
+    }
 }
 
 } // namespace MaterialX

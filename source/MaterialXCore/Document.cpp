@@ -6,6 +6,7 @@
 #include <MaterialXCore/Document.h>
 
 #include <MaterialXCore/Util.h>
+#include <MaterialXCore/MaterialNode.h>
 
 #include <mutex>
 
@@ -19,150 +20,6 @@ namespace {
 
 const string DOCUMENT_VERSION_STRING = std::to_string(MATERIALX_MAJOR_VERSION) + "." +
                                        std::to_string(MATERIALX_MINOR_VERSION);
-
-template<class T> shared_ptr<T> updateChildSubclass(ElementPtr parent, ElementPtr origChild)
-{
-    string childName = origChild->getName();
-    int childIndex = parent->getChildIndex(childName);
-    parent->removeChild(childName);
-    shared_ptr<T> newChild = parent->addChild<T>(childName);
-    parent->setChildIndex(childName, childIndex);
-    newChild->copyContentFrom(origChild);
-    return newChild;
-}
-
-bool convertMaterialsToNodes(DocumentPtr doc)
-{
-    bool modified = false;
-
-    vector<MaterialPtr> materials = doc->getMaterials();
-    for (auto m : materials)
-    {
-        // See if a node of this name has already been created.
-        // Should not occur otherwise there are duplicate existing
-        // Material elements.
-        string materialName = m->getName();
-        if (doc->getNode(materialName))
-        {
-            throw Exception("Material node already exists: " + materialName);
-        }
-
-        // Create a temporary name for the material element
-        // so the new node can reuse the existing name.
-        string validName = doc->createValidChildName(materialName + "1");
-        m->setName(validName);
-
-        // Create a new material node
-        NodePtr materialNode = nullptr;
-
-        ShaderRefPtr sr;
-        // Only include the shader refs explicitly specified on the material instance
-        vector<ShaderRefPtr> srs = m->getShaderRefs();
-        for (size_t i = 0; i < srs.size(); i++)
-        {
-            sr = srs[i];
-
-            // See if shader has been created already.
-            // Should not occur as the shaderref is a uniquely named
-            // child of a uniquely named material element, but the two combined
-            // may have been used for another node instance which not a shader node.
-            string shaderNodeName = materialName + "_" + sr->getName();
-            NodePtr existingShaderNode = doc->getNode(shaderNodeName);
-            if (existingShaderNode)
-            {
-                const string& existingType = existingShaderNode->getType();
-                if (existingType == VOLUME_SHADER_TYPE_STRING ||
-                    existingType == SURFACE_SHADER_TYPE_STRING ||
-                    existingType == DISPLACEMENT_SHADER_TYPE_STRING)
-                {
-                    throw Exception("Shader node already exists: " + shaderNodeName);
-                }
-                else
-                {
-                    shaderNodeName = doc->createValidChildName(shaderNodeName);
-                }
-            }
-
-            modified = true;
-
-            // Find the shader type if defined
-            string shaderNodeType = SURFACE_SHADER_TYPE_STRING;
-            NodeDefPtr nodeDef = sr->getNodeDef();
-            if (nodeDef)
-            {
-                shaderNodeType = nodeDef->getType();
-            }
-
-            // Add in a new shader node
-            const string shaderNodeCategory = sr->getNodeString();
-            NodePtr shaderNode = doc->addNode(shaderNodeCategory, shaderNodeName, shaderNodeType);
-            shaderNode->setSourceUri(sr->getSourceUri());
-
-            for (auto valueElement : sr->getChildrenOfType<ValueElement>())
-            {
-                ElementPtr portChild = nullptr;
-
-                // Copy over bindinputs as inputs, and bindparams as params
-                if (valueElement->isA<BindInput>())
-                {
-                    portChild = shaderNode->addInput(valueElement->getName(), valueElement->getType());
-                }
-                else if (valueElement->isA<BindParam>())
-                {
-                    portChild = shaderNode->addParameter(valueElement->getName(), valueElement->getType());
-                }
-                if (portChild)
-                {
-                    // Copy over attributes.
-                    // Note: We preserve inputs which have nodegraph connections,
-                    // as well as top level output connections.
-                    portChild->copyContentFrom(valueElement);
-                }
-            }
-
-            // Copy over any bindtokens as tokens
-            for (auto bt : sr->getBindTokens())
-            {
-                TokenPtr token = shaderNode->addToken(bt->getName());
-                token->copyContentFrom(bt);
-            }
-
-            // Create a new material node if not already created and
-            // add a reference from the material node to the new shader node
-            if (!materialNode)
-            {
-                // Set the type of material based on current assumption that
-                // surfaceshaders + displacementshaders result in a surfacematerial
-                // while a volumeshader means a volumematerial needs to be created.
-                string materialNodeCategory =
-                    (shaderNodeType != VOLUME_SHADER_TYPE_STRING) ? SURFACE_MATERIAL_NODE_STRING
-                    : VOLUME_MATERIAL_NODE_STRING;
-                materialNode = doc->addNode(materialNodeCategory, materialName, MATERIAL_TYPE_STRING);
-                materialNode->setSourceUri(m->getSourceUri());
-                // Note: Inheritance does not get transfered to the node we do
-                // not perform the following:
-                //      - materialNode->setInheritString(m->getInheritString());
-            }
-            // Create input to replace each shaderref. Use shaderref name as unique
-            // input name.
-            InputPtr shaderInput = materialNode->addInput(shaderNodeType, shaderNodeType);
-            shaderInput->setNodeName(shaderNode->getName());
-            // Make sure to copy over any target and version information from the shaderref.
-            if (!sr->getTarget().empty())
-            {
-                shaderInput->setTarget(sr->getTarget());
-            }
-            if (!sr->getVersionString().empty())
-            {
-                shaderInput->setVersionString(sr->getVersionString());
-            }
-        }
-
-        // Remove existing material element
-        doc->removeChild(m->getName());
-    }
-    return modified;
-}
 
 } // anonymous namespace
 
@@ -326,11 +183,12 @@ void Document::importLibrary(const ConstDocumentPtr& library)
 
     for (auto child : library->getChildren())
     {
-        string childName = child->getQualifiedName(child->getName());
         if (child->getCategory().empty())
         {
             throw Exception("Trying to import child without a category: " + child->getName());
         }
+
+        const string childName = child->getQualifiedName(child->getName());
 
         // Check for duplicate elements.
         ConstElementPtr previous = getChild(childName);
@@ -463,6 +321,70 @@ bool Document::validate(string* message) const
     return GraphElement::validate(message) && res;
 }
 
+bool Document::convertParametersToInputs()
+{
+    bool anyConverted = false;
+
+    // Convert all parameters to be inputs. If needed set them to be "uniform".
+    const StringSet uniformTypes = { FILENAME_TYPE_STRING, STRING_TYPE_STRING };
+    const string PARAMETER_CATEGORY_STRING("parameter");
+    for (ElementPtr e : traverseTree())
+    {
+        InterfaceElementPtr elem = e->asA<InterfaceElement>();
+        if (!elem)
+        {
+            continue;
+        }
+        vector<ElementPtr> children = elem->getChildren();
+        for (ElementPtr child : children)
+        {
+            if (child->getCategory() == PARAMETER_CATEGORY_STRING)
+            {
+                InputPtr newInput = changeChildCategory(elem, child, Input::CATEGORY)->asA<Input>();
+                if (uniformTypes.count(child->getAttribute(TypedElement::TYPE_ATTRIBUTE)))
+                {
+                    newInput->setIsUniform(true);
+                }
+                else
+                {
+                    // TODO: Determine based on usage whether to make
+                    // the input a uniform. 
+                    newInput->setIsUniform(true);
+                }
+                anyConverted = true;
+            }
+        }
+    }
+    return anyConverted;
+}
+
+bool Document::convertUniformInputsToParameters()
+{
+    bool anyConverted = false;
+
+    const StringSet uniformTypes = { FILENAME_TYPE_STRING, STRING_TYPE_STRING };
+    for (ElementPtr e : traverseTree())
+    {
+        InterfaceElementPtr elem = e->asA<InterfaceElement>();
+        if (!elem)
+        {
+            continue;
+        }
+        vector<ElementPtr> children = elem->getChildren();
+        for (ElementPtr child : children)
+        {
+            InputPtr input = child->asA<Input>();
+            if (input && input->getIsUniform())
+            {
+                ParameterPtr newParameter = changeChildCategory(elem, child, Parameter::CATEGORY)->asA<Parameter>();
+                newParameter->removeAttribute(ValueElement::UNIFORM_ATTRIBUTE);
+                anyConverted = true;
+            }
+        }
+    }
+    return anyConverted;
+}
+
 void Document::upgradeVersion(bool applyFutureUpdates)
 {
     std::pair<int, int> versions = getVersionIntegers();
@@ -507,7 +429,7 @@ void Document::upgradeVersion(bool applyFutureUpdates)
             {
                 if (child->getCategory() == "assign")
                 {
-                    updateChildSubclass<MaterialAssign>(elem, child);
+                    changeChildCategory(elem, child, MaterialAssign::CATEGORY);
                 }
             }
         }
@@ -556,11 +478,11 @@ void Document::upgradeVersion(bool applyFutureUpdates)
             {
                 if (child->getCategory() == "opgraph")
                 {
-                    updateChildSubclass<NodeGraph>(elem, child);
+                    changeChildCategory(elem, child, NodeGraph::CATEGORY);
                 }
                 else if (child->getCategory() == "shader")
                 {
-                    NodeDefPtr nodeDef = updateChildSubclass<NodeDef>(elem, child);
+                    NodeDefPtr nodeDef = changeChildCategory(elem, child, NodeDef::CATEGORY)->asA<NodeDef>();
                     if (nodeDef->hasAttribute("shadertype"))
                     {
                         nodeDef->setType(SURFACE_SHADER_TYPE_STRING);
@@ -572,6 +494,14 @@ void Document::upgradeVersion(bool applyFutureUpdates)
                         nodeDef->removeAttribute("shaderprogram");
                     }
                 }
+                else if (child->getCategory() == "shaderref")
+                {
+                    if (child->hasAttribute("shadertype"))
+                    {
+                        child->setAttribute(TypedElement::TYPE_ATTRIBUTE, SURFACE_SHADER_TYPE_STRING);
+                        child->removeAttribute("shadertype");
+                    }
+                }
                 else if (child->isA<Parameter>())
                 {
                     ParameterPtr param = child->asA<Parameter>();
@@ -579,7 +509,7 @@ void Document::upgradeVersion(bool applyFutureUpdates)
                     {
                         if (elem->isA<Node>())
                         {
-                            InputPtr input = updateChildSubclass<Input>(elem, param);
+                            InputPtr input = changeChildCategory(elem, param, Input::CATEGORY)->asA<Input>();
                             input->setNodeName(input->getAttribute("value"));
                             input->removeAttribute("value");
                             if (input->getConnectedNode())
@@ -615,6 +545,7 @@ void Document::upgradeVersion(bool applyFutureUpdates)
                     if (nodeDef)
                     {
                         shaderRef->setNodeDefString(nodeDef->getName());
+                        shaderRef->setNodeString(nodeDef->getNodeString());
                     }
                 }
             }
@@ -653,7 +584,7 @@ void Document::upgradeVersion(bool applyFutureUpdates)
             {
                 if (child->getCategory() == "geomattr")
                 {
-                    updateChildSubclass<GeomProp>(geomInfo, child);
+                    changeChildCategory(geomInfo, child, GeomProp::CATEGORY);
                 }
             }
         }
@@ -826,7 +757,7 @@ void Document::upgradeVersion(bool applyFutureUpdates)
             {
                 if (child->getCategory() == "geomattr")
                 {
-                    updateChildSubclass<GeomProp>(geomInfo, child);
+                    changeChildCategory(geomInfo, child, GeomProp::CATEGORY);
                 }
             }
         }
@@ -883,7 +814,7 @@ void Document::upgradeVersion(bool applyFutureUpdates)
                 ParameterPtr cutoff = node->getParameter("cutoff");
                 if (cutoff)
                 {
-                    InputPtr value2 = node->addInput("value2");
+                    InputPtr value2 = node->addInput("value2", DEFAULT_TYPE_STRING);
                     value2->copyContentFrom(cutoff);
                     node->removeChild(cutoff->getName());
                 }
@@ -983,7 +914,7 @@ void Document::upgradeVersion(bool applyFutureUpdates)
     }
 
     // Upgrade from 1.37 to 1.38
-    if (majorVersion == 1 && minorVersion == 37)
+    if (majorVersion == 1 && minorVersion >= 37)
     {
         convertMaterialsToNodes(asA<Document>());
 
@@ -993,15 +924,22 @@ void Document::upgradeVersion(bool applyFutureUpdates)
         const string IN2 = "in2";
         const string ROTATE3D = "rotate3d";
         const string AXIS = "axis";
+        const string INPUT_ONE = "1.0";
 
         // Update nodedefs
+        bool upgradeAtan2Instances = false;
         for (auto nodedef : getMatchingNodeDefs(ATAN2))
         {
             InputPtr input = nodedef->getInput(IN1);
             InputPtr input2 = nodedef->getInput(IN2);
             string inputValue = input->getValueString();
-            input->setValueString(input2->getValueString());
-            input2->setValueString(inputValue);
+            // Only flip value if nodedef value is the previous versions.
+            if (inputValue == INPUT_ONE)
+            {
+                input->setValueString(input2->getValueString());
+                input2->setValueString(inputValue);
+                upgradeAtan2Instances = true;
+            }
         }
         for (auto nodedef : getMatchingNodeDefs(ROTATE3D))
         {
@@ -1022,7 +960,7 @@ void Document::upgradeVersion(bool applyFutureUpdates)
                 continue;
             }
             const string& nodeCategory = node->getCategory();
-            if (nodeCategory == ATAN2)
+            if (upgradeAtan2Instances && nodeCategory == ATAN2)
             {
                 InputPtr input = node->getInput(IN1);
                 InputPtr input2 = node->getInput(IN2);
@@ -1094,8 +1032,15 @@ void Document::upgradeVersion(bool applyFutureUpdates)
                     node->setName(newNodeName);
                 }
             }
-        }
-        minorVersion = 38;
+        }       
+
+        // While we are in the process of supporting 1.38. Leave files as 1.37
+        minorVersion = 37;
+    }
+
+    if (applyFutureUpdates)
+    {
+        convertParametersToInputs();
     }
 
     if (majorVersion == MATERIALX_MAJOR_VERSION &&
@@ -1105,32 +1050,7 @@ void Document::upgradeVersion(bool applyFutureUpdates)
     }
 }
 
-void Document::onAddElement(ElementPtr, ElementPtr)
-{
-    _cache->valid = false;
-}
-
-void Document::onRemoveElement(ElementPtr, ElementPtr)
-{
-    _cache->valid = false;
-}
-
-void Document::onSetAttribute(ElementPtr, const string&, const string&)
-{
-    _cache->valid = false;
-}
-
-void Document::onRemoveAttribute(ElementPtr, const string&)
-{
-    _cache->valid = false;
-}
-
-void Document::onCopyContent(ElementPtr)
-{
-    _cache->valid = false;
-}
-
-void Document::onClearContent(ElementPtr)
+void Document::invalidateCache()
 {
     _cache->valid = false;
 }

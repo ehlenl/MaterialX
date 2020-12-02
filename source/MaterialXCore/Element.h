@@ -344,9 +344,18 @@ class Element : public std::enable_shared_from_this<Element>
     {
         for (ConstElementPtr elem = getSelf(); elem; elem = elem->getParent())
         {
-            if (elem->hasNamespace())
+            const string& namespaceStr = elem->getNamespace();
+            if (!namespaceStr.empty())
             {
-                return elem->getNamespace() + NAME_PREFIX_SEPARATOR + name;
+                // Check if the name is qualified already.
+                const size_t i = name.find_first_of(NAME_PREFIX_SEPARATOR);
+                if (i != string::npos && name.substr(0, i) == namespaceStr)
+                {
+                    // The name is already qualified with this namespace,
+                    // so just return it as is.
+                    return name;
+                }
+                return namespaceStr + NAME_PREFIX_SEPARATOR + name;
             }
         }
         return name;
@@ -1151,6 +1160,22 @@ class ValueElement : public TypedElement
     }
 
     /// @}
+    /// @name Uniform attribute
+    /// @{
+
+    /// Set the uniform attribute flag on this element.
+    void setIsUniform(bool value)
+    {
+        setTypedAttribute<bool>(UNIFORM_ATTRIBUTE, value);
+    }
+
+    /// The the uniform attribute flag for this element.
+    bool getIsUniform() const
+    {
+        return getTypedAttribute<bool>(UNIFORM_ATTRIBUTE);
+    }
+
+    /// @}
     /// @name Validation
     /// @{
 
@@ -1177,6 +1202,7 @@ class ValueElement : public TypedElement
     static const string UI_ADVANCED_ATTRIBUTE;
     static const string UNIT_ATTRIBUTE;
     static const string UNITTYPE_ATTRIBUTE;
+    static const string UNIFORM_ATTRIBUTE;
 };
 
 /// @class Token

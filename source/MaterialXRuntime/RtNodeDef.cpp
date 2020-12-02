@@ -13,12 +13,14 @@ namespace MaterialX
 {
 
 RtToken RtNodeDef::NODE("node");
+RtToken RtNodeDef::NODEDEF("nodedef");
 RtToken RtNodeDef::NODEGROUP("nodegroup");
 RtToken RtNodeDef::INHERIT("inherit");
 RtToken RtNodeDef::TARGET("target");
 RtToken RtNodeDef::VERSION("version");
 RtToken RtNodeDef::IS_DEFAULT_VERSION("isdefaultversion");
 RtToken RtNodeDef::NAMESPACE("namespace");
+RtToken RtNodeDef::UIFOLDER("uifolder");
 
 DEFINE_TYPED_SCHEMA(RtNodeDef, "nodedef");
 
@@ -47,14 +49,13 @@ RtToken RtNodeDef::getNamespacedNode() const
 {
     const RtToken& nodeToken = getNode();
     string nodeString = nodeToken.c_str();
-    string namespaceString = getNamespace().c_str();;
+    string namespaceString = getNamespace().c_str();
     if (!namespaceString.empty())
     {
         return RtToken(namespaceString + NAME_PREFIX_SEPARATOR + nodeString);
     }
     return nodeToken;
 }
-
 
 void RtNodeDef::setNode(const RtToken& node)
 {
@@ -212,19 +213,19 @@ RtAttrIterator RtNodeDef::getOutputs() const
     return RtAttrIterator(getPrim(), filter);
 }
 
-void RtNodeDef::registerMasterPrim() const
+RtNodeLayout RtNodeDef::getNodeLayout()
 {
-    RtApi::get().registerMasterPrim(prim()->hnd());
-}
-
-void RtNodeDef::unregisterMasterPrim() const
-{
-    RtApi::get().unregisterMasterPrim(prim()->getName());
-}
-
-bool RtNodeDef::isMasterPrim() const
-{
-    return RtApi::get().hasMasterPrim(prim()->getName());
+    RtNodeLayout layout;
+    for (RtAttribute input : getInputs())
+    {
+        layout.order.push_back(input.getName());
+        RtTypedValue* data = input.getMetadata(UIFOLDER);
+        if (data && data->getType() == RtType::STRING)
+        {
+            layout.uifolder[input.getName()] = data->getValue().asString();
+        }
+    }
+    return layout;
 }
 
 }

@@ -8,6 +8,8 @@
 #include <MaterialXGenShader/Shader.h>
 #include <MaterialXGenShader/Util.h>
 
+#include <iostream>
+
 namespace MaterialX
 {
 
@@ -40,7 +42,10 @@ const string ImageLoader::TXR_EXTENSION = "txr";
 ImageHandler::ImageHandler(ImageLoaderPtr imageLoader)
 {
     addLoader(imageLoader);
-    _zeroImage = createUniformImage(1, 1, 4, Image::BaseType::UINT8, Color4(0.0f));
+    _zeroImage = createUniformImage(2, 2, 4, Image::BaseType::UINT8, Color4(0.0f));
+
+    // Generated shaders interpret 1x1 textures as invalid images.
+    _invalidImage = createUniformImage(1, 1, 4, Image::BaseType::UINT8, Color4(0.0f));
 }
 
 void ImageHandler::addLoader(ImageLoaderPtr loader)
@@ -83,7 +88,15 @@ bool ImageHandler::saveImage(const FilePath& filePath,
     string extension = foundFilePath.getExtension();
     for (ImageLoaderPtr loader : _imageLoaders[extension])
     {
-        bool saved = loader->saveImage(foundFilePath, image, verticalFlip);
+        bool saved = false;
+        try
+        {
+            saved = loader->saveImage(foundFilePath, image, verticalFlip);
+        }
+        catch (std::exception& e)
+        {
+            std::cerr << "Exception in image I/O library: " << e.what() << std::endl;
+        }
         if (saved)
         {
             return true;
@@ -92,7 +105,7 @@ bool ImageHandler::saveImage(const FilePath& filePath,
     return false;
 }
 
-ImagePtr ImageHandler::acquireImage(const FilePath& filePath, bool, const Color4* fallbackColor, string* message)
+ImagePtr ImageHandler::acquireImage(const FilePath& filePath, bool)
 {
     FilePath foundFilePath = _searchPath.find(filePath);
     string extension = stringToLower(foundFilePath.getExtension());
@@ -100,10 +113,19 @@ ImagePtr ImageHandler::acquireImage(const FilePath& filePath, bool, const Color4
     for (ImageLoaderPtr loader : _imageLoaders[extension])
     {
         extensionSupported = true;
-        ImagePtr image = loader->loadImage(foundFilePath);
+        ImagePtr image;
+        try
+        {
+            image = loader->loadImage(foundFilePath);
+        }
+        catch (std::exception& e)
+        {
+            std::cerr << "Exception in image I/O library: " << e.what() << std::endl;
+        }
         if (image)
         {
-            // Workaround for sampling issues with 1x1 textures.
+            // Generated shaders interpret 1x1 textures as invalid images, so valid 1x1
+            // images must be resized.
             if (image->getWidth() == 1 && image->getHeight() == 1)
             {
                 image = createUniformImage(2, 2, image->getChannelCount(),
@@ -115,32 +137,24 @@ ImagePtr ImageHandler::acquireImage(const FilePath& filePath, bool, const Color4
         }
     }
 
-    if (message && !filePath.isEmpty())
+    if (!filePath.isEmpty())
     {
         if (!foundFilePath.exists())
         {
-            *message = string("Image file not found: ") + filePath.asString();
+            std::cerr << string("Image file not found: ") + filePath.asString() << std::endl;
         }
         else if (!extensionSupported)
         {
-            *message = string("Unsupported image extension: ") + filePath.asString();
+            std::cerr << string("Unsupported image extension: ") + filePath.asString() << std::endl;
         }
         else
         {
-            *message = string("Image loader failed to parse image: ") + filePath.asString();
-        }
-    }
-    if (fallbackColor)
-    {
-        ImagePtr image = createUniformImage(2, 2, 4, Image::BaseType::UINT8, *fallbackColor);
-        if (image)
-        {
-            cacheImage(filePath, image);
-            return image;
+            std::cerr << string("Image loader failed to parse image: ") + filePath.asString() << std::endl;
         }
     }
 
-    return nullptr;
+    cacheImage(filePath, _invalidImage);
+    return _invalidImage;
 }
 
 bool ImageHandler::bindImage(ImagePtr, const ImageSamplingProperties&)

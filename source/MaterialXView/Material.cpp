@@ -17,8 +17,6 @@ namespace {
 using MatrixXfProxy = Eigen::Map<const ng::MatrixXf>;
 using MatrixXuProxy = Eigen::Map<const ng::MatrixXu>;
 
-const mx::Color4 IMAGE_DEFAULT_COLOR(0, 0, 0, 1);
-
 const float PI = std::acos(-1.0f);
 
 } // anonymous namespace
@@ -104,7 +102,6 @@ bool Material::generateShader(mx::GenContext& context)
 
     mx::GenContext materialContext = context;
     materialContext.getOptions().hwTransparency = _hasTransparency;
-    materialContext.getOptions().hwShadowMap = materialContext.getOptions().hwShadowMap && !_hasTransparency;
 
     // Initialize in case creation fails and throws an exception
     clearShader();
@@ -163,7 +160,7 @@ bool Material::generateEnvironmentShader(mx::GenContext& context,
     {
         return false;
     }
-    image->setParameterValue("file", imagePath.asString(), mx::FILENAME_TYPE_STRING);
+    image->setInputValue("file", imagePath.asString(), mx::FILENAME_TYPE_STRING);
     mx::OutputPtr output = envGraph->getOutput("out");
     if (!output)
     {
@@ -302,7 +299,7 @@ void Material::bindImages(mx::ImageHandlerPtr imageHandler, const mx::FileSearch
         // Set the requested mipmap sampling property,
         samplingProperties.enableMipmaps = enableMipmaps;
 
-        mx::ImagePtr image = bindImage(filename, uniformVariable, imageHandler, samplingProperties, &IMAGE_DEFAULT_COLOR);
+        mx::ImagePtr image = bindImage(filename, uniformVariable, imageHandler, samplingProperties);
         if (image)
         {
             _boundImages.push_back(image);
@@ -311,7 +308,7 @@ void Material::bindImages(mx::ImageHandlerPtr imageHandler, const mx::FileSearch
 }
 
 mx::ImagePtr Material::bindImage(const mx::FilePath& filePath, const std::string& uniformName, mx::ImageHandlerPtr imageHandler,
-                                 const mx::ImageSamplingProperties& samplingProperties, const mx::Color4* fallbackColor)
+                                 const mx::ImageSamplingProperties& samplingProperties)
 {
     if (!_glShader)
     {
@@ -327,12 +324,7 @@ mx::ImagePtr Material::bindImage(const mx::FilePath& filePath, const std::string
     imageHandler->setFilenameResolver(resolver);
 
     // Acquire the given image.
-    std::string error;
-    mx::ImagePtr image = imageHandler->acquireImage(filePath, true, fallbackColor, &error);
-    if (!error.empty())
-    {
-        std::cerr << error << std::endl;
-    }
+    mx::ImagePtr image = imageHandler->acquireImage(filePath, true);
     if (!image)
     {
         return nullptr;
@@ -512,20 +504,6 @@ void Material::bindLights(const mx::GenContext& genContext, mx::LightHandlerPtr 
                         {
                             bindUniform(inputName, input->getValue());
                         }
-                    }
-                }
-            }
-
-            // Set all parameters. Note that upstream node connections are not currently supported.
-            for (mx::ParameterPtr param : light->getParameters())
-            {
-                // Make sure we have a value to set
-                if (param->hasValue())
-                {
-                    std::string paramName(prefix + "." + param->getName());
-                    if (_glShader->uniform(paramName, false) != -1)
-                    {
-                        bindUniform(paramName, param->getValue());
                     }
                 }
             }

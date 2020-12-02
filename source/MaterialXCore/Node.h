@@ -41,6 +41,10 @@ using BackdropPtr = shared_ptr<Backdrop>;
 /// A shared pointer to a const Backdrop
 using ConstBackdropPtr = shared_ptr<const Backdrop>;
 
+// Predicate to test a node against some criteria whether
+// that criteria has passed
+using NodePredicate = std::function<bool(NodePtr node)>;
+
 /// @class Node
 /// A node element within a NodeGraph or Document.
 ///
@@ -145,6 +149,7 @@ class Node : public InterfaceElement
     }
 
     /// Add an input based on the corresponding input for the associated node definition.
+    /// If the input already exists on the node it will just be returned.
     ValueElementPtr addInputFromNodeDef(const string& name);
 
     /// @}
@@ -268,7 +273,7 @@ class GraphElement : public InterfaceElement
 
     /// Flatten any references to graph-based node definitions within this
     /// node graph, replacing each reference with the equivalent node network.
-    void flattenSubgraphs(const string& target = EMPTY_STRING);
+    void flattenSubgraphs(const string& target = EMPTY_STRING, NodePredicate filter=nullptr);
 
     /// Return a vector of all children (nodes and outputs) sorted in
     /// topological order.

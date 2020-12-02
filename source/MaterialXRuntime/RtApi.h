@@ -12,7 +12,9 @@
 #include <MaterialXRuntime/Library.h>
 #include <MaterialXRuntime/RtLogger.h>
 #include <MaterialXRuntime/RtPrim.h>
+#include <MaterialXRuntime/RtConnectableApi.h>
 #include <MaterialXRuntime/RtTypeDef.h>
+#include <MaterialXRuntime/RtFileIo.h>
 
 #include <MaterialXFormat/File.h>
 
@@ -39,7 +41,7 @@ public:
     void unregisterLogger(RtLoggerPtr logger);
 
     /// Logs a message with the registered loggers
-    void log(RtLogger::MessageType type, const RtToken& msg);
+    void log(RtLogger::MessageType type, const string& msg);
 
     /// Register a create function for a typename.
     void registerCreateFunction(const RtToken& typeName, RtPrimCreateFunc func);
@@ -48,36 +50,34 @@ public:
     void unregisterCreateFunction(const RtToken& typeName);
 
     /// Return true if the given typename has a create function registered.
-    bool hasCreateFunction(const RtToken& typeName);
+    bool hasCreateFunction(const RtToken& typeName) const;
 
     /// Return the create function for given typename.
     /// Or nullptr if no such create function has been registered.
-    RtPrimCreateFunc getCreateFunction(const RtToken& typeName);
+    RtPrimCreateFunc getCreateFunction(const RtToken& typeName) const;
 
-    /// Register a master prim to be used for creating instances from.
-    /// A typical use case is for registering a nodedef prim to be used for
-    /// creating node instances.
-    void registerMasterPrim(const RtPrim& prim);
+    /// Register a nodedef prim to be used for creating node instances from.
+    void registerNodeDef(const RtPrim& prim);
 
-    /// Unregister a master prim.
-    void unregisterMasterPrim(const RtToken& name);
+    /// Unregister a nodedef.
+    void unregisterNodeDef(const RtToken& name);
 
-    /// Return true if a master prim with the given name has been registered.
-    bool hasMasterPrim(const RtToken& name);
+    /// Return true if a nodedef prim with the given name has been registered.
+    bool hasNodeDef(const RtToken& name) const;
 
-    /// Return the master prim with given name.
-    /// Or a null object if no such prim has been registered.
-    RtPrim getMasterPrim(const RtToken& name);
+    /// Return the nodedef prim with given name. Or a null object if no such 
+    /// nodedef prim has been registered.
+    RtPrim getNodeDef(const RtToken& name) const;
 
-    /// Return and iterator over all registered master prims,
-    /// optionally filtered using a predicate.
-    RtPrimIterator getMasterPrims(RtObjectPredicate predicate = nullptr);
+    /// Return and iterator over all registered nodedefs.
+    RtPrimIterator getNodeDefs() const;
 
     /// Register a typed prim schema.
-    template<class T>
+    template<class T, class ConnectableApi = RtConnectableApi>
     void registerTypedSchema()
     {
         registerCreateFunction(T::typeName(), T::createPrim);
+        RtConnectableApi::registerApi<T, ConnectableApi>();
     }
 
     /// Unregister a typed prim schema.
@@ -85,6 +85,7 @@ public:
     void unregisterTypedSchema()
     {
         unregisterCreateFunction(T::typeName());
+        RtConnectableApi::unregisterApi<T>();
     }
 
     /// Clear the definition search path
@@ -121,7 +122,7 @@ public:
     void createLibrary(const RtToken& name);
 
     /// Load a library.
-    void loadLibrary(const RtToken& name);
+    void loadLibrary(const RtToken& name, const RtReadOptions& options);
 
     /// Unload a library.
     void unloadLibrary(const RtToken& name);

@@ -26,7 +26,7 @@ void Node::setConnectedNode(const string& inputName, NodePtr node)
     InputPtr input = getInput(inputName);
     if (!input)
     {
-        input = addInput(inputName);
+        input = addInput(inputName, DEFAULT_TYPE_STRING);
     }
     if (node)
     {
@@ -50,7 +50,7 @@ void Node::setConnectedNodeName(const string& inputName, const string& nodeName)
     InputPtr input = getInput(inputName);
     if (!input)
     {
-        input = addInput(inputName);
+        input = addInput(inputName, DEFAULT_TYPE_STRING);
     }
     input->setNodeName(nodeName);
 }
@@ -194,7 +194,7 @@ bool Node::validate(string* message) const
 // GraphElement methods
 //
 
-void GraphElement::flattenSubgraphs(const string& target)
+void GraphElement::flattenSubgraphs(const string& target, NodePredicate filter)
 {
     vector<NodePtr> processNodeVec = getNodes();
     while (!processNodeVec.empty())
@@ -220,10 +220,20 @@ void GraphElement::flattenSubgraphs(const string& target)
         }
         processNodeVec.clear();
 
+        // Attributes in addition to value to copy over
+        StringVec copyAttributes = { ValueElement::UNIT_ATTRIBUTE,
+                                     ValueElement::UNITTYPE_ATTRIBUTE,
+                                     ValueElement::COLOR_SPACE_ATTRIBUTE };
+
         // Iterate through nodes with graph implementations.
         for (const auto& pair : graphImplMap)
         {
             NodePtr processNode = pair.first;
+            if (filter && !filter(processNode))
+            {
+                continue;
+            }
+
             NodeGraphPtr sourceSubGraph = pair.second;
             std::unordered_map<NodePtr, NodePtr> subNodeMap;
 
@@ -249,6 +259,13 @@ void GraphElement::flattenSubgraphs(const string& target)
                         if (refValue->hasValueString())
                         {
                             destValue->setValueString(refValue->getValueString());
+                        }
+                        for (auto copyAttribute : copyAttributes)
+                        {
+                            if (refValue->hasAttribute(copyAttribute))
+                            {
+                                destValue->setAttribute(copyAttribute, refValue->getAttribute(copyAttribute));
+                            }
                         }
                         if (destValue->isA<Input>() && refValue->isA<Input>())
                         {
@@ -486,13 +503,16 @@ ValueElementPtr Node::addInputFromNodeDef(const string& name)
     if (elemNodeDef)
     {
         ValueElementPtr nodeDefElem = elemNodeDef->getChildOfType<ValueElement>(name);
+        const string& inputName = nodeDefElem->getName();
+        ElementPtr existingElement = getChild(inputName);
+        if (existingElement && existingElement->isA<ValueElement>())
+        {
+            return existingElement->asA<ValueElement>();
+        }
+
         if (nodeDefElem->isA<Input>())
         {
-            newChild = addInput(nodeDefElem->getName());
-        }
-        else if (nodeDefElem->isA<Parameter>())
-        {
-            newChild = addParameter(nodeDefElem->getName());
+            newChild = addInput(inputName, nodeDefElem->getType());
         }
         if (newChild)
         {
@@ -518,8 +538,7 @@ void NodeGraph::addInterface(const string& childPath, const string& interfaceNam
     ElementPtr elem = getDescendant(childPath);
     ValueElementPtr valueElem = elem->asA<ValueElement>();
     InputPtr input = valueElem ? valueElem->asA<Input>() : nullptr;
-    ParameterPtr param = valueElem ? valueElem->asA<Parameter>() : nullptr;
-    if ((!input && !param) || (input && input->getConnectedNode()))
+    if (!input || (input && input->getConnectedNode()))
     {
         throw Exception("Invalid nodegraph child to create interface for:  " + childPath);
     }
@@ -533,14 +552,6 @@ void NodeGraph::addInterface(const string& childPath, const string& interfaceNam
         if (value)
         {
             nodeDefInput->setValueString(value->getValueString());
-        }
-    }
-    else
-    {
-        ParameterPtr nodeDefParam = nodeDef->addParameter(interfaceName, param->getType());
-        if (value)
-        {
-            nodeDefParam->setValueString(value->getValueString());
         }
     }
 }

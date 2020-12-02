@@ -20,7 +20,7 @@ TEST_CASE("Document", "[document]")
     // Create a node graph with a constant color output.
     mx::NodeGraphPtr nodeGraph = doc->addNodeGraph();
     mx::NodePtr constant = nodeGraph->addNode("constant");
-    constant->setParameterValue("value", mx::Color3(0.5f));
+    constant->setInputValue("value", mx::Color3(0.5f));
     mx::OutputPtr output = nodeGraph->addOutput();
     output->setConnectedNode(constant);
     REQUIRE(doc->validate());
@@ -48,8 +48,12 @@ TEST_CASE("Document", "[document]")
     // Create a simple shader interface.
     mx::NodeDefPtr shader = doc->addNodeDef("", "surfaceshader", "simpleSrf");
     mx::InputPtr diffColor = shader->addInput("diffColor", "color3");
-    shader->addInput("specColor", "color3");
-    mx::ParameterPtr roughness = shader->addParameter("roughness", "float");
+    REQUIRE(!diffColor->getIsUniform());
+    mx::InputPtr specColor = shader->addInput("specColor", "color3", true);
+    REQUIRE(specColor->getIsUniform());
+    specColor->setIsUniform(false);
+    REQUIRE(!specColor->getIsUniform());
+    mx::InputPtr roughness = shader->addInput("roughness", "float");
 
     // Create a material that instantiates the shader.
     mx::MaterialPtr material = doc->addMaterial();
@@ -61,14 +65,14 @@ TEST_CASE("Document", "[document]")
     REQUIRE(diffColor->getUpstreamElement(material) == output);
 
     // Bind the roughness parameter to a value.
-    mx::BindParamPtr bindParam = shaderRef->addBindParam("roughness");
-    bindParam->setValue(0.5f);
+    bindInput = shaderRef->addBindInput("roughness");
+    bindInput->setValue(0.5f);
     REQUIRE(roughness->getBoundValue(material)->asA<float>() == 0.5f);
 
     // Create and test a type mismatch in a data binding.
-    bindParam->setValue(5);
+    bindInput->setValue(5);
     REQUIRE(!doc->validate());
-    bindParam->setValue(0.5f);
+    bindInput->setValue(0.5f);
     REQUIRE(doc->validate());
 
     // Create a collection 
@@ -163,21 +167,20 @@ TEST_CASE("Version", "[document]")
 
     // 1.37 to 1.38
     {
-        mx::XmlReadOptions options;
-        options.applyFutureUpdates = true;
         doc = mx::createDocument();
-        mx::loadLibrary(mx::FilePath::getCurrentPath() / mx::FilePath("libraries/stdlib/stdlib_defs.mtlx"), doc, nullptr, &options);
-        mx::loadLibrary(mx::FilePath::getCurrentPath() / mx::FilePath("libraries/stdlib/stdlib_ng.mtlx"), doc, nullptr, &options);
-        mx::readFromXmlFile(doc, "1_37_to_1_38.mtlx", searchPath, &options);
+        mx::loadLibrary(mx::FilePath::getCurrentPath() / mx::FilePath("libraries/stdlib/stdlib_defs.mtlx"), doc);
+        mx::loadLibrary(mx::FilePath::getCurrentPath() / mx::FilePath("libraries/stdlib/stdlib_ng.mtlx"), doc);
+        mx::readFromXmlFile(doc, "1_37_to_1_38.mtlx", searchPath);
         REQUIRE(doc->validate());
 
         mx::XmlWriteOptions writeOptions;
-        writeOptions.writeXIncludeEnable = true;
+        writeOptions.writeXIncludeEnable = false;
         mx::writeToXmlFile(doc, "1_37_to_1_38_updated.mtlx", &writeOptions);
 
         mx::DocumentPtr doc2 = mx::createDocument();
         mx::readFromXmlFile(doc2, "1_37_to_1_38_updated.mtlx");
         REQUIRE(doc2->validate());
+        std::string doc2String = mx::writeToXmlString(doc2);
 
         // atan2 test
         const std::string ATAN2 = "atan2";
@@ -214,6 +217,19 @@ TEST_CASE("Version", "[document]")
         REQUIRE(testNodeGraph->getNode("add2"));
         REQUIRE(testNodeGraph->getNode("add2")->getInput("in1")->getInterfaceName() == "add");
         REQUIRE(testNodeGraph->getNode("add1")->getInput("in1")->getNodeName() == "add2");
+
+        // Convert back and forth between parameters and inputs
+        REQUIRE(doc2->convertUniformInputsToParameters());
+        REQUIRE(doc2->validate());
+        mx::writeToXmlFile(doc2, "1_38_to_1_37_parameters.mtlx", &writeOptions);
+        mx::DocumentPtr doc3 = mx::createDocument();
+        mx::XmlReadOptions noParamUpdateOptions;
+        noParamUpdateOptions.applyFutureUpdates = false;
+        mx::readFromXmlFile(doc3, "1_38_to_1_37_parameters.mtlx", mx::FileSearchPath(), &noParamUpdateOptions);
+        REQUIRE(doc3->validate());
+        REQUIRE(doc3->convertParametersToInputs());
+        std::string doc3String = mx::writeToXmlString(doc3);
+        REQUIRE(doc2String == doc3String);
     }
 }
 

@@ -1,10 +1,39 @@
 # Change Log
 
-## [1.37.2] - Development
+## [1.38] - Development
 
-- ILM : General
-  - Load standard libraries for MaterialXView regardless of build folder location (#922)
-  - Python Texture Bake and Multiple Udims Texture Bake Support (#943)
+### Highlights ("v1.37.3_parameters_as_inputs" to "v1.38_adsk_development1")
+ - Up-to-date with ILM v1.38 branch @3900415.
+ - Finished API support for Material Nodes (from Material Elements)
+ - Baker support for v1.38, CM and units.
+ - Shader Translator support for v1.38, CM and units.
+ - Parameter -> input upgrade and downgrade added
+ - GLSL fidelity enhancements include SSS
+ - USDPreviewSurface v2.3 support (Fresnel input fix)
+ - Import of namespaced documents fix (no double namespacing)
+ - Graph flattening enhancement
+ - Update of WASM to 1.38. (new APIS to expose)
+ - Filename resolver utilities
+ - Github actions support.
+ - Plus changes up to 1.37.3.
+
+## [1.37.3] - Development
+
+### Added
+- Added Render Transparency and Render Double-Sided options to the Advanced Settings panel of the viewer.
+- Added viewer support for partially-transparent mesh partitions.
+- Added a subsurface scattering approximation to MaterialX GLSL.
+- Added a CMake option for building shared libraries on Linux and MacOS.
+
+### Changed
+- Improved the robustness of texture baking and shader translation.
+- Moved CI builds from Travis and Appveyor to GitHub Actions.
+
+### Fixed
+- Fixed rendering of single-channel textures in MaterialXRenderGlsl.
+
+## [1.37.2] - 2020-09-06
+
 - ADSK : General
   - Add definition searching for shader nodes for <material> instances (#919)
   - Add in new ADSK shaderball + rectangle geometries (#943)
@@ -25,7 +54,7 @@
   - Improve layering in OSL (#901)
   - Fix regression with search paths in MaterialXView (#894)
   - Test case and python bindings (#898)
-  - Enable GlslShaderGenerator to add `layout` in generated code. (#896) 
+  - Enable GlslShaderGenerator to add `layout` in generated code. (#896)
   - Use mod() vs fmod() logic for OSL and MDL codegen (#871). Only for 1.38
 - ADSK : Render general changes
   - Environment rendering improvements (#945)
@@ -41,6 +70,20 @@
 - ADSK : Javascript Bindings
   - Fix JavaScript security issues from the Codacy scan (#925)
   - Part I : Basic setup MaterialX and parts of MaterialXFormat modules. CI on Travis. (#879)
+
+### ILM Added
+- Added support for texture baking from Python, including new example script [baketextures.py](python/Scripts/baketextures.py).
+- Added support for texture baking of materials with multiple UDIMs.
+- Added support for floating-point render targets in ShaderRenderer and its subclasses, allowing for HDR texture baking.
+- Added support for displacement shaders in generated OSL.
+- Added the ShaderTranslator class, laying the groundwork for support of shader translation graphs.
+- Added Python bindings for the Image class.
+
+### ILM Fixed
+- Fixed the alignment of environment backgrounds in the viewer.
+
+### ILM Removed
+- Removed the CopyOptions class, making it the default behavior of Document\:\:importLibrary to skip conflicting elements.
 
 ## [1.37.1] - 2020-06-04
 

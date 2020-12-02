@@ -12,6 +12,7 @@
 #include <MaterialXFormat/Util.h>
 
 #include <MaterialXGenShader/HwShaderGenerator.h>
+#include <MaterialXGenShader/ShaderTranslator.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -141,8 +142,6 @@ TEST_CASE("GenShader: OSL Reference Implementation Check", "[genshader]")
         }
     }
 
-    std::string nodeDefNode;
-    std::string nodeDefType;
     unsigned int count = 0;
     unsigned int missing = 0;
     std::string missing_str;
@@ -165,7 +164,7 @@ TEST_CASE("GenShader: OSL Reference Implementation Check", "[genshader]")
         if (!inter)
         {
             missing++;
-            missing_str += "Missing nodeDef implemenation: " + nodeDefName + ", Node: " + nodeName + ".\n";
+            missing_str += "Missing nodeDef implementation: " + nodeDefName + ", Node: " + nodeName + ".\n";
         }
         else
         {
@@ -207,5 +206,46 @@ TEST_CASE("GenShader: OSL Reference Implementation Check", "[genshader]")
 
     // To enable once this is true
     //REQUIRE(missing == 0);
+}
+
+TEST_CASE("GenShader: Shader Translation", "[translate]")
+{
+    mx::FileSearchPath searchPath;
+    const mx::FilePath currentPath = mx::FilePath::getCurrentPath();
+    searchPath.append(currentPath / mx::FilePath("libraries"));
+    searchPath.append(currentPath / mx::FilePath("resources/Materials/TestSuite"));
+
+    mx::ShaderTranslatorPtr shaderTranslator = mx::ShaderTranslator::create();
+
+    const std::string USD_PREVIEW_SURFACE_NAME("UsdPreviewSurface");
+
+    mx::FilePath testPath = mx::FilePath::getCurrentPath() / mx::FilePath("resources/Materials/Examples/StandardSurface");
+    for (mx::FilePath& mtlxFile : testPath.getFilesInDirectory("mtlx"))
+    {
+        mx::DocumentPtr doc = mx::createDocument();
+        mx::StringSet libFiles = loadLibraries({ "stdlib", "pbrlib", "bxdf", "translation" }, searchPath, doc);
+
+        mx::readFromXmlFile(doc, testPath / mtlxFile, searchPath);
+        mtlxFile.removeExtension();
+        mx::writeToXmlFile(doc, mtlxFile.asString() + "_untranslated.mtlx");
+
+        try {
+            shaderTranslator->translateAllMaterials(doc, USD_PREVIEW_SURFACE_NAME);
+        }
+        catch (mx::Exception &e)
+        {
+            std::cout << "Failed translating: " << (testPath / mtlxFile).asString() << ": " << e.what() << std::endl;
+        }
+
+        mx::writeToXmlFile(doc, mtlxFile.asString() + "_translated.mtlx");
+        std::string validationErrors;
+        bool valid = doc->validate(&validationErrors);
+        std::cout << "SHader translation of : " << (testPath / mtlxFile).asString() << (valid ?  ": passed"  : ": failed") << std::endl;
+        if (!valid)
+        {
+            std::cout << "Validation errors: " << validationErrors << std::endl;
+        }
+        CHECK(valid);
+    }
 }
 

@@ -545,11 +545,7 @@ ImagePtr GlslProgram::bindTexture(unsigned int uniformType, int uniformLocation,
     {
         // Acquire the image.
         string error;
-        ImagePtr image = imageHandler->acquireImage(filePath, generateMipMaps, &(samplingProperties.defaultColor), &error);
-        if (!error.empty())
-        {
-            std::cerr << error << std::endl;
-        }
+        ImagePtr image = imageHandler->acquireImage(filePath, generateMipMaps);
         if (imageHandler->bindImage(image, samplingProperties))
         {
             GLTextureHandlerPtr textureHandler = std::static_pointer_cast<GLTextureHandler>(imageHandler);
@@ -691,7 +687,7 @@ void GlslProgram::bindLighting(LightHandlerPtr lightHandler, ImageHandlerPtr ima
                 string filename = inputPtr->value->getValueString();
                 if (!filename.empty())
                 {
-                    image = imageHandler->acquireImage(filename, true);
+                    image = imageHandler->acquireImage(filename);
                 }
             }
             if (!image)
@@ -773,20 +769,6 @@ void GlslProgram::bindLighting(LightHandlerPtr lightHandler, ImageHandlerPtr ima
                 if (input != uniformList.end())
                 {
                     bindUniform(input->second->location, *lightInput->getValue());
-                }
-            }
-        }
-
-        // Set all parameters. Note that upstream connections are not currently handled.
-        for (auto param : light->getParameters())
-        {
-            // Make sure we have a value to set
-            if (param->hasValue())
-            {
-                input = uniformList.find(prefix + "." + param->getName());
-                if (input != uniformList.end())
-                {
-                    bindUniform(input->second->location, *param->getValue());
                 }
             }
         }

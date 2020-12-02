@@ -10,6 +10,7 @@
 /// TODO: Docs
 
 #include <MaterialXRuntime/RtNode.h>
+#include <MaterialXRuntime/RtNodeDef.h>
 
 namespace MaterialX
 {
@@ -55,6 +56,14 @@ public:
     /// to the named output attribute.
     RtInput getOutputSocket(const RtToken& name) const;
 
+    /// Return a node layout struct for this graph.
+    /// Containing its input ordering and uifolder hierarchy.
+    RtNodeLayout getNodeLayout();
+
+    /// Set the node layout for this graph, reordering its inputs
+    /// and uifolder hierarchy according to the given layout struct.
+    void setNodeLayout(const RtNodeLayout& layout);
+
     /// Return a node by name.
     RtPrim getNode(const RtToken& name) const;
 
@@ -76,6 +85,10 @@ public:
     /// Convert this graph to a string in the DOT language syntax. This can be
     /// used to visualise the graph using GraphViz (http://www.graphviz.org).
     string asStringDot() const;
+
+public:
+    /// Type info for internal socket nodes.
+    static const RtTypeInfo SOCKETS_TYPE_INFO;
 };
 
 }

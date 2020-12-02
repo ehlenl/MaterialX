@@ -27,8 +27,10 @@ class Viewer : public ng::Screen
            const mx::Vector3& cameraPosition,
            const mx::Vector3& cameraTarget,
            float cameraViewAngle,
+           float cameraZoom,
            const std::string& envRadiancePath,
            mx::HwSpecularEnvironmentMethod specularEnvironmentMethod,
+           int envSampleCount,
            float lightRotation,
            const mx::FilePathVec& libraryFolders,
            const mx::FileSearchPath& searchPath,
@@ -122,6 +124,7 @@ class Viewer : public ng::Screen
     void createLoadMaterialsInterface(Widget* parent, const std::string& label);
     void createLoadEnvironmentInterface(Widget* parent, const std::string& label);
     void createSaveMaterialsInterface(Widget* parent, const std::string& label);
+    void createWedgeParameterInterface(Widget* parent, const std::string& label);
     void createPropertyEditorInterface(Widget* parent, const std::string& label);
     void createAdvancedSettings(Widget* parent);
 
@@ -132,8 +135,8 @@ class Viewer : public ng::Screen
     /// returning a new indirect map and directional light document.
     void splitDirectLight(mx::ImagePtr envRadianceMap, mx::ImagePtr& indirectMap, mx::DocumentPtr& dirLightDoc);
 
-    /// Update the current shadow map.
     void updateShadowMap();
+    void invalidateShadowMap();
 
     /// Update the directional albedo table.
     void updateAlbedoTable();
@@ -242,9 +245,6 @@ class Viewer : public ng::Screen
 
     // Material options
     bool _mergeMaterials;
-    bool _bakeTextures;
-    bool _bakeHdr;
-    int _bakeTextureRes;
 
     // Unit options
     mx::StringVec _distanceUnitOptions;
@@ -252,6 +252,8 @@ class Viewer : public ng::Screen
     mx::LinearUnitConverterPtr _distanceUnitConverter;
 
     // Render options
+    bool _renderTransparency;
+    bool _renderDoubleSided;
     bool _outlineSelection;
     int _envSamples;
     bool _drawEnvironment;
@@ -267,13 +269,21 @@ class Viewer : public ng::Screen
     float _wedgePropertyMin;
     float _wedgePropertyMax;
     unsigned int _wedgeImageCount;
+    ng::ComboBox* _wedgeSelectionBox;
 
     // Texture baking
+    bool _bakeTextures;
+    bool _bakeHdr;
+    bool _bakeAverage;
+    bool _bakeOptimize;
+    int _bakeTextureRes;
     bool _bakeRequested;
     mx::FilePath _bakeFilename;
 };
 
 extern const mx::Vector3 DEFAULT_CAMERA_POSITION;
 extern const float DEFAULT_CAMERA_VIEW_ANGLE;
+extern const float DEFAULT_CAMERA_ZOOM;
+extern const int DEFAULT_ENV_SAMPLES;
 
 #endif // MATERIALXVIEW_VIEWER_H

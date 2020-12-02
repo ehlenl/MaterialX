@@ -14,6 +14,9 @@
 namespace MaterialX
 {
 
+class Element;
+using ElementPtr = shared_ptr<Element>;
+
 extern const string EMPTY_STRING;
 
 /// Return the version of the MaterialX library as a string.
@@ -45,11 +48,26 @@ string stringToLower(string str);
 /// Return true if the given string ends with the given suffix.
 bool stringEndsWith(const string& str, const string& suffix);
 
+/// Trim leading an trailing spaces from a string
+string trimSpaces(const string& str);
+
 /// Combine the hash of a value with an existing seed.
 template<typename T> void hashCombine(size_t& seed, const T& value)
 {
     seed ^= std::hash<T>()(value) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 } 
+
+/// Split a name path into string vector
+StringVec splitNamePath(const string& namePath);
+
+/// Create a name path from a string vector
+string createNamePath(const StringVec& nameVec);
+
+/// Given a name path, return the parent name path
+string parentNamePath(const string& namePath);
+
+/// Change the category of a child element
+ElementPtr changeChildCategory(ElementPtr parent, ElementPtr origChild, const string& category);
 
 } // namespace MaterialX
 
