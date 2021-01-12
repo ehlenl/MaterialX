@@ -25,13 +25,6 @@ void bindPyDocument(py::module& mod)
         .def("getNodeGraphs", &mx::Document::getNodeGraphs)
         .def("removeNodeGraph", &mx::Document::removeNodeGraph)
         .def("getMatchingPorts", &mx::Document::getMatchingPorts)
-        .def("addMaterial", &mx::Document::addMaterial,
-            py::arg("name") = mx::EMPTY_STRING)
-        .def("getMaterial", &mx::Document::getMaterial)
-        .def("getMaterials", &mx::Document::getMaterials)
-        .def("removeMaterial", &mx::Document::removeMaterial)
-        .def("getMaterialNode", &mx::Document::getMaterialNode)
-        .def("getMaterialNodes", &mx::Document::getMaterialNodes)
         .def("addGeomInfo", &mx::Document::addGeomInfo,
             py::arg("name") = mx::EMPTY_STRING, py::arg("geom") = mx::UNIVERSAL_GEOM_NAME)
         .def("getGeomInfo", &mx::Document::getGeomInfo)
@@ -94,14 +87,11 @@ void bindPyDocument(py::module& mod)
         .def("getUnitTypeDef", &mx::Document::getUnitTypeDef)
         .def("getUnitTypeDefs", &mx::Document::getUnitTypeDefs)
         .def("removeUnitTypeDef", &mx::Document::removeUnitTypeDef)
-        .def("upgradeVersion", &mx::Document::upgradeVersion,
-            py::arg("applyFutureUpdates") = false)
+        .def("upgradeVersion", &mx::Document::upgradeVersion)
         .def("setColorManagementSystem", &mx::Document::setColorManagementSystem)
         .def("hasColorManagementSystem", &mx::Document::hasColorManagementSystem)
         .def("getColorManagementSystem", &mx::Document::getColorManagementSystem)
         .def("setColorManagementConfig", &mx::Document::setColorManagementConfig)
         .def("hasColorManagementConfig", &mx::Document::hasColorManagementConfig)
-        .def("getColorManagementConfig", &mx::Document::getColorManagementConfig)
-        .def("convertParametersToInputs", &mx::Document::convertParametersToInputs)
-        .def("convertUniformInputsToParameters", &mx::Document::convertUniformInputsToParameters);
+        .def("getColorManagementConfig", &mx::Document::getColorManagementConfig);
 }

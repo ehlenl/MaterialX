@@ -3,8 +3,6 @@
 // All rights reserved.  See LICENSE.txt for license.
 //
 
-#ifdef MATERIALX_BUILD_RUNTIME
-
 #include <MaterialXTest/Catch/catch.hpp>
 
 #include <MaterialXCore/Document.h>
@@ -32,6 +30,7 @@
 #include <MaterialXRuntime/RtLook.h>
 #include <MaterialXRuntime/RtCollection.h>
 #include <MaterialXRuntime/RtMessage.h>
+#include <MaterialXRuntime/Tokens.h>
 
 #include <MaterialXRuntime/Commands/PrimCommands.h>
 #include <MaterialXRuntime/Commands/AttributeCommands.h>
@@ -73,6 +72,7 @@ namespace
     const mx::RtToken MAIN("main");
     const mx::RtToken LIBS("libs");
     const mx::RtToken NONAME("");
+    const mx::RtToken TARGETS("targets");
     const mx::RtToken STDLIB("stdlib");
     const mx::RtToken PBRLIB("pbrlib");
     const mx::RtToken BXDFLIB("bxdf");
@@ -94,7 +94,7 @@ TEST_CASE("Runtime: Material Element Upgrade", "[runtime]")
     mx::FileSearchPath searchPath(mx::FilePath::getCurrentPath() / mx::FilePath("libraries"));
     api->setSearchPath(searchPath);
     mx::RtReadOptions options;
-    options.applyFutureUpdates = true;
+    api->loadLibrary(TARGETS, options);
     api->loadLibrary(STDLIB, options);
     api->loadLibrary(PBRLIB, options);
     api->loadLibrary(BXDFLIB, options);
@@ -222,8 +222,6 @@ TEST_CASE("Runtime: Values", "[runtime]")
     REQUIRE(value.asInt() == 23);
     mx::RtValue::fromString(mx::RtType::FLOAT, "1234.5678", value);
     REQUIRE(fabs(value.asFloat() - 1234.5678f) < 1e-3f);
-    mx::RtValue::fromString(mx::RtType::COLOR2, "1.0, 2.0", value);
-    REQUIRE(value.asColor2() == mx::Color2(1.0, 2.0));
     mx::RtValue::fromString(mx::RtType::COLOR3, "1.0, 2.0, 3.0", value);
     REQUIRE(value.asColor3() == mx::Color3(1.0, 2.0, 3.0));
     mx::RtValue::fromString(mx::RtType::COLOR4, "1.0, 2.0, 3.0, 4.0", value);
@@ -257,9 +255,6 @@ TEST_CASE("Runtime: Types", "[runtime]")
     const mx::RtTypeDef* booleanType = mx::RtTypeDef::findType(mx::RtType::BOOLEAN);
     REQUIRE(booleanType != nullptr);
     REQUIRE(booleanType->getBaseType() == mx::RtTypeDef::BASETYPE_BOOLEAN);
-    const mx::RtTypeDef* color2Type = mx::RtTypeDef::findType(mx::RtType::COLOR2);
-    REQUIRE(color2Type != nullptr);
-    REQUIRE(color2Type->getBaseType() == mx::RtTypeDef::BASETYPE_FLOAT);
     const mx::RtTypeDef* color3Type = mx::RtTypeDef::findType(mx::RtType::COLOR3);
     REQUIRE(color3Type != nullptr);
     REQUIRE(color3Type->getBaseType() == mx::RtTypeDef::BASETYPE_FLOAT);
@@ -861,11 +856,11 @@ TEST_CASE("Runtime: NodeGraphs", "[runtime]")
     mx::RtNode agNode(agPrim);
     {
         // 1. Metadata like version should be copiedbut not target or node.
-        mx::RtTypedValue* agVersion = agNode.getMetadata(mx::RtNodeDef::VERSION);
+        mx::RtTypedValue* agVersion = agNode.getMetadata(mx::Tokens::VERSION);
         REQUIRE(agVersion->getValueString() == ADDGRAPH_VERSION);
-        mx::RtTypedValue* agTarget = agNode.getMetadata(mx::RtNodeDef::TARGET);
+        mx::RtTypedValue* agTarget = agNode.getMetadata(mx::Tokens::TARGET);
         REQUIRE(!agTarget);
-        mx::RtTypedValue* agNodeValue = agNode.getMetadata(mx::RtNodeDef::NODE);
+        mx::RtTypedValue* agNodeValue = agNode.getMetadata(mx::Tokens::NODE);
         REQUIRE(!agNodeValue);
     }
 
@@ -946,11 +941,11 @@ TEST_CASE("Runtime: NodeGraphs", "[runtime]")
         doc->validate();
         mx::ElementPtr agInstance = doc->getChild("addgraph1");
         REQUIRE(agInstance);
-        bool instanceVersionSaved = agInstance->getAttribute(mx::RtNodeDef::VERSION.str()) == ADDGRAPH_VERSION;
+        bool instanceVersionSaved = agInstance->getAttribute(mx::Tokens::VERSION.str()) == ADDGRAPH_VERSION;
         REQUIRE(instanceVersionSaved);
-        bool instanceTargetNotSaved = agInstance->getAttribute(mx::RtNodeDef::TARGET.str()) == mx::EMPTY_STRING;
+        bool instanceTargetNotSaved = agInstance->getAttribute(mx::Tokens::TARGET.str()) == mx::EMPTY_STRING;
         REQUIRE(instanceTargetNotSaved);
-        bool instanceNodeNotSaved = agInstance->getAttribute(mx::RtNodeDef::NODE.str()) == mx::EMPTY_STRING;
+        bool instanceNodeNotSaved = agInstance->getAttribute(mx::Tokens::NODE.str()) == mx::EMPTY_STRING;
         REQUIRE(instanceNodeNotSaved);
     }
 }
@@ -964,7 +959,7 @@ TEST_CASE("Runtime: FileIo", "[runtime]")
         // Load in stdlib
         api->setSearchPath(searchPath);
         mx::RtReadOptions readOptions;
-        readOptions.applyFutureUpdates = true;
+        api->loadLibrary(TARGETS, readOptions);
         api->loadLibrary(STDLIB, readOptions);
 
         // Create a stage.
@@ -1014,7 +1009,7 @@ TEST_CASE("Runtime: FileIo", "[runtime]")
         // Load in stdlib
         api->setSearchPath(searchPath);
         mx::RtReadOptions options;
-        options.applyFutureUpdates = true;
+        api->loadLibrary(TARGETS, options);
         api->loadLibrary(STDLIB, options);
 
         // Create a new working space stage
@@ -1068,7 +1063,7 @@ TEST_CASE("Runtime: DefaultLook", "[runtime]")
     mx::FileSearchPath searchPath(mx::FilePath::getCurrentPath() / mx::FilePath("libraries"));
     api->setSearchPath(searchPath);
     mx::RtReadOptions options;
-    options.applyFutureUpdates = true;
+    api->loadLibrary(TARGETS, options);
     api->loadLibrary(STDLIB, options);
     api->loadLibrary(PBRLIB, options);
     api->loadLibrary(BXDFLIB, options);
@@ -1100,7 +1095,7 @@ TEST_CASE("Runtime: Namespaced definitions", "[runtime]")
     }
     api->setSearchPath(searchPath);
     mx::RtReadOptions options;
-    options.applyFutureUpdates = true;
+    api->loadLibrary(TARGETS, options);
     api->loadLibrary(STDLIB, options);
     api->loadLibrary(PBRLIB, options);
     api->loadLibrary(BXDFLIB, options);
@@ -1127,7 +1122,7 @@ TEST_CASE("Runtime: Conflict resolution", "[runtime]")
     mx::FileSearchPath searchPath(mx::FilePath::getCurrentPath() / mx::FilePath("libraries"));
     api->setSearchPath(searchPath);
     mx::RtReadOptions options;
-    options.applyFutureUpdates = true;
+    api->loadLibrary(TARGETS, options);
     api->loadLibrary(STDLIB, options);
     api->loadLibrary(PBRLIB, options);
     api->loadLibrary(BXDFLIB, options);
@@ -1210,7 +1205,7 @@ TEST_CASE("Runtime: FileIo NodeGraph", "[runtime]")
     mx::FileSearchPath searchPath(mx::FilePath::getCurrentPath() / mx::FilePath("libraries"));
     api->setSearchPath(searchPath);
     mx::RtReadOptions readOptions;
-    readOptions.applyFutureUpdates = true;
+    api->loadLibrary(TARGETS, readOptions);
     api->loadLibrary(STDLIB, readOptions);
 
     // Create a main stage
@@ -1273,7 +1268,7 @@ TEST_CASE("Runtime: Rename", "[runtime]")
     mx::FileSearchPath searchPath(mx::FilePath::getCurrentPath() / mx::FilePath("libraries"));
     api->setSearchPath(searchPath);
     mx::RtReadOptions options;
-    options.applyFutureUpdates = true;
+    api->loadLibrary(TARGETS, options);
     api->loadLibrary(STDLIB, options);
 
     // Create a main stage
@@ -1316,8 +1311,8 @@ TEST_CASE("Runtime: Stage References", "[runtime]")
     // Load in stdlib
     mx::FileSearchPath searchPath(mx::FilePath::getCurrentPath() / mx::FilePath("libraries"));
     mx::RtReadOptions readOptions;
-    readOptions.applyFutureUpdates = true;
     api->setSearchPath(searchPath);
+    api->loadLibrary(TARGETS, readOptions);
     api->loadLibrary(STDLIB, readOptions);
     api->loadLibrary(PBRLIB, readOptions);
 
@@ -1365,9 +1360,9 @@ TEST_CASE("Runtime: Traversal", "[runtime]")
     api->setSearchPath(searchPath);
 
     mx::RtReadOptions options;
-    options.applyFutureUpdates = true;
 
     // Load in the standard libraries.
+    api->loadLibrary(TARGETS, options);
     api->loadLibrary(STDLIB, options);
     api->loadLibrary(PBRLIB, options);
 
@@ -1393,7 +1388,7 @@ TEST_CASE("Runtime: Traversal", "[runtime]")
     // Loading the same libraries into a MaterialX document
     // and tests the same element counts.
     mx::DocumentPtr doc = mx::createDocument();
-    loadLibraries({ "stdlib", "pbrlib" }, searchPath, doc);
+    loadLibraries({ "targets", "stdlib", "pbrlib" }, searchPath, doc);
     const size_t libNodeCount = doc->getNodes().size();
     const size_t libNodeDefCount = doc->getNodeDefs().size();
     const size_t libNodeGraphCount = doc->getNodeGraphs().size();
@@ -1537,7 +1532,7 @@ TEST_CASE("Runtime: Looks", "[runtime]")
     mx::FileSearchPath searchPath(mx::FilePath::getCurrentPath() / mx::FilePath("libraries"));
     api->setSearchPath(searchPath);
     mx::RtReadOptions libReadOptions;
-    libReadOptions.applyFutureUpdates = true;
+    api->loadLibrary(TARGETS, libReadOptions);
     api->loadLibrary(STDLIB, libReadOptions);
     api->loadLibrary(PBRLIB, libReadOptions);
 
@@ -1612,7 +1607,6 @@ TEST_CASE("Runtime: Looks", "[runtime]")
         readOptions.readLookInformation = true;
         // Do not upgrade on reload:
         mx::DocumentPtr doc = mx::createDocument();
-        readOptions.applyFutureUpdates = false;
 
         mx::RtFileIo stageIo(stage);
         stageIo.write("rtLookExport.mtlx", useOptions ? &writeOptions : nullptr);
@@ -1820,7 +1814,7 @@ TEST_CASE("Runtime: libraries", "[runtime]")
     mx::FileSearchPath searchPath(mx::FilePath::getCurrentPath() / mx::FilePath("libraries"));
     api->setSearchPath(searchPath);
     mx::RtReadOptions options;
-    options.applyFutureUpdates = true;
+    api->loadLibrary(TARGETS, options);
     api->loadLibrary(STDLIB, options);
     api->loadLibrary(PBRLIB, options);
     api->loadLibrary(BXDFLIB, options);
@@ -1850,7 +1844,7 @@ TEST_CASE("Runtime: units", "[runtime]")
     mx::FileSearchPath searchPath(mx::FilePath::getCurrentPath() / mx::FilePath("libraries"));
     api->setSearchPath(searchPath);
     mx::RtReadOptions options;
-    options.applyFutureUpdates = true;
+    api->loadLibrary(TARGETS, options);
     api->loadLibrary(STDLIB, options);
     // Load in stdlib twice on purpose to ensure no exception is thrown when trying to add a duplicate unit 
     // definition 
@@ -1881,9 +1875,7 @@ TEST_CASE("Runtime: units", "[runtime]")
         // Test that read and write of files with units works.
         std::stringstream inStream;
         mx::DocumentPtr inDoc = mx::createDocument();
-        mx::XmlReadOptions readOptions;
-        readOptions.applyFutureUpdates = true;
-        mx::readFromXmlFile(inDoc, test, testSearchPath, &readOptions);
+        mx::readFromXmlFile(inDoc, test, testSearchPath);
 
         mx::DocumentPtr outDoc = mx::createDocument();
         std::stringstream outStream;
@@ -1919,7 +1911,7 @@ TEST_CASE("Runtime: Commands", "[runtime]")
     mx::FileSearchPath searchPath(mx::FilePath::getCurrentPath() / mx::FilePath("libraries"));
     api->setSearchPath(searchPath);
     mx::RtReadOptions options;
-    options.applyFutureUpdates = true;
+    api->loadLibrary(TARGETS, options);
     api->loadLibrary(STDLIB, options);
 
     mx::RtStagePtr stage = api->createStage(MAIN);
@@ -2325,7 +2317,7 @@ TEST_CASE("Runtime: graph output connection", "[runtime]")
                                   mx::FilePath("libraries"));
     api->setSearchPath(searchPath);
     mx::RtReadOptions options;
-    options.applyFutureUpdates = true;
+    api->loadLibrary(TARGETS, options);
     api->loadLibrary(STDLIB, options);
     api->loadLibrary(PBRLIB, options);
     api->loadLibrary(BXDFLIB, options);
@@ -2334,10 +2326,10 @@ TEST_CASE("Runtime: graph output connection", "[runtime]")
         "<?xml version=\"1.0\"?>\n"
         "<materialx version=\"1.38\">\n"
         "  <nodegraph name=\"Compound\">\n"
-        "    <output name=\"in\" type=\"color2\" />\n"
+        "    <output name=\"in\" type=\"color3\" />\n"
         "  </nodegraph>\n"
-        "  <clamp name=\"clamp\" type=\"color2\">\n"
-        "    <input name=\"in\" type=\"color2\" nodegraph=\"Compound\" />\n"
+        "  <clamp name=\"clamp\" type=\"color3\">\n"
+        "    <input name=\"in\" type=\"color3\" nodegraph=\"Compound\" />\n"
         "  </clamp>\n"
         "</materialx>";
     mx::RtStagePtr defaultStage = api->createStage(mx::RtToken("defaultStage"));
@@ -2509,5 +2501,3 @@ TEST_CASE("Runtime: duplicate name", "[runtime]")
     REQUIRE(graph1.getOutputSocket(add5));
     REQUIRE(duplicateCount(add5) == 1);
 }
-
-#endif // MATERIALX_BUILD_RUNTIME

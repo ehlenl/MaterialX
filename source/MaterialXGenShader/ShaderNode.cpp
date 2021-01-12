@@ -205,7 +205,7 @@ ShaderNodePtr ShaderNode::create(const ShaderGraph* parent, const string& name, 
     const ShaderGenerator& shadergen = context.getShaderGenerator();
 
     // Find the implementation for this nodedef
-    InterfaceElementPtr impl = nodeDef.getImplementation(shadergen.getTarget(), shadergen.getLanguage());
+    InterfaceElementPtr impl = nodeDef.getImplementation(shadergen.getTarget());
     if (impl)
     {
         newNode->_impl = shadergen.getImplementation(*impl, context);
@@ -213,7 +213,7 @@ ShaderNodePtr ShaderNode::create(const ShaderGraph* parent, const string& name, 
     if (!newNode->_impl)
     {
         throw ExceptionShaderGenError("Could not find a matching implementation for node '" + nodeDef.getNodeString() +
-            "' matching language '" + shadergen.getLanguage() + "' and target '" + shadergen.getTarget() + "'");
+            "' matching target '" + shadergen.getTarget() + "'");
     }
 
     // Check for classification based on group name
@@ -408,7 +408,7 @@ void ShaderNode::initialize(const Node& node, const NodeDef& nodeDef, GenContext
 
     // Set element paths based on the node definition. Note that these
     // paths don't actually exist at time of shader generation since there
-    // are no inputs/parameters specified on the node itself
+    // are no inputs specified on the node itself
     //
     const string& nodePath = node.getNamePath();
     for (auto nodeInput : nodeDef.getActiveInputs())
@@ -417,14 +417,6 @@ void ShaderNode::initialize(const Node& node, const NodeDef& nodeDef, GenContext
         if (input && input->getPath().empty())
         {
             input->setPath(nodePath + NAME_PATH_SEPARATOR + nodeInput->getName());
-        }
-    }
-    for (auto nodeParameter : nodeDef.getActiveParameters())
-    {
-        ShaderInput* input = getInput(nodeParameter->getName());
-        if (input && input->getPath().empty())
-        {
-            input->setPath(nodePath + NAME_PATH_SEPARATOR + nodeParameter->getName());
         }
     }
 }

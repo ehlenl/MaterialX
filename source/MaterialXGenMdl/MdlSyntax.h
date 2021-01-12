@@ -7,7 +7,7 @@
 #define MATERIALX_MDLSYNTAX_H
 
 /// @file
-/// OSL syntax class
+/// MDL syntax class
 
 #include <MaterialXGenShader/Syntax.h>
 
@@ -16,14 +16,14 @@ namespace MaterialX
 
 class MdlSyntax;
 
-/// Shared pointer to a MdlSyntax
+/// Shared pointer to an MdlSyntax
 using MdlSyntaxPtr = shared_ptr<MdlSyntax>;
 
 /// @class MdlSyntax
 /// Syntax class for MDL (Material Definition Language)
 class MdlSyntax : public Syntax
 {
-public:
+  public:
     MdlSyntax();
 
     static SyntaxPtr create() { return std::make_shared<MdlSyntax>(); }
@@ -46,7 +46,6 @@ public:
     static const StringVec VECTOR2_MEMBERS;
     static const StringVec VECTOR3_MEMBERS;
     static const StringVec VECTOR4_MEMBERS;
-    static const StringVec COLOR2_MEMBERS;
     static const StringVec COLOR3_MEMBERS;
     static const StringVec COLOR4_MEMBERS;
     static const StringVec ADDRESSMODE_MEMBERS;

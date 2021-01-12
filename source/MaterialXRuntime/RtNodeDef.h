@@ -74,11 +74,11 @@ public:
     /// Set the version for this nodedef.
     void setIsDefaultVersion(bool isDefault);
 
-    /// Return the namespacefor this nodedef.
-    const RtToken& getNamespace() const;
+    /// Return the namespace for this nodedef.
+    const string& getNamespace() const;
 
-    /// Set the namespacefor this nodedef.
-    void setNamespace(const RtToken& space);
+    /// Set the namespace for this nodedef.
+    void setNamespace(const string& space);
 
     /// Add an input attribute to the interface.
     RtInput createInput(const RtToken& name, const RtToken& type, uint32_t flags = 0);
@@ -115,19 +115,16 @@ public:
     /// Return an iterator traversing all output attributes.
     RtAttrIterator getOutputs() const;
 
+    /// Return the relationship maintaining all node implementations registered for this nodedef.
+    RtRelationship getNodeImpls() const;
+
+    /// Return the node implementation prim for this nodedef matching the given target.
+    /// If no such implementation can be found a null prim is returned.
+    RtPrim getNodeImpl(const RtToken& target) const;
+
     /// Return a node layout struct for this nodedef.
     /// Containing its input ordering and uifolder hierarchy.
     RtNodeLayout getNodeLayout();
-
-    static RtToken NODE;
-    static RtToken NODEDEF;
-    static RtToken NODEGROUP;
-    static RtToken INHERIT;
-    static RtToken TARGET;
-    static RtToken VERSION;
-    static RtToken IS_DEFAULT_VERSION;
-    static RtToken NAMESPACE;
-    static RtToken UIFOLDER;
 };
 
 }

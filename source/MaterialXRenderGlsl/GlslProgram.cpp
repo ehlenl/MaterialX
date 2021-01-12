@@ -6,6 +6,7 @@
 #include <MaterialXRenderGlsl/External/GLew/glew.h>
 #include <MaterialXRenderGlsl/GlslProgram.h>
 #include <MaterialXRenderGlsl/GLTextureHandler.h>
+#include <MaterialXRenderGlsl/GLUtil.h>
 
 #include <MaterialXRender/ShaderRenderer.h>
 
@@ -26,22 +27,16 @@ int GlslProgram::Input::INVALID_OPENGL_TYPE = -1;
 // GlslProgram methods
 //
 
-GlslProgramPtr GlslProgram::create()
-{
-    return std::shared_ptr<GlslProgram>(new GlslProgram());
-}
-
 GlslProgram::GlslProgram() :
     _programId(UNDEFINED_OPENGL_RESOURCE_ID),
     _shader(nullptr),
-    _vertexArray(0),
+    _vertexArray(UNDEFINED_OPENGL_RESOURCE_ID),
     _lastGeometryName(EMPTY_STRING)
 {
 }
 
 GlslProgram::~GlslProgram()
 {
-    // Clean up the program and offscreen target
     deleteProgram();
 }
 
@@ -248,7 +243,7 @@ bool GlslProgram::bind()
     if (_programId > UNDEFINED_OPENGL_RESOURCE_ID)
     {
         glUseProgram(_programId);
-        checkErrors();
+        checkGlErrors("after program bind");
         return true;
     }
     return false;
@@ -268,7 +263,7 @@ void GlslProgram::bindInputs(ViewHandlerPtr viewHandler,
         throw ExceptionShaderRenderError(errorType, errors);
     }
 
-    checkErrors();
+    checkGlErrors("after program bind inputs");
 
     // Parse for uniforms and attributes
     getUniformsList();
@@ -368,7 +363,11 @@ void GlslProgram::bindAttribute(const GlslProgram::InputMap& inputs, MeshPtr mes
 
         glEnableVertexAttribArray(location);
         _enabledStreamLocations.insert(location);
-        glVertexAttribPointer(location, stride, GL_FLOAT, GL_FALSE, 0, nullptr);
+        if (input.second->gltype != GL_INT) {
+            glVertexAttribPointer(location, stride, GL_FLOAT, GL_FALSE, 0, nullptr);
+        } else {
+            glVertexAttribIPointer(location, stride, GL_INT, 0, nullptr);
+        }
     }
 }
 
@@ -463,7 +462,14 @@ void GlslProgram::bindStreams(MeshPtr mesh)
         bindAttribute(foundList, mesh);
     }
 
-    // Bind any named geometric property information
+    // Bind any named varying geometric property information
+    findInputs(HW::IN_GEOMPROP + "_", attributeList, foundList, false);
+    if (foundList.size())
+    {
+        bindAttribute(foundList, mesh);
+    }
+
+    // Bind any named uniform geometric property information
     const GlslProgram::InputMap& uniformList = getUniformsList();
     findInputs(HW::GEOMPROP + "_", uniformList, foundList, false);
     for (const auto& input : foundList)
@@ -491,7 +497,7 @@ void GlslProgram::bindStreams(MeshPtr mesh)
         }
     }
 
-    checkErrors();
+    checkGlErrors("after program bind streams");
 }
 
 void GlslProgram::unbindGeometry()
@@ -533,7 +539,7 @@ void GlslProgram::unbindGeometry()
     glDeleteVertexArrays(1, &_vertexArray);
     _vertexArray = GlslProgram::UNDEFINED_OPENGL_RESOURCE_ID;
 
-    checkErrors();
+    checkGlErrors("after program unbind geometry");
 }
 
 ImagePtr GlslProgram::bindTexture(unsigned int uniformType, int uniformLocation, const FilePath& filePath,
@@ -555,7 +561,7 @@ ImagePtr GlslProgram::bindTexture(unsigned int uniformType, int uniformLocation,
                 glUniform1i(uniformLocation, textureLocation);
             }
         }
-        checkErrors();
+        checkGlErrors("after program bind texture");
         return image;
     }
 
@@ -617,9 +623,7 @@ void GlslProgram::bindTextures(ImageHandlerPtr imageHandler)
             }
         }
     }
-    checkErrors();
 }
-
 
 void GlslProgram::bindLighting(LightHandlerPtr lightHandler, ImageHandlerPtr imageHandler)
 {
@@ -803,11 +807,6 @@ void GlslProgram::bindUniform(int location, const Value& value)
         {
             bool v = value.asA<bool>();
             glUniform1i(location, v ? 1 : 0);
-        }
-        else if (value.getTypeString() == "color2")
-        {
-            Color2 v = value.asA<Color2>();
-            glUniform2f(location, v[0], v[1]);
         }
         else if (value.getTypeString() == "color3")
         {
@@ -1028,8 +1027,6 @@ void GlslProgram::bindViewInformation(ViewHandlerPtr viewHandler)
             glUniformMatrix4fv(location, 1, false, viewProjWorld.data());
         }
     } 
-
-    checkErrors();
 }
 
 void GlslProgram::bindTimeAndFrame()
@@ -1482,21 +1479,6 @@ void GlslProgram::printAttributes(std::ostream& outputStream)
         if (!value.empty())
             outputStream << ". Value: " << value;
         outputStream << "." << std::endl;
-    }
-}
-
-void GlslProgram::checkErrors()
-{
-    StringVec errors;
-
-    GLenum error;
-    while ((error = glGetError()) != GL_NO_ERROR)
-    {
-        errors.push_back("OpenGL error: " + std::to_string(error));
-    }
-    if (!errors.empty())
-    {
-        throw ExceptionShaderRenderError("OpenGL context error.", errors);
     }
 }
 

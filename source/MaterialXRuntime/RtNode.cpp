@@ -7,6 +7,7 @@
 #include <MaterialXRuntime/RtApi.h>
 #include <MaterialXRuntime/RtPrim.h>
 #include <MaterialXRuntime/RtNodeDef.h>
+#include <MaterialXRuntime/Tokens.h>
 
 #include <MaterialXRuntime/Private/PvtPrim.h>
 
@@ -48,7 +49,7 @@ RtPrim RtNode::createPrim(const RtToken& typeName, const RtToken& name, RtPrim p
     // Copy over meta-data from nodedef to node. 
     // TODO: Checks with ILM need to be made to make sure that the appropriate
     // meta-data set. TBD if target should be set.
-    RtTokenSet copyList = { RtNodeDef::VERSION };
+    RtTokenSet copyList = { Tokens::VERSION };
     const vector<RtToken>& metadata = nodedefPrim->getMetadataOrder();
     for (const RtToken& dataName : metadata)
     { 
@@ -101,6 +102,18 @@ void RtNode::setNodeDef(RtPrim nodeDef)
         nodedefRel->clearTargets();
     }
     nodedefRel->addTarget(PvtObject::ptr<PvtPrim>(nodeDef));
+}
+
+const RtToken& RtNode::getVersion() const
+{
+    RtTypedValue* v = prim()->getMetadata(Tokens::VERSION, RtType::TOKEN);
+    return v ? v->getValue().asToken() : EMPTY_TOKEN;
+}
+
+void RtNode::setVersion(const RtToken& version)
+{
+    RtTypedValue* v = prim()->addMetadata(Tokens::VERSION, RtType::TOKEN);
+    v->getValue().asToken() = version;
 }
 
 size_t RtNode::numInputs() const

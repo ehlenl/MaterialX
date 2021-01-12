@@ -102,6 +102,7 @@ const string GlslSyntax::INPUT_QUALIFIER = "in";
 const string GlslSyntax::OUTPUT_QUALIFIER = "out";
 const string GlslSyntax::UNIFORM_QUALIFIER = "uniform";
 const string GlslSyntax::CONSTANT_QUALIFIER = "const";
+const string GlslSyntax::FLAT_QUALIFIER = "flat";
 const string GlslSyntax::SOURCE_FILE_EXTENSION = ".glsl";
 const StringVec GlslSyntax::VEC2_MEMBERS = { ".x", ".y" };
 const StringVec GlslSyntax::VEC3_MEMBERS = { ".x", ".y", ".z" };
@@ -209,18 +210,6 @@ GlslSyntax::GlslSyntax()
             "bool",
             "false",
             "false")
-    );
-
-    registerTypeSyntax
-    (
-        Type::COLOR2,
-        std::make_shared<AggregateTypeSyntax>(
-            "vec2",
-            "vec2(0.0)",
-            "vec2(0.0)",
-            EMPTY_STRING,
-            EMPTY_STRING,
-            VEC2_MEMBERS)
     );
 
     registerTypeSyntax

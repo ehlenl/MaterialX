@@ -89,7 +89,7 @@ TEST_CASE("GenShader: OSL Implementation Check", "[genosl]")
     generatorSkipNodeTypes.insert("light");
     mx::StringSet generatorSkipNodeDefs;
 
-    GenShaderUtil::checkImplementations(context, generatorSkipNodeTypes, generatorSkipNodeDefs, 67);
+    GenShaderUtil::checkImplementations(context, generatorSkipNodeTypes, generatorSkipNodeDefs, 63);
 }
 
 TEST_CASE("GenShader: OSL Unique Names", "[genosl]")
@@ -110,7 +110,7 @@ TEST_CASE("GenShader: Metadata", "[genosl]")
     searchPath.append(mx::FilePath::getCurrentPath() / mx::FilePath("libraries"));
 
     mx::DocumentPtr doc = mx::createDocument();
-    mx::loadLibraries({ "stdlib", "pbrlib", "bxdf" }, searchPath, doc);
+    mx::loadLibraries({ "targets", "stdlib", "pbrlib", "bxdf" }, searchPath, doc);
 
     //
     // Define custom attributes to be exported as shader metadata

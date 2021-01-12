@@ -32,7 +32,6 @@ namespace
 			{ Type::FLOAT->getName(), "float" },
 			{ Type::INTEGER->getName(), "int" },
 			{ Type::STRING->getName(), "int" },
-			{ Type::COLOR2->getName(), "float2" },
 			{ Type::COLOR3->getName(), "float3" },
 			{ Type::COLOR4->getName(), "float4" },
 			{ Type::VECTOR2->getName(), "float2" },
@@ -56,8 +55,6 @@ namespace
         { "Tm", "Tm" },
         { "Bw", "Bw" },
         { "Bm", "Bm" },
-        { "texcoord_0", "mayaUvCoordSemantic" },
-        { "color_0", "colorset" },
 
         { "u_worldMatrix", "World" },
         { "u_worldInverseMatrix", "WorldInverse" },
@@ -83,6 +80,13 @@ namespace
 
         { "u_frame", "Frame" },
         { "u_time", "Time" }
+    };
+
+    static const vector<std::pair<string, const pugi::char_t*> > OGS_SEMANTICS_PREFIX_MAP =
+    {
+        { "texcoord_", "mayaUvCoordSemantic" },
+        { "color_", "colorset" },
+        { "i_geomprop_", "mayaUvCoordSemantic" }
     };
 
     namespace OgsParameterFlags
@@ -142,6 +146,12 @@ namespace
         if (semantic != OGS_SEMANTICS_MAP.end())
         {
             prop.append_attribute(SEMANTIC) = semantic->second;
+        }
+        for (auto const& ogsSemantic: OGS_SEMANTICS_PREFIX_MAP) {
+            // STL startswith:
+            if (name.rfind(ogsSemantic.first, 0) == 0) {
+                prop.append_attribute(SEMANTIC) = ogsSemantic.second;
+            }
         }
         if (!parameterFlags.empty())
         {

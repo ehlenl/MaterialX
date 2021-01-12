@@ -5,7 +5,7 @@ assign_source_group("Source Files" ${materialx_source})
 assign_source_group("Header Files" ${materialx_headers})
 
 if(POLICY CMP0072)
-    cmake_policy(SET CMP0072 OLD)
+    cmake_policy(SET CMP0072 NEW)
 endif()
 
 if(APPLE)
@@ -32,12 +32,14 @@ if(MSVC)
     target_link_libraries(
         MaterialXRenderGlsl
         MaterialXRenderHw
+        MaterialXGenGlsl
         Opengl32
         ${CMAKE_DL_LIBS})
 elseif(APPLE)
     target_link_libraries(
         MaterialXRenderGlsl
         MaterialXRenderHw
+        MaterialXGenGlsl
         ${CMAKE_DL_LIBS}
         ${OPENGL_LIBRARIES}
         "-framework Foundation"
@@ -46,6 +48,7 @@ elseif(UNIX)
     target_link_libraries(
         MaterialXRenderGlsl
         MaterialXRenderHw
+        MaterialXGenGlsl
         ${CMAKE_DL_LIBS}
         ${OPENGL_LIBRARIES}
         ${X11_LIBRARIES}

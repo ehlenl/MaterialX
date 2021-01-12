@@ -10,8 +10,6 @@
 
 #include <MaterialXCore/Value.h>
 
-#include <regex>
-
 namespace MaterialX
 {
 
@@ -231,11 +229,6 @@ ValuePtr Syntax::getSwizzledValue(ValuePtr value, const TypeDesc* srcType, const
                 bool v = value->asA<bool>();
                 ss << std::to_string(v);
             }
-            else if (srcType == Type::COLOR2)
-            {
-                Color2 v = value->asA<Color2>();
-                ss << std::to_string(v[channelIndex]);
-            }
             else if (srcType == Type::COLOR3)
             {
                 Color3 v = value->asA<Color3>();
@@ -299,11 +292,7 @@ static bool isInvalidChar(char c)
 void Syntax::makeValidName(string& name) const
 {
     std::replace_if(name.begin(), name.end(), isInvalidChar, '_');
-    for (auto tokenPair : _invalidTokens)
-    {
-        std::regex expression(tokenPair.first);
-        name = std::regex_replace(name, expression, tokenPair.second);
-    }
+    name = replaceSubstrings(name, _invalidTokens);
 }
 
 void Syntax::makeIdentifier(string& name, IdentifierMap& identifiers) const

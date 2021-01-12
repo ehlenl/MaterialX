@@ -5,10 +5,11 @@
 
 #include <MaterialXRenderGlsl/External/GLew/glew.h>
 #include <MaterialXRenderGlsl/GlslRenderer.h>
-#include <MaterialXRenderGlsl/GLUtilityContext.h>
+#include <MaterialXRenderGlsl/GLContext.h>
+#include <MaterialXRenderGlsl/GLUtil.h>
 #include <MaterialXRenderHw/SimpleWindow.h>
 #include <MaterialXRender/TinyObjLoader.h>
-
+#include <MaterialXGenShader/HwShaderGenerator.h>
 #include <iostream>
 
 namespace MaterialX
@@ -25,26 +26,24 @@ const float FAR_PLANE_PERSP = 100.0f;
 // GlslRenderer methods
 //
 
-GlslRendererPtr GlslRenderer::create(unsigned int width, unsigned int height, Image::BaseType baseType, const Color4& clearColor)
+GlslRendererPtr GlslRenderer::create(unsigned int width, unsigned int height, Image::BaseType baseType)
 {
-    return GlslRendererPtr(new GlslRenderer(width, height, baseType, clearColor));
+    return GlslRendererPtr(new GlslRenderer(width, height, baseType));
 }
 
-GlslRenderer::GlslRenderer(unsigned int width, unsigned int height, Image::BaseType baseType, const Color4& clearColor) :
+GlslRenderer::GlslRenderer(unsigned int width, unsigned int height, Image::BaseType baseType) :
     ShaderRenderer(width, height, baseType),
     _initialized(false),
     _eye(0.0f, 0.0f, 4.0f),
     _center(0.0f, 0.0f, 0.0f),
     _up(0.0f, 1.0f, 0.0f),
-    _objectScale(1.0f)
+    _objectScale(1.0f),
+    _clearColor(0.4f, 0.4f, 0.4f, 1.0f)
 {
-    setClearColor(clearColor);
-
     _program = GlslProgram::create();
 
-    TinyObjLoaderPtr loader = TinyObjLoader::create();
     _geometryHandler = GeometryHandler::create();
-    _geometryHandler->addLoader(loader);
+    _geometryHandler->addLoader(TinyObjLoader::create());
 
     _viewHandler = ViewHandler::create();
 }
@@ -53,39 +52,7 @@ GlslRenderer::~GlslRenderer()
 {
     if (_program->geometryBound())
     {
-        if (_context->makeCurrent())
-        {
-            _program->unbindGeometry();
-        }
-    }
-
-    // Clean up the program
-    _program = nullptr;
-
-    // Clean up frame buffer
-    _frameBuffer = nullptr;
-
-    // Clean up the context
-    _context = nullptr;
-
-    // Clean up the window
-    _window = nullptr;
-}
-
-void GlslRenderer::setSize(unsigned int width, unsigned int height)
-{
-    if (_context->makeCurrent())
-    {
-        if (_frameBuffer)
-        {
-            _frameBuffer->resize(width, height);
-        }
-        else
-        {
-            _frameBuffer = GLFramebuffer::create(width, height, 4, Image::BaseType::UINT8);
-        }
-        _width = width;
-        _height = height;
+        _program->unbindGeometry();
     }
 }
 
@@ -99,15 +66,14 @@ void GlslRenderer::initialize()
         // Create window
         _window = SimpleWindow::create();
 
-        const char* windowName = "Renderer Window";
-        if (!_window->initialize(const_cast<char *>(windowName), _width, _height, nullptr))
+        if (!_window->initialize("Renderer Window", _width, _height, nullptr))
         {
             errors.push_back("Failed to create window for testing.");
             throw ExceptionShaderRenderError(errorType, errors);
         }
 
         // Create offscreen context
-        _context = GLUtilityContext::create(_window->windowWrapper(), nullptr);
+        _context = GLContext::create(_window);
         if (!_context)
         {
             errors.push_back("Failed to create OpenGL context for testing.");
@@ -212,6 +178,23 @@ void GlslRenderer::validateInputs()
     _program->getAttributesList();
 }
 
+void GlslRenderer::setSize(unsigned int width, unsigned int height)
+{
+    if (_context->makeCurrent())
+    {
+        if (_frameBuffer)
+        {
+            _frameBuffer->resize(width, height);
+        }
+        else
+        {
+            _frameBuffer = GLFramebuffer::create(width, height, 4, Image::BaseType::UINT8);
+        }
+        _width = width;
+        _height = height;
+    }
+}
+
 void GlslRenderer::updateViewInformation()
 {
     float fH = std::tan(FOV_PERSP / 360.0f * PI) * NEAR_PLANE_PERSP;
@@ -297,7 +280,6 @@ void GlslRenderer::render()
                         glDrawElements(GL_TRIANGLES, (GLsizei)indexData.size(), GL_UNSIGNED_INT, (void*)0);
                     }
                 }
-                checkErrors();
 
                 // Unbind resources
                 _program->unbind();
@@ -326,18 +308,7 @@ ImagePtr GlslRenderer::captureImage()
         throw ExceptionShaderRenderError(errorType, errors);
     }
 
-    ImagePtr result = _frameBuffer->createColorImage();
-    try
-    {
-        checkErrors();
-    }
-    catch (ExceptionShaderRenderError& e)
-    {
-        errors.push_back("Failed to read color buffer back.");
-        errors.insert(std::end(errors), std::begin(e.errorLog()), std::end(e.errorLog()));
-        throw ExceptionShaderRenderError(errorType, errors);
-    }
-    return result;
+    return _frameBuffer->createColorImage();
 }
 
 void GlslRenderer::saveImage(const FilePath& filePath, ConstImagePtr image, bool verticalFlip)
@@ -349,21 +320,6 @@ void GlslRenderer::saveImage(const FilePath& filePath, ConstImagePtr image, bool
     {
         errors.push_back("Failed to save to file:" + filePath.asString());
         throw ExceptionShaderRenderError(errorType, errors);
-    }
-}
-
-void GlslRenderer::checkErrors()
-{
-    StringVec errors;
-
-    GLenum error;
-    while ((error = glGetError()) != GL_NO_ERROR)
-    {
-        errors.push_back("OpenGL error: " + std::to_string(error));
-    }
-    if (errors.size())
-    {
-        throw ExceptionShaderRenderError("OpenGL context error.", errors);
     }
 }
 
@@ -381,17 +337,32 @@ void GlslRenderer::drawScreenSpaceQuad()
         0, 1, 3,
         1, 2, 3
     };
-    
+    const unsigned int VERTEX_STRIDE = 5;
+    const unsigned int TEXCOORD_OFFSET = 3;
+
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
     GLuint vbo;
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(QUAD_VERTICES), QUAD_VERTICES, GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) 0);
+    for (const auto& pair : _program->getAttributesList())
+    {
+        if (pair.first.find(HW::IN_POSITION) != std::string::npos)
+        {
+            glEnableVertexAttribArray(pair.second->location);
+            glVertexAttribPointer(pair.second->location, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE * sizeof(float), (void*) 0);
+        }
 
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) (3 * sizeof(float)));
+        if (pair.first.find(HW::IN_TEXCOORD + "_") != std::string::npos)
+        {
+            glEnableVertexAttribArray(pair.second->location);
+            glVertexAttribPointer(pair.second->location, 2, GL_FLOAT, GL_FALSE, VERTEX_STRIDE * sizeof(float), (void*) (TEXCOORD_OFFSET * sizeof(float)));
+        }
+    }
 
     GLuint ebo;
     glGenBuffers(1, &ebo);
@@ -399,6 +370,16 @@ void GlslRenderer::drawScreenSpaceQuad()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(QUAD_INDICES), QUAD_INDICES, GL_STATIC_DRAW);
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    glBindVertexArray(GlslProgram::UNDEFINED_OPENGL_RESOURCE_ID);
+    glBindBuffer(GL_ARRAY_BUFFER, GlslProgram::UNDEFINED_OPENGL_RESOURCE_ID);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GlslProgram::UNDEFINED_OPENGL_RESOURCE_ID);
+
+    glDeleteBuffers(1, &ebo);
+    glDeleteBuffers(1, &vbo);
+    glDeleteVertexArrays(1, &vao);
+
+    checkGlErrors("after draw screen-space quad");
 }
 
 void GlslRenderer::setClearColor(const Color4& clearColor)
