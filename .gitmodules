@@ -1,3 +1,6 @@
 [submodule "source/MaterialXView/NanoGUI"]
 	path = source/MaterialXView/NanoGUI
 	url = https://github.com/wjakob/nanogui
+[submodule "adsk-git-submodules/adsklib"]
+	path = adsk-git-submodules/adsklib
+	url = https://git.autodesk.com/GFX/adsklib.git
