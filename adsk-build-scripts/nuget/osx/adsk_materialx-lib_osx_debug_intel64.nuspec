@@ -22,6 +22,10 @@
       <file src="$installdir$/libs/libMaterialXGenGlsld.a" target="libs" />
       <file src="$installdir$/libs/libMaterialXGenOsld.a" target="libs" />
       <file src="$installdir$/libs/libMaterialXGenShaderd.a" target="libs"/>
+      <file src="$installdir$/libs/libMaterialXRenderd.a" target="libs"/>
+      <file src="$installdir$/libs/libMaterialXRenderHwd.a" target="libs"/>
+      <file src="$installdir$/libs/libMaterialXRenderGlsld.a" target="libs"/>
+      <file src="$installdir$/libs/libMaterialXRenderOsld.a" target="libs"/>
 	</files>
 </package>
 
