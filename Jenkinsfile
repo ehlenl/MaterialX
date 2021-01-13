@@ -14,10 +14,10 @@ for(int i=0; i< axisNode.size(); i++) {
             def WorkDir
             def WorkDirComp
             if(axisNodeValue.contains("GEC-vs")) {
-                WorkDir="D:\\Stage\\workspace\\${env.COMPONENT}\\" + env.BRANCH_NAME.replace("/", "\\")
+                    WorkDir="D:\\Stage\\workspace\\${env.COMPONENT}\\" + env.BRANCH_NAME.replace("/", "\\")
                 WorkDirComp = WorkDir + "\\${env.COMPONENT}"
             } else {
-                WorkDir="/Stage/workspace/${env.COMPONENT}/${env.BRANCH_NAME}"
+                    WorkDir="/Stage/workspace/${env.COMPONENT}/${env.BRANCH_NAME}"
                 WorkDirComp = WorkDir + "/${env.COMPONENT}"
             }
             try {
@@ -102,7 +102,7 @@ for(int i=0; i< axisNode.size(); i++) {
                     }
                     stage("Upload Artifactory") {
                         withEnv(properties) {
-                            uploadArtifactory()
+                                uploadArtifactory()
                         }
                     }
                 }
@@ -163,7 +163,7 @@ def uploadArtifactory() {
         def uploadSpec = """{
             "files": [{
                 "pattern": "${env.WORKSPACE}/packages/*.nupkg",
-                "target": "team-gfx-nuget/materialx/${env.NUGET_VERSION}/",
+                "target": "oss-stg-nuget/materialx/${env.NUGET_VERSION}/",
                 "recursive": "false",
                 "props":"git.branch=${env.BRANCH_NAME};git.hash=${env.GITCOMMIT}"
             }]
