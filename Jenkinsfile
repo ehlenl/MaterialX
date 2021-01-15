@@ -2,6 +2,12 @@
     
 def axisNode = ["GEC-vs2017", "GEC-xcode1021"]
 
+if (currentBuild.rawBuild.getCauses().toString().contains('BranchIndexingCause')) {
+  print "INFO: Build skipped due to trigger being Branch Indexing"
+  currentBuild.result = 'ABORTED'
+  return
+}
+
 def tasks = [:]
 
 for(int i=0; i< axisNode.size(); i++) {
