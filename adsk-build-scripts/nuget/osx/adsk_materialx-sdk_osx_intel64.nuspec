@@ -12,8 +12,8 @@
     <tags>materialx-$materialX$</tags>
   </metadata>
  	<files>
-    <file src="$installdir$/libraries/**" target="libraries" />
-    <file src="$adsklibdir$/adsklib/**" target="libraries/adsk/adsklib" />
+    <file src="$installdir$/libraries/**" target="content/libraries" />
+    <file src="$adsklibdir$/adsklib/**" target="content/libraries/adsk/adsklib" />
     <file src="$installdir$/inc/**" target="inc" />
     <file src="$installdir$/cmake/**" target="cmake" />
     <file src="$installdir$/libs/**" target="libs" />
