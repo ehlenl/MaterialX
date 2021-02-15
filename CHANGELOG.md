@@ -2,16 +2,23 @@
 
 ## [1.38] - Development
 
-### v1.38_adsk_development2 : Work-in-progress
-- Up-to-date with ILM v1.38 branch @8718c59
-- GPU testing framework setup (in progress)
-- Deprecation of Language specifier and introduction of TargetDefs
-- Deprecation of Material and ShaderRef elements.
-- Deprecation of Parameter element.
-- TextureBaker v1 completion
+### [v1.38_adsk_development2](https://github.com/autodesk-forks/MaterialX/releases/tag/v1.38_adsk_development2) : 2021-02-10
+- Up-to-date with LucasFilm `master` branch (no longer on v1.38 branch) [@e954329e29480ca2b2d05e437a018c0685a8d62b](https://github.com/materialx/MaterialX/commit/e954329e29480ca2b2d05e437a018c0685a8d62b).
+- *All documents upgrade to "1.38" as version number. Files must be marked as "1.37" for upgrade to occur*
+- Standard surface [default value changes](https://github.com/Autodesk/standard-surface/blob/master/reference/standard_surface.mtlx). Version is still 1.0.1.
+- UsdPreviewSurface "metallic" input name update for conformance. Version 2.3.
+- Deprecation of Language specifier and introduction of TargetDefs. Removal of "language" qualifier from public API.
+- Deprecation of `Material`, `ShaderRef`, `BindInput`, `BindToken` and other associated Elements. Removal of all interfaces from public API.
+- Deprecation of `Parameter` Element. Remapped to `Input` element with optional "uniform" attribute. Removal of Parameter interface from public API.
+- PBR node modifications including deprecation of the following nodes: `fresnel`, `viewdirection`, `backfacing`. `artistic_ior` signature change.
+- Updates to support Lama shaders.
+- TextureBaker version milestone "1" completion.
+- Deprecation of invalid nodegraph "version" tags. Version logic fixes.
+- GPU testing framework set up for Linux using Mesa.
+- Update of MDL to support 1.38. Passes unit tests verification using version 1.6.
 
-### v1.38_adsk_development1 : Major changes since "v1.37.3_parameters_as_inputs"
- - Up-to-date with ILM v1.38 branch @3900415.
+### [v1.38_adsk_development1](https://github.com/autodesk-forks/MaterialX/releases/tag/v1.38_adsk_development1) : Major changes since "v1.37.3_parameters_as_inputs"
+ - Up-to-date with LucasFilm v1.38 branch [@3900415](https://github.com/materialx/MaterialX/commit/39004152256d64231352be8a28515c30a08b4414).
  - Finished API support for Material Nodes (from Material Elements)
  - Baker support for v1.38, CM and units.
  - Shader Translator support for v1.38, CM and units.
@@ -33,6 +40,9 @@
 ### Changed
 - Improved the robustness of context management in MaterialXRenderGlsl.
 
+### Fixed
+- Added a missing VAO binding to GlslRenderer\:\:drawScreenSpaceQuad.
+
 ## [1.37.3] - 2020-11-24
 
 ### Added
@@ -40,12 +50,15 @@
 - Added viewer support for partially-transparent mesh partitions.
 - Added a subsurface scattering approximation to MaterialX GLSL.
 - Added a CMake option for building shared libraries on Linux and MacOS.
+- Added support for the latest OpenImageIO interface.
 
 ### Changed
 - Improved the robustness of texture baking and shader translation.
+- Unified the handling of missing images in generated GLSL.
 - Moved CI builds from Travis and Appveyor to GitHub Actions.
 
 ### Fixed
+- Fixed a bug in code generation for custom BSDF/EDF graphs.
 - Fixed rendering of single-channel textures in MaterialXRenderGlsl.
 
 ## [1.37.2] - 2020-09-06
@@ -116,9 +129,6 @@
 - Upgraded Smith masking-shadowing to height-correlated form in generated GLSL.
 - Improved the robustness of tangent frame computations in MaterialXRender.
 - Renamed Backdrop\:\:setContains and getContains to Backdrop\:\:setContainsString and getContainsString for consistency.
-- Added `applyFutureUpdates` to XmlReadOptions. Updates current applied include:
-  - Upgrade from Material Element to Material Node
-  - Fix for arguments of from `atan2(x,y)` to `atan2(y,x)`. (in1 and in2 arguments are swapped)
 
 ### Fixed
 - Fixed the GLSL implementation of Burley diffuse for punctual lights.

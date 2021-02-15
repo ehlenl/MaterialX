@@ -12,6 +12,8 @@
 #include <MaterialXGenMdl/Nodes/HeightToNormalNodeMdl.h>
 #include <MaterialXGenMdl/Nodes/BlurNodeMdl.h>
 #include <MaterialXGenMdl/Nodes/CombineNodeMdl.h>
+#include <MaterialXGenMdl/Nodes/BsdfNodesMdl.h>
+#include <MaterialXGenMdl/Nodes/ThinFilmNodeMdl.h>
 
 #include <MaterialXGenShader/GenContext.h>
 #include <MaterialXGenShader/Shader.h>
@@ -50,10 +52,10 @@ namespace
         "import ::anno::*",
         "import ::tex::*",
         "import ::mx::swizzle::*",
-        "import ::mx::pbrlib::*",
         "import ::mx::cm::*",
-        "using ::mx::stdlib import *",
         "using ::mx::core import *",
+        "using ::mx::stdlib import *",
+        "using ::mx::pbrlib import *",
         "using ::mx::sampling import *",
     };
 }
@@ -71,29 +73,6 @@ MdlShaderGenerator::MdlShaderGenerator() :
 
     // <!-- <surface> -->
     registerImplementation("IM_surface_" + MdlShaderGenerator::TARGET, SurfaceNodeMdl::create);
-
-    // <!-- <switch> -->
-    // <!-- 'which' type : float -->
-    registerImplementation("IM_switch_float_" + MdlShaderGenerator::TARGET, SwitchNode::create);
-    registerImplementation("IM_switch_color3_" + MdlShaderGenerator::TARGET, SwitchNode::create);
-    registerImplementation("IM_switch_color4_" + MdlShaderGenerator::TARGET, SwitchNode::create);
-    registerImplementation("IM_switch_vector2_" + MdlShaderGenerator::TARGET, SwitchNode::create);
-    registerImplementation("IM_switch_vector3_" + MdlShaderGenerator::TARGET, SwitchNode::create);
-    registerImplementation("IM_switch_vector4_" + MdlShaderGenerator::TARGET, SwitchNode::create);
-    // <!-- 'which' type : integer -->
-    registerImplementation("IM_switch_floatI_" + MdlShaderGenerator::TARGET, SwitchNode::create);
-    registerImplementation("IM_switch_color3I_" + MdlShaderGenerator::TARGET, SwitchNode::create);
-    registerImplementation("IM_switch_color4I_" + MdlShaderGenerator::TARGET, SwitchNode::create);
-    registerImplementation("IM_switch_vector2I_" + MdlShaderGenerator::TARGET, SwitchNode::create);
-    registerImplementation("IM_switch_vector3I_" + MdlShaderGenerator::TARGET, SwitchNode::create);
-    registerImplementation("IM_switch_vector4I_" + MdlShaderGenerator::TARGET, SwitchNode::create);
-    // <!-- 'which' type : boolean -->
-    registerImplementation("IM_switch_floatB_" + MdlShaderGenerator::TARGET, SwitchNode::create);
-    registerImplementation("IM_switch_color3B_" + MdlShaderGenerator::TARGET, SwitchNode::create);
-    registerImplementation("IM_switch_color4B_" + MdlShaderGenerator::TARGET, SwitchNode::create);
-    registerImplementation("IM_switch_vector2B_" + MdlShaderGenerator::TARGET, SwitchNode::create);
-    registerImplementation("IM_switch_vector3B_" + MdlShaderGenerator::TARGET, SwitchNode::create);
-    registerImplementation("IM_switch_vector4B_" + MdlShaderGenerator::TARGET, SwitchNode::create);
 
     // <!-- <swizzle> -->
     // <!-- from type : float -->
@@ -180,6 +159,18 @@ MdlShaderGenerator::MdlShaderGenerator() :
 
     // <!-- <layer> -->
     registerImplementation("IM_layer_bsdf_" + MdlShaderGenerator::TARGET, LayerNode::create);
+
+    // <!-- <thin_film_bsdf> -->
+    registerImplementation("IM_thin_film_bsdf_" + MdlShaderGenerator::TARGET, ThinFilmNodeMdl::create);
+
+    // <!-- <dielectric_bsdf> -->
+    registerImplementation("IM_dielectric_bsdf_" + MdlShaderGenerator::TARGET, DielectricBsdfNodeMdl::create);
+
+    // <!-- <generalized_schlick_bsdf> -->
+    registerImplementation("IM_generalized_schlick_bsdf_" + MdlShaderGenerator::TARGET, DielectricBsdfNodeMdl::create);
+
+    // <!-- <sheen_bsdf> -->
+    registerImplementation("IM_sheen_bsdf_" + MdlShaderGenerator::TARGET, SheenBsdfNodeMdl::create);
 }
 
 ShaderPtr MdlShaderGenerator::generate(const string& name, ElementPtr element, GenContext& context) const
@@ -280,6 +271,9 @@ ShaderPtr MdlShaderGenerator::generate(const string& name, ElementPtr element, G
     }
     else
     {
+        // End shader body
+        emitScopeEnd(stage);
+
         throw ExceptionShaderGenError("Output type '" + outputSocket->getType()->getName() + "' is not yet supported by shader generator");
     }
 
