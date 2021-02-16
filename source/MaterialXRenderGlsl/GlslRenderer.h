@@ -44,7 +44,7 @@ class GlslRenderer : public ShaderRenderer
     static GlslRendererPtr create(unsigned int width = 512, unsigned int height = 512, Image::BaseType baseType = Image::BaseType::UINT8);
 
     /// Destructor
-    virtual ~GlslRenderer();
+    virtual ~GlslRenderer() { };
 
     /// @name Setup
     /// @{
@@ -87,7 +87,6 @@ class GlslRenderer : public ShaderRenderer
     ImagePtr captureImage() override;
 
     /// Save the current contents of the off-screen hardware buffer to disk.
-    /// @param filePath Name of file to save rendered image to.
     void saveImage(const FilePath& filePath, ConstImagePtr image, bool verticalFlip) override;
 
     /// Return the GL frame buffer.

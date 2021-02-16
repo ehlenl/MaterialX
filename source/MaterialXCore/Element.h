@@ -245,28 +245,6 @@ class Element : public std::enable_shared_from_this<Element>
     }
 
     /// @}
-    /// @name Target
-    /// @{
-
-    /// Set the element's target string.
-    void setTarget(const string& target)
-    {
-        setAttribute(TARGET_ATTRIBUTE, target);
-    }
-
-    /// Return true if the given element has a target string.
-    bool hasTarget() const
-    {
-        return hasAttribute(TARGET_ATTRIBUTE);
-    }
-
-    /// Return the element's target string.
-    const string& getTarget() const
-    {
-        return getAttribute(TARGET_ATTRIBUTE);
-    }
-
-    /// @}
     /// @name Inheritance
     /// @{
 
@@ -360,50 +338,6 @@ class Element : public std::enable_shared_from_this<Element>
     }
 
     /// @}
-    /// @name Version
-    /// @{
-
-    /// Set the version string of this element.
-    void setVersionString(const string& version)
-    {
-        setAttribute(VERSION_ATTRIBUTE, version);
-    }
-
-    /// Return true if this element has a version string.
-    bool hasVersionString() const
-    {
-        return hasAttribute(VERSION_ATTRIBUTE);
-    }
-
-    /// Return the version string of this element.
-    const string& getVersionString() const
-    {
-        return getAttribute(VERSION_ATTRIBUTE);
-    }
-
-    /// Set the major and minor versions as an integer pair.
-    void setVersionIntegers(int majorVersion, int minorVersion);
-
-    /// Return the major and minor versions as an integer pair.
-    virtual std::pair<int, int> getVersionIntegers() const;
-
-    /// @}
-    /// @name Default Version
-    /// @{
-
-    /// Set the default version flag of this element.
-    void setDefaultVersion(bool defaultVersion)
-    {
-        setTypedAttribute<bool>(DEFAULT_VERSION_ATTRIBUTE, defaultVersion);
-    }
-
-    /// Return the default version flag of this element.
-    bool getDefaultVersion() const
-    {
-        return getTypedAttribute<bool>(DEFAULT_VERSION_ATTRIBUTE);
-    }
-
-    /// @}
     /// @name Documentation String
     /// @{
 
@@ -465,6 +399,13 @@ class Element : public std::enable_shared_from_this<Element>
     ///     given name.
     /// @return A shared pointer to the new child element.
     ElementPtr addChildOfCategory(const string& category, string name = EMPTY_STRING);
+
+    /// Change the category of the given child element.
+    /// @param child The child element that will be modified.
+    /// @param category The new category string for the child element.
+    /// @return A shared pointer to a new child element, containing the contents
+    ///     of the original child but with a new category and subclass.
+    ElementPtr changeChildCategory(ElementPtr child, const string& category);
 
     /// Return the child element, if any, with the given name.
     ElementPtr getChild(const string& name) const
@@ -695,8 +636,6 @@ class Element : public std::enable_shared_from_this<Element>
 
     /// Return the Edge with the given index that lies directly upstream from
     /// this element in the dataflow graph.
-    /// @param material An optional material element, whose data bindings will
-    ///    be applied to the query.
     /// @param index An optional index of the edge to be returned, where the
     ///    valid index range may be determined with getUpstreamEdgeCount.
     /// @return The upstream Edge, if valid, or an empty Edge object.
@@ -837,9 +776,6 @@ class Element : public std::enable_shared_from_this<Element>
     static const string FILE_PREFIX_ATTRIBUTE;
     static const string GEOM_PREFIX_ATTRIBUTE;
     static const string COLOR_SPACE_ATTRIBUTE;
-    static const string TARGET_ATTRIBUTE;
-    static const string VERSION_ATTRIBUTE;
-    static const string DEFAULT_VERSION_ATTRIBUTE;
     static const string INHERIT_ATTRIBUTE;
     static const string NAMESPACE_ATTRIBUTE;
     static const string DOC_ATTRIBUTE;

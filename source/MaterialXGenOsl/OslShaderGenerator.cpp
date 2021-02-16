@@ -19,6 +19,7 @@
 #include <MaterialXGenShader/Nodes/SourceCodeNode.h>
 #include <MaterialXGenShader/Nodes/LayerNode.h>
 #include <MaterialXGenShader/Nodes/ThinFilmNode.h>
+#include <MaterialXGenShader/Nodes/BsdfNodes.h>
 
 namespace MaterialX
 {
@@ -77,13 +78,6 @@ OslShaderGenerator::OslShaderGenerator() :
     registerImplementation("IM_switch_vector2I_" + OslShaderGenerator::TARGET, SwitchNode::create);
     registerImplementation("IM_switch_vector3I_" + OslShaderGenerator::TARGET, SwitchNode::create);
     registerImplementation("IM_switch_vector4I_" + OslShaderGenerator::TARGET, SwitchNode::create);
-    // <!-- 'which' type : boolean -->
-    registerImplementation("IM_switch_floatB_" + OslShaderGenerator::TARGET, SwitchNode::create);
-    registerImplementation("IM_switch_color3B_" + OslShaderGenerator::TARGET, SwitchNode::create);
-    registerImplementation("IM_switch_color4B_" + OslShaderGenerator::TARGET, SwitchNode::create);
-    registerImplementation("IM_switch_vector2B_" + OslShaderGenerator::TARGET, SwitchNode::create);
-    registerImplementation("IM_switch_vector3B_" + OslShaderGenerator::TARGET, SwitchNode::create);
-    registerImplementation("IM_switch_vector4B_" + OslShaderGenerator::TARGET, SwitchNode::create);
 
     // <!-- <swizzle> -->
     // <!-- from type : float -->
@@ -168,11 +162,20 @@ OslShaderGenerator::OslShaderGenerator() :
     // <!-- <layer> -->
     registerImplementation("IM_layer_bsdf_" + OslShaderGenerator::TARGET, LayerNode::create);
 
-    // <!-- <thin_film_brdf> -->
-    registerImplementation("IM_thin_film_brdf_" + OslShaderGenerator::TARGET, ThinFilmNode::create);
-    // <!-- <dielectric_brdf> -->
-    registerImplementation("IM_dielectric_brdf_" + OslShaderGenerator::TARGET, ThinFilmSupport::create);
+    // <!-- <thin_film_bsdf> -->
+    registerImplementation("IM_thin_film_bsdf_" + OslShaderGenerator::TARGET, ThinFilmNode::create);
 
+    // <!-- <dielectric_bsdf> -->
+    registerImplementation("IM_dielectric_bsdf_" + OslShaderGenerator::TARGET, DielectricBsdfNode::create);
+
+    // <!-- <generalized_schlick_bsdf> -->
+    registerImplementation("IM_generalized_schlick_bsdf_" + OslShaderGenerator::TARGET, DielectricBsdfNode::create);
+
+    // <!-- <conductor_bsdf> -->
+    registerImplementation("IM_conductor_bsdf_" + OslShaderGenerator::TARGET, ConductorBsdfNode::create);
+
+    // <!-- <sheen_bsdf> -->
+    registerImplementation("IM_sheen_bsdf_" + OslShaderGenerator::TARGET, SheenBsdfNode::create);
 }
 
 ShaderPtr OslShaderGenerator::generate(const string& name, ElementPtr element, GenContext& context) const
