@@ -75,7 +75,7 @@ for(int i=0; i< axisNode.size(); i++) {
                             if(branch.contains("release")) {
                                 properties.add("NUGET_VERSION=${env.Version}")
                             } else {
-                                properties.add("NUGET_VERSION=1.0.0-${env.GITCOMMIT}")
+                                properties.add("NUGET_VERSION=1.38.alpha-${env.GITCOMMIT}")
                             }
                         }
                         withEnv(properties) {
