@@ -183,7 +183,7 @@ void flattenFilenames(DocumentPtr doc, const FileSearchPath& searchPath, StringR
                     FilePath testPath = searchPath[i] / resolvedValue;
                     if (testPath.exists())
                     {
-                        testPath = testPath.removeRelativePathQualifiers();
+                        //testPath = testPath.removeRelativePathQualifiers();
                         resolvedString = testPath.asString();
                         break;
                     }
