@@ -55,7 +55,6 @@ function init()
     // Set up renderer
     renderer = new THREE.WebGLRenderer({ canvas, context });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setFaceCulling(false);
 
     composer = new EffectComposer(renderer);
     const renderPass = new RenderPass(scene.getScene(), scene.getCamera());
@@ -96,7 +95,6 @@ function init()
         viewer.getScene().loadGeometry(viewer, orbitControls);
 
     }).then(() => {
-        gui.open();
         animate();
     }).catch(err => {
         console.error(Number.isInteger(err) ? this.getMx().getExceptionMessage(err) : err);
