@@ -83,7 +83,6 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
         return false;
     }
 
-    const string input_filename = filePath.asString();
     const string ext = stringToLower(filePath.getExtension());
     const string BINARY_EXTENSION = "glb";
     const string ASCII_EXTENSION = "gltf";
@@ -208,12 +207,10 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
     data->materials_count = materials_count;
 
     // Set of image nodes.
-    // TODO: Fix to be dynamic
-    cgltf_texture textureList[1024];
-    cgltf_image imageList[1024];
+    std::vector<cgltf_texture> textureList;
+    std::vector<cgltf_image> imageList;
 
     size_t i = 0;
-    size_t imageIndex = 0;
     for (const NodePtr& pbrNode : pbrNodes)
     {
         cgltf_material* material = &(materials[i]);
@@ -251,17 +248,20 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
         }
         if (imageNode)
         {
-            cgltf_texture* texture = &(textureList[imageIndex]);
+            cgltf_texture* texture = new cgltf_texture();
+            cgltf_image* image = new cgltf_image();
+
             roughness.base_color_texture.texture = texture;
-            initialize_cgtlf_texture(*texture, imageNode->getNamePath(), filename,
-                &(imageList[imageIndex]));            
+
+            initialize_cgtlf_texture(*texture, imageNode->getNamePath(), filename, image);            
 
             roughness.base_color_factor[0] = 1.0;
             roughness.base_color_factor[1] = 1.0;
             roughness.base_color_factor[2] = 1.0;
             roughness.base_color_factor[3] = 1.0;
 
-            imageIndex++;
+            textureList.push_back(*texture);
+            imageList.push_back(*image);
         }
         else
         {
@@ -324,11 +324,12 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
                         filename = fileInput && fileInput->getAttribute("type") == "filename" ?
                             fileInput->getValueString() : EMPTY_STRING;
 
-                        cgltf_texture* texture = &(textureList[imageIndex]);
+                        cgltf_texture* texture = new cgltf_texture();
+                        cgltf_image* image = new cgltf_image();
                         roughness.metallic_roughness_texture.texture = texture;
-                        initialize_cgtlf_texture(*texture, imageNode->getNamePath(), filename,
-                            &(imageList[imageIndex]));
-                        imageIndex++;
+                        initialize_cgtlf_texture(*texture, imageNode->getNamePath(), filename, image);
+                        textureList.push_back(*texture);
+                        imageList.push_back(*image);
                     }
 
                     if (roughnessInputs[e])
@@ -356,10 +357,10 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
     }
 
     // Set image and texture lists
-    data->images_count = imageIndex;
-    data->images = &imageList[0];
-    data->textures_count = imageIndex; 
-    data->textures = &textureList[0];
+    data->images_count = imageList.size();
+    data->images = imageList.data();
+    data->textures_count = textureList.size();
+    data->textures = textureList.data();
 
     // Write to disk
     cgltf_result result = cgltf_write_file(&options, filePath.asString().c_str(), data);
@@ -713,11 +714,10 @@ void CgltfMaterialLoader::loadMaterials(void *vdata)
         // Set ior
         if (material->has_ior)
         {
-            cgltf_ior& ior = material->ior;
             InputPtr iorInput = shaderNode->getInput("ior");
             if (iorInput)
             {
-                iorInput->setValue<float>(ior.ior);
+                iorInput->setValue<float>(material->ior.ior);
             }
         }
 
@@ -730,11 +730,10 @@ void CgltfMaterialLoader::loadMaterials(void *vdata)
 
         if (material->has_emissive_strength)
         {
-            cgltf_emissive_strength& emissive_strength = material->emissive_strength;
             InputPtr input = shaderNode->getInput("emissive_strength");
             if (input)
             {
-                input->setValue<float>(emissive_strength.emissive_strength);
+                input->setValue<float>(material->emissive_strength.emissive_strength);
             }
         }
 
