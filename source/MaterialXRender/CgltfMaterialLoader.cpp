@@ -47,6 +47,7 @@ namespace
 void initialize_cgltf_texture_view(cgltf_texture_view& textureview)
 {
     textureview.texture = nullptr;
+    textureview.texcoord = 0;
     textureview.scale = 1.0;
     textureview.has_transform = false;
     textureview.extras.start_offset = 0;
@@ -142,6 +143,7 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
 
 	data->asset.generator = const_cast<char*>((new string("MaterialX 1.38.4 to glTF generator"))->c_str());
     data->asset.version = const_cast<char*>((new string("2.0"))->c_str());
+    data->asset.min_version = const_cast<char*>((new string("2.0"))->c_str());
 
     // Scan for PBR shader nodes
     const string PBR_CATEGORY_STRING("gltf_pbr");
@@ -228,6 +230,13 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
 	    material->extensions = nullptr;
         material->emissive_texture.texture = nullptr;
         material->normal_texture.texture = nullptr;
+        material->occlusion_texture.texture = nullptr;
+        material->unlit = false;
+        material->double_sided = false;
+
+        material->emissive_factor[0] = 0.0;
+        material->emissive_factor[1] = 0.0;
+        material->emissive_factor[2] = 0.0;
 
         string* name = new string(pbrNode->getNamePath());
         material->name = const_cast<char*>(name->c_str());
