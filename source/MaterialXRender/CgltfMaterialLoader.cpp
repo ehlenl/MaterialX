@@ -75,6 +75,13 @@ void initialize_cgtlf_texture(cgltf_texture& texture, const string& name, const 
     texture.image->uri = const_cast<char*>((new string(uri))->c_str());
 }
 
+void get_image_filename(NodePtr imageNode, string& filename)
+{
+    InputPtr fileInput = imageNode->getInput("file");
+    filename = fileInput && fileInput->getAttribute("type") == "filename" ?
+        fileInput->getValueString() : EMPTY_STRING;
+}
+
 }
 
 bool CgltfMaterialLoader::save(const FilePath& filePath)
@@ -227,7 +234,7 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
 	    material->has_sheen = false;
 	    material->has_emissive_strength = false;
 	    material->extensions_count = 0;
-	    material->extensions = nullptr;
+        material->extensions = nullptr;
         material->emissive_texture.texture = nullptr;
         material->normal_texture.texture = nullptr;
         material->occlusion_texture.texture = nullptr;
@@ -250,25 +257,21 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
         NodePtr imageNode = pbrNode->getConnectedNode("base_color");
         if (imageNode)
         {
-            InputPtr fileInput = imageNode->getInput("file");
-            filename = fileInput && fileInput->getAttribute("type") == "filename" ?
-                fileInput->getValueString() : EMPTY_STRING;
-            if (filename.empty())
-                imageNode = nullptr;
-        }
-        if (imageNode)
-        {
-            cgltf_texture* texture = &(textureList[imageIndex]);
-            roughness.base_color_texture.texture = texture;
-            initialize_cgtlf_texture(*texture, imageNode->getNamePath(), filename,
-                &(imageList[imageIndex]));            
+            get_image_filename(imageNode, filename);
+            if (!filename.empty())
+            {
+                cgltf_texture* texture = &(textureList[imageIndex]);
+                roughness.base_color_texture.texture = texture;
+                initialize_cgtlf_texture(*texture, imageNode->getNamePath(), filename,
+                                         &(imageList[imageIndex]));
 
-            roughness.base_color_factor[0] = 1.0;
-            roughness.base_color_factor[1] = 1.0;
-            roughness.base_color_factor[2] = 1.0;
-            roughness.base_color_factor[3] = 1.0;
+                roughness.base_color_factor[0] = 1.0;
+                roughness.base_color_factor[1] = 1.0;
+                roughness.base_color_factor[2] = 1.0;
+                roughness.base_color_factor[3] = 1.0;
 
-            imageIndex++;
+                imageIndex++;
+            }
         }
         else
         {
@@ -287,7 +290,51 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
                 roughness.base_color_factor[3] = value->asA<float>();
             }
         }
+        // Handle emissive texture
+        imageNode = nullptr;
+        imageNode = pbrNode->getConnectedNode("emissive");
+        if (imageNode)
+        {
+            get_image_filename(imageNode, filename);
+            if (!filename.empty())
+            {
+                cgltf_texture_view& emissive = material->emissive_texture;
+                initialize_cgltf_texture_view(emissive);
 
+                cgltf_texture* texture = &(textureList[imageIndex]);
+                emissive.texture = texture;
+                initialize_cgtlf_texture(*texture, imageNode->getNamePath(), filename,
+                                         &(imageList[imageIndex]));
+
+                ValuePtr value = pbrNode->getInputValue("emissive_strength");
+                float emissiveStrength = value->asA<float>();
+
+                material->emissive_factor[0] = emissiveStrength;
+                material->emissive_factor[1] = emissiveStrength;
+                material->emissive_factor[2] = emissiveStrength;
+
+                imageIndex++; 
+            }
+        }
+        // Handle normals
+        imageNode = nullptr;
+        imageNode = pbrNode->getConnectedNode("normal")->getConnectedNode("in");
+        if (imageNode)
+        {
+            get_image_filename(imageNode, filename);
+            if (!filename.empty())
+            {
+                cgltf_texture_view& normal = material->normal_texture;
+                initialize_cgltf_texture_view(normal);
+
+                cgltf_texture* texture = &(textureList[imageIndex]);
+                normal.texture = texture;
+                initialize_cgtlf_texture(*texture, imageNode->getNamePath(), filename,
+                                         &(imageList[imageIndex]));
+
+                imageIndex++;
+            }
+        }
         // Handle metallic, roughness, occlusion
         initialize_cgltf_texture_view(roughness.metallic_roughness_texture);
         ValuePtr value;
@@ -327,14 +374,19 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
                     {
                         ormNode = imageNode;
 
-                        InputPtr fileInput = imageNode->getInput("file");
-                        filename = fileInput && fileInput->getAttribute("type") == "filename" ?
-                            fileInput->getValueString() : EMPTY_STRING;
+                        cgltf_texture_view& occlusion = material->occlusion_texture;
+                        initialize_cgltf_texture_view(occlusion);
+
+                        get_image_filename(imageNode, filename);
 
                         cgltf_texture* texture = &(textureList[imageIndex]);
                         roughness.metallic_roughness_texture.texture = texture;
+                        // Assign occlusion texture
+                        // TODO: occlusion is not always assigned via ORM texture
+                        occlusion.texture = texture;
                         initialize_cgtlf_texture(*texture, imageNode->getNamePath(), filename,
                             &(imageList[imageIndex]));
+
                         imageIndex++;
                     }
 
