@@ -14,6 +14,7 @@ jobs:
   build:
     name: Build
     runs-on: ${{ matrix.os }}
+    if: ! github.event.pull_request.draft
     strategy:
       fail-fast: false
       matrix:
@@ -288,3 +289,12 @@ jobs:
       with:
         name: Renders_${{ matrix.name }}
         path: build/render/
+  
+  draft-build:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft
+    timeout-minutes: 1
+
+    steps:
+    - name: Omit build on Draft PR
+      run: exit 1
