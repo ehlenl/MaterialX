@@ -4,9 +4,11 @@ Generate a .gltf file from a .mtlx gltf_pbr definition
 '''
 
 import argparse, json, os, sys
+
 import MaterialX as mx
 import MaterialX.PyMaterialXRender as mx_render
 
+from utils import load_mtlx_doc, load_std_lib, validate_mtlx_doc
 
 def main():
     parser = argparse.ArgumentParser(description='Generate a *.gltf material file from a *.mtlx gltf_pbr file.')
@@ -21,37 +23,18 @@ def main():
         parser.error("Output must specify a *.gltf file.")
 
     loader = mx_render.CgltfMaterialLoader.create()
-    doc = mx.createDocument()
-    try:
-        mx.readFromXmlFile(doc, opts.mtlxFile)
-    except mx.ExceptionFileMissing as err:
-        parser.error(err)
-
-    stdlib = mx.createDocument()
-    filePath = os.path.dirname(os.path.abspath(__file__))
-    searchPath = mx.FileSearchPath(os.path.join(filePath, '..', '..'))
-    libraryFolders = []
-    if opts.paths:
-        for pathList in opts.paths:
-            for path in pathList:
-                searchPath.append(path)
-    if opts.libraries:
-        for libraryList in opts.libraries:
-            for library in libraryList:
-                libraryFolders.append(library)
-    libraryFolders.append('libraries')
-    mx.loadLibraries(libraryFolders, searchPath, stdlib)
-    
+    doc = load_mtlx_doc(opts.mtlxFile)
+    stdlib = load_std_lib(opts.mtlxFile, opts.paths, opts.libraries)
     loader.setDefinitions(stdlib)
     doc.importLibrary(stdlib)
 
-    valid, msg = doc.validate()
-    if not valid:
-        print('Validation warnings for input document:')
-        print(msg)
+    validate_mtlx_doc(doc)
     
     loader.setMaterials(doc)
-    loader.save(opts.gltfFile)
+    if loader.save(opts.gltfFile):
+        print(f"Wrote {opts.gltfFile}")
+    else:
+        print(f"Error writing {opts.gltfFile}. Is the inputfile gltf_pbr?")
 
     if opts.mergeFile:
         with open(opts.gltfFile) as f:
