@@ -252,6 +252,10 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
         initialize_cgltf_texture_view(roughness.base_color_texture);
 
         // Handle base color
+        roughness.base_color_factor[0] = 1.0;
+        roughness.base_color_factor[1] = 1.0;
+        roughness.base_color_factor[2] = 1.0;
+        roughness.base_color_factor[3] = 1.0;
         string filename;
         NodePtr imageNode = pbrNode->getConnectedNode("base_color");
         if (imageNode)
@@ -263,11 +267,6 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
                 roughness.base_color_texture.texture = texture;
                 initialize_cgtlf_texture(*texture, imageNode->getNamePath(), filename,
                                          &(images[imageIndex]));
-
-                roughness.base_color_factor[0] = 1.0;
-                roughness.base_color_factor[1] = 1.0;
-                roughness.base_color_factor[2] = 1.0;
-                roughness.base_color_factor[3] = 1.0;
 
                 imageIndex++;
             }
@@ -344,6 +343,8 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
 
         // Handle metallic, roughness, occlusion
         initialize_cgltf_texture_view(roughness.metallic_roughness_texture);
+        roughness.metallic_factor = 0.0;
+        roughness.roughness_factor = 0.0;
         ValuePtr value;
         string extractInputs[3] =
         {
