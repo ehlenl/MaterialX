@@ -1377,6 +1377,12 @@ void Viewer::loadDocument(const mx::FilePath& filename, mx::DocumentPtr librarie
                     }
                 }
             }
+
+            // TODO: Clean debug
+            // mx::CgltfMaterialLoaderPtr gltfMTLXLoader = mx::CgltfMaterialLoader::create();
+            // gltfMTLXLoader->setDefinitions(_stdLib);
+            // gltfMTLXLoader->setMaterials(doc);
+            // gltfMTLXLoader->save(filename.asString() + "_gltf.gltf");
         }
     }
     catch (mx::ExceptionRenderError& e)

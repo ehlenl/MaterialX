@@ -274,7 +274,7 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
         else
         {
             ValuePtr value = pbrNode->getInputValue("base_color");
-            if (value)
+            if (value->isA<Color3>())
             {
                 Color3 color = value->asA<Color3>();
                 roughness.base_color_factor[0] = color[0];
@@ -283,7 +283,7 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
             }
 
             value = pbrNode->getInputValue("alpha");
-            if (value)
+            if (value->isA<float>())
             {
                 roughness.base_color_factor[3] = value->asA<float>();
             }
@@ -306,7 +306,10 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
                                          &(images[imageIndex]));
 
                 ValuePtr value = pbrNode->getInputValue("emissive_strength");
-                float emissiveStrength = value->asA<float>();
+                float emissiveStrength;
+                if (value->isA<float>()) {
+                    emissiveStrength = value->asA<float>();
+                }
 
                 material->emissive_factor[0] = emissiveStrength;
                 material->emissive_factor[1] = emissiveStrength;
@@ -344,7 +347,7 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
         // Handle metallic, roughness, occlusion
         initialize_cgltf_texture_view(roughness.metallic_roughness_texture);
         roughness.metallic_factor = 0.0;
-        roughness.roughness_factor = 0.0;
+        roughness.roughness_factor = 1.0;
         ValuePtr value;
         string extractInputs[3] =
         {
@@ -408,7 +411,9 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
                     if (roughnessInputs[e])
                     {
                         value = pbrInput->getValue();
-                        *(roughnessInputs[e]) = value->asA<float>();
+                        if (value->isA<float>()) {
+                            *(roughnessInputs[e]) = value->asA<float>();
+                        }                        
                     }
                 }
             }
