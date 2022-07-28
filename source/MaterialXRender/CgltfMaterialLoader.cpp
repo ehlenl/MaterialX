@@ -280,12 +280,13 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
                 roughness.base_color_factor[0] = color[0];
                 roughness.base_color_factor[1] = color[1];
                 roughness.base_color_factor[2] = color[2];
+                roughness.base_color_factor[3] = 1.0;
             }
 
-            value = pbrNode->getInputValue("alpha");
-            if (value->isA<float>())
+            if (pbrNode->hasAttribute("alpha"))
             {
-                roughness.base_color_factor[3] = value->asA<float>();
+                value = pbrNode->getInputValue("alpha");
+                roughness.base_color_factor[3] = value->asA<float>();       
             }
         }
 
@@ -305,15 +306,15 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
                 initialize_cgtlf_texture(*texture, imageNode->getNamePath(), filename,
                                          &(images[imageIndex]));
 
-                ValuePtr value = pbrNode->getInputValue("emissive_strength");
-                float emissiveStrength;
-                if (value->isA<float>()) {
-                    emissiveStrength = value->asA<float>();
+                if (pbrNode->hasAttribute("emissive_strength"))
+                {
+                    ValuePtr value = pbrNode->getInputValue("emissive_strength");
+                    float emissiveStrength = value->asA<float>();
+                    material->emissive_factor[0] = emissiveStrength;
+                    material->emissive_factor[1] = emissiveStrength;
+                    material->emissive_factor[2] = emissiveStrength; 
                 }
 
-                material->emissive_factor[0] = emissiveStrength;
-                material->emissive_factor[1] = emissiveStrength;
-                material->emissive_factor[2] = emissiveStrength;
 
                 imageIndex++; 
             }
@@ -347,7 +348,7 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
         // Handle metallic, roughness, occlusion
         initialize_cgltf_texture_view(roughness.metallic_roughness_texture);
         roughness.metallic_factor = 0.0;
-        roughness.roughness_factor = 1.0;
+        roughness.roughness_factor = 0.0;
         ValuePtr value;
         string extractInputs[3] =
         {
@@ -423,6 +424,60 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
             value = roughnessInput->getValue();
             roughness.roughness_factor = value->asA<float>();
         }*/
+
+        // Handle transmission
+        ValuePtr transmissionValue = pbrNode->getInputValue("transmission");
+        if (transmissionValue->isA<float>()) {
+            if (transmissionValue->asA<float>() != 0) {
+                cgltf_transmission& transmission = material->transmission;
+                initialize_cgltf_texture_view(transmission.transmission_texture);
+                transmission.transmission_factor = transmissionValue->asA<float>();
+                ValuePtr transmissionColorValue = pbrNode->getInputValue("");
+                roughness.metallic_factor = 0.0;
+                material->has_transmission = true;
+                material->extensions_count++;
+            }
+        }
+
+        // Handle Coat
+        ValuePtr clearcoatValue = pbrNode->getInputValue("clearcoat");
+        if (clearcoatValue->isA<float>()) {
+            if (clearcoatValue->asA<float>() != 0) {
+                cgltf_clearcoat& clearcoat = material->clearcoat;
+                initialize_cgltf_texture_view(clearcoat.clearcoat_texture);
+                initialize_cgltf_texture_view(clearcoat.clearcoat_normal_texture);
+                initialize_cgltf_texture_view(clearcoat.clearcoat_roughness_texture);
+                clearcoat.clearcoat_factor = clearcoatValue->asA<float>();
+                ValuePtr clearcoatRoughnessValue = pbrNode->getInputValue("clearcoat_roughness");
+                if (clearcoatRoughnessValue->isA<float>()) {
+                    clearcoat.clearcoat_roughness_factor = clearcoatRoughnessValue->asA<float>();
+                }
+                material->has_clearcoat = true;
+                material->extensions_count++;
+            }
+        }
+
+        // Handle Sheen
+        ValuePtr sheenColorValue = pbrNode->getInputValue("sheen_color");
+        if (sheenColorValue->isA<Color3>()) {
+            Color3 sheenColor = sheenColorValue->asA<Color3>();
+            if (sheenColor[0] != 0 &&
+                sheenColor[1] != 0 &&
+                sheenColor[2] != 0) {
+                cgltf_sheen& sheen = material->sheen;
+                initialize_cgltf_texture_view(sheen.sheen_color_texture);
+                initialize_cgltf_texture_view(sheen.sheen_roughness_texture);
+                sheen.sheen_color_factor[0] = sheenColor[0];
+                sheen.sheen_color_factor[1] = sheenColor[1];
+                sheen.sheen_color_factor[2] = sheenColor[2];
+                ValuePtr sheenRoughnessValue = pbrNode->getInputValue("sheen_roughness");
+                if (sheenRoughnessValue->isA<float>()) {
+                    sheen.sheen_roughness_factor = sheenRoughnessValue->asA<float>();
+                }
+                material->has_sheen = true;
+                material->extensions_count++;
+            }
+        }
 
         i++;
     }
