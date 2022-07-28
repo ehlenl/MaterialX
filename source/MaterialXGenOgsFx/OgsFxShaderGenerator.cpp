@@ -201,13 +201,13 @@ ShaderPtr OgsFxShaderGenerator::generate(const string& name, ElementPtr element,
         emitLineBreak(fx);
 
         // Emit OGS lighting uniforms
-        emitInclude("pbrlib/genglsl/ogsfx/mx_lighting_uniforms.glsl", context, fx);
+        emitLibraryInclude("pbrlib/genglsl/ogsfx/mx_lighting_uniforms.glsl", context, fx);
         emitLineBreak(fx);
 
         // Emit lighting functions
         emitLine("GLSLShader LightingFunctions", fx, false);
         emitScopeBegin(fx);
-        emitInclude("pbrlib/genglsl/ogsfx/mx_lighting_functions.glsl", context, fx);
+        emitLibraryInclude("pbrlib/genglsl/ogsfx/mx_lighting_functions.glsl", context, fx);
         emitLineBreak(fx);
 
         emitScopeEnd(fx);
@@ -215,8 +215,9 @@ ShaderPtr OgsFxShaderGenerator::generate(const string& name, ElementPtr element,
     }
 
     // Add code blocks from the vertex and pixel shader stages generated above
-    emitBlock(vs.getSourceCode(), context, fx);
-    emitBlock(ps.getSourceCode(), context, fx);
+    // TODO: <MERGE> CHECK if empty filename works
+    emitBlock(vs.getSourceCode(), "", context, fx);
+    emitBlock(ps.getSourceCode(), "", context, fx);
 
     // Add Main technique block
     string techniqueParams;
@@ -297,19 +298,12 @@ void OgsFxShaderGenerator::emitPixelStage(const ShaderGraph& graph, GenContext& 
     }
 
     // Emit common math functions
-    emitInclude("stdlib/genglsl/lib/mx_math.glsl", context, stage);
+    emitLibraryInclude("stdlib/genglsl/lib/mx_math.glsl", context, stage);
     emitLineBreak(stage);
 
     // Set the include file to use for uv transformations,
     // depending on the vertical flip flag.
-    if (context.getOptions().fileTextureVerticalFlip)
-    {
-        _tokenSubstitutions[ShaderGenerator::T_FILE_TRANSFORM_UV] = "stdlib/genglsl/lib/mx_transform_uv_vflip.glsl";
-    }
-    else
-    {
-        _tokenSubstitutions[ShaderGenerator::T_FILE_TRANSFORM_UV] = "stdlib/genglsl/lib/mx_transform_uv.glsl";
-    }
+    _tokenSubstitutions[ShaderGenerator::T_FILE_TRANSFORM_UV] = (context.getOptions().fileTextureVerticalFlip ? "mx_transform_uv_vflip.glsl" : "mx_transform_uv.glsl");
 
     // Emit environment lighting functions
     if (lighting)
