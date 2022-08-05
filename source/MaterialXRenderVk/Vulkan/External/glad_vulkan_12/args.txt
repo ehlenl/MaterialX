@@ -1,0 +1,1 @@
+--out-path F:/source/glad/example/c/vulkan_tri_glfw/_build/gladsources/glad_vulkan_12 --api vulkan=1.2 --reproducible c --loader 

@@ -38,8 +38,8 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 add_library(MaterialXRenderVk ${materialx_source} ${materialx_headers})
-
-add_definitions(-DMATERIALX_RENDERVK_EXPORTS -DVK_USE_PLATFORM_WIN32_KHR -DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1)
+ # -DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1
+add_definitions(-DMATERIALX_RENDERVK_EXPORTS -DVK_USE_PLATFORM_WIN32_KHR)
 
 set(COMMON_LIBRARIES
     MaterialXRenderHw
@@ -84,7 +84,9 @@ target_include_directories(MaterialXRenderVk
         ${EXTERNAL_INCLUDE_DIRS}
         ${Vulkan_INCLUDE_DIR}
         #for glm
-        ${Vulkan_INCLUDE_DIR}/../Third-Party/Include)
+        ${Vulkan_INCLUDE_DIR}/../Third-Party/Include
+        #for glad vulkan
+        ${CMAKE_CURRENT_SOURCE_DIR}/Vulkan/External/glad_vulkan_12/include)
 
 install(TARGETS MaterialXRenderVk
     EXPORT MaterialX

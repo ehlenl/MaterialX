@@ -10,12 +10,12 @@
 /// Glsl Vulkan code renderer
 
 #include <MaterialXRenderVk/Export.h>
-//#include <MaterialXRenderVk/VkContext.h>
-
 //#include <MaterialXRenderVk/VkFramebuffer.h>
 
 //#include <MaterialXRenderVk/VkProgram.h>
 #include <MaterialXRender/ShaderRenderer.h>
+
+#include <MaterialXRenderVk/Vulkan/vkContext.h>
 
 MATERIALX_NAMESPACE_BEGIN
 
@@ -139,7 +139,7 @@ class MX_RENDERVK_API VkRenderer : public ShaderRenderer
     float _objectScale;
 
     SimpleWindowPtr _window;
-    //VkContextPtr _context;
+    VkContextPtr _context;
     Color3 _screenColor;
 };
 

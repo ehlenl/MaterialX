@@ -7,20 +7,14 @@
 #define MATERIALX_VKCONTEXT_H
 
 /// @file
-
-#include <MaterialXRenderVk/Export.h>
-//#include <MaterialXRenderVk/VkSwapChain.h>
-
 #include <MaterialXRenderHw/SimpleWindow.h>
 
+//#include <MaterialXRenderVk/Export.h>
+//#include <MaterialXRenderVk/VkSwapChain.h>
+
+
+
 #include <vulkan/vulkan.hpp>
-#if defined(_WIN32)
-    #include <vulkan/vulkan_win32.h>
-#elif defined(__linux__)
-    #include <vulkan/vulkan_xcb.h>
-#elif defined(__ANDROID__)
-    #include <vulkan/vulkan_android.h>
-#endif
 
 MATERIALX_NAMESPACE_BEGIN
 
@@ -62,6 +56,9 @@ class MX_RENDERVK_API VkContext
     /// Make the context "current" before execution of OpenGL operations
     int makeCurrent();
 
+    void init_vk(bool validate);
+
+
   protected:
     // Create the base context. A OpenGL context to share with can be passed in.
     VkContext(SimpleWindowPtr window, HardwareContextHandle context = 0);
@@ -75,6 +72,7 @@ class MX_RENDERVK_API VkContext
     // Create Vulkan Swapchain
     void createSwapChain();
 
+
     // Simple window
     SimpleWindowPtr _window;
 
@@ -83,6 +81,12 @@ class MX_RENDERVK_API VkContext
 
     // Flag to indicate validity
     bool _isValid;
+
+
+    uint32_t enabled_extension_count = 0;
+    uint32_t enabled_layer_count = 0;
+    std::vector<const char*> enabled_layers;
+    std::vector<char const*> extension_names;
 
 #if defined(__linux__) || defined(__FreeBSD__)
     // An X window used by context operations
@@ -97,15 +101,15 @@ class MX_RENDERVK_API VkContext
     /// The Vulkan instance.
     vk::Instance _instance;
 
-    vk::PhysicalDevice _physicalDevice;
+    //vk::PhysicalDevice _physicalDevice;
 
     /// The Vulkan device.
-    vk::Device _device;
+    //vk::Device _device;
 
     /// The Vulkan device queue.
-    vk::Queue _queue;
+    //vk::Queue _queue;
 
-    vk::DebugReportCallbackEXT debug_callback;
+    //vk::DebugReportCallbackEXT debug_callback;
     //VkSwapChain _swapChain;
 };
 

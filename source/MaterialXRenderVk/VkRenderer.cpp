@@ -71,7 +71,9 @@ void VkRenderer::initialize()
         }
 
         // Create offscreen context
-        //_context = VkContext::create(_window);
+        _context = VkContext::create(_window);
+        _context->init_vk(true);
+        
         //if (!_context)
         //{
         //    throw ExceptionRenderError("Failed to create OpenGL context for renderer");
