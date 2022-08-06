@@ -3,7 +3,7 @@
 #include "VkBuffer.h"
 #include "VkHostBuffer.h"
 
-VulkanTexture::VulkanTexture(std::shared_ptr<VulkanDevice> _device, VkFormat textureFormat, const glm::uvec3 &textureDimensions, bool _generateMipmaps, bool _multisampled)
+VulkanTexture::VulkanTexture(VulkanDevicePtr _device, VkFormat textureFormat, const glm::uvec3 &textureDimensions, bool _generateMipmaps, bool _multisampled)
 : device(_device),
     image(nullptr),
     imageView(nullptr),

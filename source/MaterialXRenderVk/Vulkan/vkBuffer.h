@@ -4,7 +4,7 @@
 class VulkanBuffer
 {
     public:
-    VulkanBuffer(std::shared_ptr<VulkanDevice> _device, VkBufferUsageFlags _bufferUsage, VkFormat _bufferFormat);
+    VulkanBuffer(VulkanDevicePtr _device, VkBufferUsageFlags _bufferUsage, VkFormat _bufferFormat);
     virtual ~VulkanBuffer();
 
     virtual void Write(void *bufferData, VkDeviceSize bufferDataSize) = 0;
@@ -37,7 +37,7 @@ class VulkanBuffer
     }
 
     protected:
-    std::shared_ptr<VulkanDevice> device;
+    VulkanDevicePtr device;
 
     void CreateBuffer(VkBufferUsageFlags usage, VkMemoryPropertyFlags props, VkDeviceSize bufferSize, VkBuffer &buf, VkDeviceMemory &bufMemory);
 

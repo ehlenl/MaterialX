@@ -22,7 +22,7 @@ class VulkanMaterialX
 {
     friend class VulkanMaterialXInstance;
     public:
-    VulkanMaterialX(std::shared_ptr<VulkanDevice> device, std::string materialXFilename);
+    VulkanMaterialX(VulkanDevicePtr device, std::string materialXFilename);
     virtual ~VulkanMaterialX();
     enum ShaderStage
     {
@@ -100,7 +100,7 @@ public:
     void LoadMaterialXTextures();
     void CompileMaterialXShader();
 
-    std::shared_ptr<VulkanDevice> device;
+    VulkanDevicePtr device;
 
     std::vector<VkVertexInputBindingDescription> bindingDescriptions;
     std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
@@ -204,7 +204,7 @@ public:
     VulkanMaterialXCache() {}
     virtual ~VulkanMaterialXCache() {}
 
-    std::shared_ptr<VulkanMaterialXInstance> AcquireMaterial(std::shared_ptr<VulkanDevice> device, std::shared_ptr<VulkanRenderPass> renderPass, std::string mtlxDocumentFilename)
+    std::shared_ptr<VulkanMaterialXInstance> AcquireMaterial(VulkanDevicePtr device, std::shared_ptr<VulkanRenderPass> renderPass, std::string mtlxDocumentFilename)
     {
         auto it = materials.find(mtlxDocumentFilename);
         if (it == materials.end())

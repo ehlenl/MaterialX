@@ -13,7 +13,7 @@
 
 #include "Geometry.h"
 
-VulkanRenderList::VulkanRenderList(std::shared_ptr<VulkanDevice> _device)
+VulkanRenderList::VulkanRenderList(VulkanDevicePtr _device)
 :   device(_device)
 {
 }

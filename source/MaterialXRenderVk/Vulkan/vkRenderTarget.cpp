@@ -1,12 +1,12 @@
 #include "vkRenderTarget.h"
 #include "vkTexture.h"
 
-VulkanRenderTarget::VulkanRenderTarget(std::shared_ptr<VulkanDevice> _device, glm::uvec3 _extent)
+VulkanRenderTarget::VulkanRenderTarget(VulkanDevicePtr _device, glm::uvec3 _extent)
 : device(_device), extent(_extent)
 {
 }
 
-VulkanRenderTarget::VulkanRenderTarget(std::shared_ptr<VulkanDevice> _device, glm::uvec3 _extent, std::vector<VkSurfaceFormatKHR> requestedSurfaceFormat)
+VulkanRenderTarget::VulkanRenderTarget(VulkanDevicePtr _device, glm::uvec3 _extent, std::vector<VkSurfaceFormatKHR> requestedSurfaceFormat)
 : device(_device), extent(_extent)
 {
     requestedSurfaceFormats = requestedSurfaceFormat;

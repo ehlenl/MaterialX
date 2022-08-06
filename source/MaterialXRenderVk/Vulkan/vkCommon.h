@@ -45,14 +45,14 @@ static std::map<VkResult, std::string> vk_error_strings = {
 #define VK_LOG std::cout << __FUNCTION__ << " "
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugReportCallbackFn(
-    VkDebugReportFlagsEXT                       flags,
-    VkDebugReportObjectTypeEXT                  objectType,
-    uint64_t                                    object,
-    size_t                                      location,
-    int32_t                                     messageCode,
+    VkDebugReportFlagsEXT                       /*flags*/,
+    VkDebugReportObjectTypeEXT                  /*objectType*/,
+    uint64_t                                    /*object*/,
+    size_t                                      /*location*/,
+    int32_t                                     /*messageCode*/,
     const char*                                 pLayerPrefix,
     const char*                                 pMessage,
-    void*                                       pUserData) {
+    void*                                       /*pUserData*/) {
 
     VK_LOG << "Debug Report: " << pLayerPrefix << ": " << pMessage << std::endl;
 

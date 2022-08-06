@@ -6,7 +6,7 @@
 
 #include <algorithm>
 
-VulkanSwapchain::VulkanSwapchain(std::shared_ptr<VulkanDevice> _device, const glm::uvec2 &extent)
+VulkanSwapchain::VulkanSwapchain(VulkanDevicePtr _device, const glm::uvec2 &extent)
 :   swapchain(nullptr),
     device(_device),
     imageCount(2),

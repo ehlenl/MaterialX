@@ -7,7 +7,7 @@ class VulkanRenderTarget;
 class VulkanRenderPass
 {
     public:
-    VulkanRenderPass(std::shared_ptr<VulkanDevice> _device);
+    VulkanRenderPass(VulkanDevicePtr _device);
     virtual ~VulkanRenderPass();
 
     VkRenderPass GetRenderPass(){ return renderPass; }
@@ -27,7 +27,7 @@ class VulkanRenderPass
 
     std::shared_ptr<VulkanRenderTarget> renderTarget;
 
-    std::shared_ptr<VulkanDevice> device;
+    VulkanDevicePtr device;
 
     VkRenderPass renderPass;
     VkCommandBuffer commandBuffer;

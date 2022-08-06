@@ -2,7 +2,7 @@
 #include "vkHelpers.h"
 #include <cstring>
 
-VulkanBuffer::VulkanBuffer(std::shared_ptr<VulkanDevice> _device, VkBufferUsageFlags _bufferUsage, VkFormat _bufferFormat)
+VulkanBuffer::VulkanBuffer(VulkanDevicePtr _device, VkBufferUsageFlags _bufferUsage, VkFormat _bufferFormat)
 :   device(_device),
     bufferUsage(_bufferUsage),
     buffer(nullptr),

@@ -11,10 +11,12 @@
 
 //#include <MaterialXRenderVk/Export.h>
 //#include <MaterialXRenderVk/VkSwapChain.h>
+#include <MaterialXRenderVk/Vulkan/vkDevice.h>
 
 
 
 #include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_win32.h>
 
 MATERIALX_NAMESPACE_BEGIN
 
@@ -83,8 +85,6 @@ class MX_RENDERVK_API VkContext
     bool _isValid;
 
 
-    uint32_t enabled_extension_count = 0;
-    uint32_t enabled_layer_count = 0;
     std::vector<const char*> enabled_layers;
     std::vector<char const*> extension_names;
 
@@ -101,10 +101,12 @@ class MX_RENDERVK_API VkContext
     /// The Vulkan instance.
     vk::Instance _instance;
 
+    vk::SurfaceKHR _surface;
+
     //vk::PhysicalDevice _physicalDevice;
 
     /// The Vulkan device.
-    //vk::Device _device;
+    VulkanDevicePtr _device;
 
     /// The Vulkan device queue.
     //vk::Queue _queue;

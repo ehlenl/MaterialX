@@ -7,7 +7,7 @@ class VulkanBuffer;
 class VulkanTexture
 {
     public:
-    VulkanTexture(std::shared_ptr<VulkanDevice> device, VkFormat textureFormat, const glm::uvec3 &textureDimensions, bool generateMipmaps, bool multisampled = false);
+    VulkanTexture(VulkanDevicePtr device, VkFormat textureFormat, const glm::uvec3 &textureDimensions, bool generateMipmaps, bool multisampled = false);
     virtual ~VulkanTexture();
 
     virtual void Initialize();
@@ -52,5 +52,5 @@ class VulkanTexture
     bool destroyImage;
     bool generateMipmaps;
 
-    std::shared_ptr<VulkanDevice> device;
+    VulkanDevicePtr device;
 };

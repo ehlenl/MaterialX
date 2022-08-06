@@ -8,7 +8,7 @@ class VulkanRenderTarget;
 class VulkanSwapchain
 {
     public:
-    VulkanSwapchain(std::shared_ptr<VulkanDevice> device, const glm::uvec2 &extent);
+    VulkanSwapchain(VulkanDevicePtr device, const glm::uvec2 &extent);
     virtual ~VulkanSwapchain();
 
     glm::uvec2 GetExtent();
@@ -41,7 +41,7 @@ class VulkanSwapchain
 
     std::vector<VkCommandBuffer> blitCommandBuffers;
 
-    std::shared_ptr<VulkanDevice> device;
+    VulkanDevicePtr device;
     uint32_t imageCount;
     uint32_t currentFrame;
     bool blit;

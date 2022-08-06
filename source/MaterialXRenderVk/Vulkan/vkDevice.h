@@ -17,10 +17,24 @@ class VulkanHostBuffer;
 class VulkanRenderTarget;
 class VulkanTexture;
 
+/// Vulkan Device shared pointer
+using VulkanDevicePtr = std::shared_ptr<class VulkanDevice>;
+
 class VulkanDevice : public std::enable_shared_from_this<VulkanDevice>
 {
     public:
-    VulkanDevice(std::vector<const char *> requestedExtensions);
+    /// Create a new context
+    static VulkanDevicePtr create()
+    {
+        std::vector<const char*> vkExtensions = {
+            VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
+            VK_KHR_SURFACE_EXTENSION_NAME,
+            VK_KHR_WIN32_SURFACE_EXTENSION_NAME
+        };
+        return VulkanDevicePtr(new VulkanDevice(vkExtensions));
+    }
+
+    
     virtual ~VulkanDevice();
 
     void InitializeDevice(VkSurfaceKHR windowSurface);
@@ -67,6 +81,7 @@ class VulkanDevice : public std::enable_shared_from_this<VulkanDevice>
     std::shared_ptr<VulkanTexture> RetrieveTextureFromCache(std::string textureName) { auto it = textureCache.find(textureName); return (it == textureCache.end() ? nullptr : it->second); }
 
     protected:
+    VulkanDevice(std::vector<const char*> requestedExtensions);
     void AppendValidationLayerExtension();
 
     void CreateInstance();

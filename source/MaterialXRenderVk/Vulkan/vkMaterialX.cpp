@@ -40,7 +40,7 @@ const std::map<std::string, VertexAttribute> VulkanMaterialX::vertexAttributeMap
 
 static std::string MATERIALX_INSTALL_DIR = ".";
 
-VulkanMaterialX::VulkanMaterialX(std::shared_ptr<VulkanDevice> _device, std::string materialXFilename)
+VulkanMaterialX::VulkanMaterialX(VulkanDevicePtr _device, std::string materialXFilename)
 :   cullMode(VK_CULL_MODE_BACK_BIT),
     primitiveTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST),
     lineWidth(1.f),

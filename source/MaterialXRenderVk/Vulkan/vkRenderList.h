@@ -13,7 +13,7 @@ class Primitive;
 class VulkanRenderList
 {
     public:
-    VulkanRenderList(std::shared_ptr<VulkanDevice> device);
+    VulkanRenderList(VulkanDevicePtr device);
     virtual ~VulkanRenderList();
 
     void SetGeometryScene( std::shared_ptr<Scene> scene );
@@ -21,7 +21,7 @@ class VulkanRenderList
     void RecordCommands(VkCommandBuffer commandBuffer);
 
     protected:
-    std::shared_ptr<VulkanDevice> device;
+    VulkanDevicePtr device;
     std::vector<glm::mat4> geometryTransforms;
 
     std::shared_ptr<Scene> renderScene;

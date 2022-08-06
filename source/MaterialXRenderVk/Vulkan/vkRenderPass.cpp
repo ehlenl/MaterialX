@@ -1,7 +1,7 @@
 #include "vkRenderPass.h"
 #include "vkRenderTarget.h"
 
-VulkanRenderPass::VulkanRenderPass(std::shared_ptr<VulkanDevice> _device)
+VulkanRenderPass::VulkanRenderPass(VulkanDevicePtr _device)
 :   device(_device),
     renderPass(nullptr),
     fence(nullptr),

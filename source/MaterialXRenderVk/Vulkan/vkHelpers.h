@@ -84,7 +84,7 @@ static void SubmitFreeCommandBuffer(VkDevice device, VkCommandPool commandPool, 
     vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
 }
 
-static void CopyBufferToImage(std::shared_ptr<VulkanDevice> device, VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t depth)
+static void CopyBufferToImage(VulkanDevicePtr device, VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t depth)
 {
     VkCommandBuffer commandBuffer = CreateSingleCommandBuffer(device->GetDevice(), device->GetCommandPool());
 
@@ -104,7 +104,7 @@ static void CopyBufferToImage(std::shared_ptr<VulkanDevice> device, VkBuffer buf
     SubmitFreeCommandBuffer(device->GetDevice(), device->GetCommandPool(), device->GetDefaultQueue(), commandBuffer);
 }
 
-static void CopyImageToBuffer(std::shared_ptr<VulkanDevice> device, VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t depth)
+static void CopyImageToBuffer(VulkanDevicePtr device, VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t depth)
 {
     VkCommandBuffer commandBuffer = CreateSingleCommandBuffer(device->GetDevice(), device->GetCommandPool());
 
@@ -124,7 +124,7 @@ static void CopyImageToBuffer(std::shared_ptr<VulkanDevice> device, VkBuffer buf
     SubmitFreeCommandBuffer(device->GetDevice(), device->GetCommandPool(), device->GetDefaultQueue(), commandBuffer);
 }
 
-static VkImageView CreateImageView(std::shared_ptr<VulkanDevice> device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageViewType imageType)
+static VkImageView CreateImageView(VulkanDevicePtr device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageViewType imageType)
 {
     VkImageViewCreateInfo viewInfo = {};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -143,7 +143,7 @@ static VkImageView CreateImageView(std::shared_ptr<VulkanDevice> device, VkImage
     return imageView;
 }
 
-static void WriteDescriptorImage(std::shared_ptr<VulkanDevice> device, VkImageView view, VkSampler sampler, VkDescriptorType descriptorType, uint32_t binding, VkDescriptorSet& descriptorSet, VkImageLayout layout= VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+static void WriteDescriptorImage(VulkanDevicePtr device, VkImageView view, VkSampler sampler, VkDescriptorType descriptorType, uint32_t binding, VkDescriptorSet& descriptorSet, VkImageLayout layout= VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
 {
     // Specify the buffer to bind to the descriptor.
     VkDescriptorImageInfo descriptorImageInfo = {};
@@ -163,7 +163,7 @@ static void WriteDescriptorImage(std::shared_ptr<VulkanDevice> device, VkImageVi
     vkUpdateDescriptorSets(device->GetDevice(), 1, &writeDescriptorSet, 0, NULL);
 }
 
-static VkSampler CreateDefaultSampler(std::shared_ptr<VulkanDevice> device, bool normalizeCoordinates)
+static VkSampler CreateDefaultSampler(VulkanDevicePtr device, bool normalizeCoordinates)
 {
     VkSampler sampler;
     VkSamplerCreateInfo samplerInfo = {};
@@ -189,7 +189,7 @@ static VkSampler CreateDefaultSampler(std::shared_ptr<VulkanDevice> device, bool
     return sampler;
 }
 
-static void WriteDescriptorBuffer(std::shared_ptr<VulkanDevice> device, VkBuffer buffer, VkDeviceSize bufferSize, VkDescriptorType descriptorType, uint32_t binding, VkDescriptorSet descriptorSet, uint32_t offset)
+static void WriteDescriptorBuffer(VulkanDevicePtr device, VkBuffer buffer, VkDeviceSize bufferSize, VkDescriptorType descriptorType, uint32_t binding, VkDescriptorSet descriptorSet, uint32_t offset)
 {
     // Specify the buffer to bind to the descriptor.
     VkDescriptorBufferInfo descriptorBufferInfo = {};
@@ -209,7 +209,7 @@ static void WriteDescriptorBuffer(std::shared_ptr<VulkanDevice> device, VkBuffer
     vkUpdateDescriptorSets(device->GetDevice(), 1, &writeDescriptorSet, 0, NULL);
 }
 
-static std::shared_ptr<VulkanTexture> LoadTextureFromImageFile(std::shared_ptr<VulkanDevice> device, std::string fileName, bool hdr)
+static std::shared_ptr<VulkanTexture> LoadTextureFromImageFile(VulkanDevicePtr device, std::string fileName, bool hdr)
 {
     //TODO: Add ImageHandler
 #if 0

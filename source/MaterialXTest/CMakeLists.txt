@@ -70,8 +70,29 @@ if(MATERIALX_BUILD_RENDER)
 
     find_package(Vulkan REQUIRED)
     add_subdirectory(MaterialXRenderVk)
-    target_include_directories(MaterialXTest PRIVATE ${Vulkan_INCLUDE_DIR})
-    target_link_libraries(MaterialXTest MaterialXRenderVk)
+            
+    target_include_directories(MaterialXTest PRIVATE 
+    ${Vulkan_INCLUDE_DIR}
+    #for glm
+    ${Vulkan_INCLUDE_DIR}/../Third-Party/Include)
+    add_definitions(-DVK_USE_PLATFORM_WIN32_KHR)
+    # temp hack to get vulkan lib folder
+    get_filename_component(Vulkan_LIB_PATH ${Vulkan_LIBRARIES} DIRECTORY)
+    target_link_libraries(MaterialXTest 
+            MaterialXRenderVk 
+            ${Vulkan_LIBRARIES}
+            debug ${Vulkan_LIB_PATH}/shaderc_sharedd.lib
+            debug ${Vulkan_LIB_PATH}/spirv-cross-cored.lib
+            debug ${Vulkan_LIB_PATH}/spirv-cross-cppd.lib
+            debug ${Vulkan_LIB_PATH}/spirv-cross-utild.lib
+            debug ${Vulkan_LIB_PATH}/spirv-cross-glsld.lib
+            debug ${Vulkan_LIB_PATH}/spirv-cross-reflectd.lib
+            optimized ${Vulkan_LIB_PATH}/shaderc_shared.lib
+            optimized ${Vulkan_LIB_PATH}/spirv-cross-core.lib
+            optimized ${Vulkan_LIB_PATH}/spirv-cross-cpp.lib
+            optimized ${Vulkan_LIB_PATH}/spirv-cross-util.lib
+            optimized ${Vulkan_LIB_PATH}/spirv-cross-glsl.lib
+            optimized ${Vulkan_LIB_PATH}/spirv-cross-reflect.lib)
   endif()
   if(MATERIALX_BUILD_GEN_OSL)
     add_subdirectory(MaterialXRenderOsl)

@@ -115,7 +115,7 @@ class Scene
     Scene() {}
     virtual ~Scene(){}
 
-    void BuildBuffers(std::vector<uint32_t> &sceneIndexData, std::vector<Vertex> &sceneVertexData, std::shared_ptr<VulkanDevice> device)
+    void BuildBuffers(std::vector<uint32_t>& sceneIndexData, std::vector<Vertex>& sceneVertexData, VulkanDevicePtr device)
     {
         for (auto& mesh : meshes)
         {

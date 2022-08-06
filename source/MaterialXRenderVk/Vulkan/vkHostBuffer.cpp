@@ -2,7 +2,7 @@
 #include "vkHelpers.h"
 #include <cstring>
 
-VulkanHostBuffer::VulkanHostBuffer(std::shared_ptr<VulkanDevice> _device, VkBufferUsageFlags _bufferUsage, VkFormat _bufferFormat)
+VulkanHostBuffer::VulkanHostBuffer(VulkanDevicePtr _device, VkBufferUsageFlags _bufferUsage, VkFormat _bufferFormat)
 : VulkanBuffer(_device, _bufferUsage, _bufferFormat)
 {
     memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;

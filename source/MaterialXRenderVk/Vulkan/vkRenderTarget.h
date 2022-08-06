@@ -6,8 +6,8 @@ class VulkanTexture;
 class VulkanRenderTarget
 {
     public:
-    VulkanRenderTarget(std::shared_ptr<VulkanDevice> device, glm::uvec3 extent);
-    VulkanRenderTarget(std::shared_ptr<VulkanDevice> device, glm::uvec3 extent, std::vector<VkSurfaceFormatKHR> requestedSurfaceFormat);
+    VulkanRenderTarget(VulkanDevicePtr device, glm::uvec3 extent);
+    VulkanRenderTarget(VulkanDevicePtr device, glm::uvec3 extent, std::vector<VkSurfaceFormatKHR> requestedSurfaceFormat);
     virtual ~VulkanRenderTarget();
     
     void CreateFrameBuffer(VkRenderPass renderPass);
@@ -27,7 +27,7 @@ class VulkanRenderTarget
     VkFramebuffer GetFramebuffer(uint32_t index) { return frameBuffers[index]; }
 
     protected:
-    std::shared_ptr<VulkanDevice> device;
+    VulkanDevicePtr device;
 
     std::vector<std::shared_ptr<VulkanTexture>> colorTextures;
     VkAttachmentDescription colorAttachmentDescription;

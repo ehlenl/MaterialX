@@ -3,7 +3,7 @@
 class VulkanHostBuffer : public VulkanBuffer
 {
     public:
-    VulkanHostBuffer(std::shared_ptr<VulkanDevice> _device, VkBufferUsageFlags _bufferUsage, VkFormat _bufferFormat);
+    VulkanHostBuffer(VulkanDevicePtr _device, VkBufferUsageFlags _bufferUsage, VkFormat _bufferFormat);
     virtual ~VulkanHostBuffer();
 
     virtual void Write(void *bufferData, VkDeviceSize bufferDataSize) override;
