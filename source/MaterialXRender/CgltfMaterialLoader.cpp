@@ -347,8 +347,8 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
 
         // Handle metallic, roughness, occlusion
         initialize_cgltf_texture_view(roughness.metallic_roughness_texture);
-        roughness.metallic_factor = 0.0;
-        roughness.roughness_factor = 0.0;
+        roughness.metallic_factor = 1.0;
+        roughness.roughness_factor = 1.0;
         ValuePtr value;
         string extractInputs[3] =
         {
@@ -451,6 +451,8 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
                 ValuePtr clearcoatRoughnessValue = pbrNode->getInputValue("clearcoat_roughness");
                 if (clearcoatRoughnessValue->isA<float>()) {
                     clearcoat.clearcoat_roughness_factor = clearcoatRoughnessValue->asA<float>();
+                } else {
+                    clearcoat.clearcoat_roughness_factor = 0.0;
                 }
                 material->has_clearcoat = true;
                 material->extensions_count++;
@@ -473,6 +475,8 @@ bool CgltfMaterialLoader::save(const FilePath& filePath)
                 ValuePtr sheenRoughnessValue = pbrNode->getInputValue("sheen_roughness");
                 if (sheenRoughnessValue->isA<float>()) {
                     sheen.sheen_roughness_factor = sheenRoughnessValue->asA<float>();
+                } else {
+                    sheen.sheen_roughness_factor = 0.0;
                 }
                 material->has_sheen = true;
                 material->extensions_count++;
