@@ -58,7 +58,7 @@ class MX_RENDERVK_API VkContext
     /// Make the context "current" before execution of OpenGL operations
     int makeCurrent();
 
-    void init_vk(bool validate);
+    void initializeVulkan(bool validate);
 
 
   protected:

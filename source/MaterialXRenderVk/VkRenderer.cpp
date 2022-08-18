@@ -5,6 +5,9 @@
 
 #include <MaterialXRenderVk/VkRenderer.h>
 #include <MaterialXRenderHw/SimpleWindow.h>
+#include <MaterialXRenderVk/Vulkan/vkSwapchain.h>
+#include <MaterialXRenderVk/Vulkan/vkRenderTarget.h>
+#include <MaterialXRenderVk/Vulkan/vkRenderPass.h>
 
 //#include <iostream>
 //#include <algorithm>
@@ -55,8 +58,6 @@ VkRenderer::VkRenderer(unsigned int width, unsigned int height, Image::BaseType 
     //_camera = Camera::create();
 }
 
-
-
 void VkRenderer::initialize()
 {
 
@@ -72,26 +73,53 @@ void VkRenderer::initialize()
 
         // Create offscreen context
         _context = VkContext::create(_window);
-        _context->init_vk(true);
+        _context->initializeVulkan(true);
         
-        //if (!_context)
-        //{
-        //    throw ExceptionRenderError("Failed to create OpenGL context for renderer");
-        //}
+        
+        VulkanDevicePtr device = _context->_device;
 
-        //if (_context->makeCurrent())
-        //{
-        //    // Initialize glad
-        //    if (!gladLoadGL())
-        //    {
-        //        throw ExceptionRenderError("OpenGL support is required");
-        //    }
+        if (!device)
+        {
+            throw ExceptionRenderError("Failed to create Vulkan device for renderer");
+        }
 
-        //    glClearStencil(0);
+        glm::uvec2 windowExtents(_width, _height);
+        auto swapchain = device->CreateSwapchain(windowExtents);
 
-        //    _framebuffer = VkFramebuffer::create(_width, _height, 4, _baseType);
-        //    _initialized = true;
-        //}
+        assert(swapchain);
+
+        _renderTarget = device->CreateRenderTarget(
+            { { device->FindSurfaceFormat().format, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT } },
+            true, glm::uvec3(windowExtents, 1u));
+
+        assert(_renderTarget);
+
+        swapchain->Bind(_renderTarget->GetColorTarget(0));
+
+        //Create Program
+
+        //Create Buffer
+        //renderList = device->CreateRenderList();
+        //renderList->SetGeometryScene(scene);
+
+        //setup Draw
+        std::shared_ptr<VulkanRenderPass> renderPass = device->CreateRenderPass();
+        renderPass->Initialize(_renderTarget);
+
+        //Clear and Draw
+        renderPass->CreateCommandBuffers();
+        auto commandBuffer = renderPass->GetCommandBuffer();
+        VkCommandBufferBeginInfo beginInfo = {};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+
+        VK_ERROR_CHECK(vkBeginCommandBuffer(commandBuffer, &beginInfo));
+        renderPass->BeginRenderPass(0);
+        renderPass->EndRenderPass();
+        VK_ERROR_CHECK(vkEndCommandBuffer(commandBuffer));
+        renderPass->Draw();
+        swapchain->Blit();
+        vkDeviceWaitIdle(device->GetDevice());
     }
 
 }

@@ -140,6 +140,7 @@ class MX_RENDERVK_API VkRenderer : public ShaderRenderer
 
     SimpleWindowPtr _window;
     VkContextPtr _context;
+    std::shared_ptr<VulkanRenderTarget> _renderTarget;
     Color3 _screenColor;
 };
 

@@ -101,8 +101,8 @@ void VulkanRenderPass::BeginRenderPass(uint32_t targetIndex)
     renderPassInfo.renderArea.extent = { extent.x, extent.y };
 
     std::vector<VkClearValue> clearValues(2);
-    //clearValues[0].color = { 0.392f, 0.584f, 0.929f, 1.0f };
-    clearValues[0].color = { 0.5372f, 0.5568f, 0.549f, 1.0f };
+    clearValues[0].color = { 0.392f, 0.584f, 0.929f, 1.0f };
+    //clearValues[0].color = { 0.5372f, 0.5568f, 0.549f, 1.0f };
     clearValues[1].depthStencil = { 1.0f, 0 };
 
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
