@@ -701,6 +701,7 @@ void VulkanMaterialX::CreatePipeline()
     pipelineInfo.pColorBlendState = &colorBlending;
     pipelineInfo.pDynamicState = nullptr; // need to do this for resizing viewport
 
+    pipelineInfo.pDepthStencilState = &depthStencil;
     pipelineInfo.layout = pipelineLayout;
     pipelineInfo.renderPass = renderPass->GetRenderPass();
     pipelineInfo.subpass = 0;
