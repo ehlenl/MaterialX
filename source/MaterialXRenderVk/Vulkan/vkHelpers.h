@@ -7,7 +7,21 @@
 #include "vkDeviceBuffer.h"
 #include "BasicIO.h"
 
-//#include <stb_image.h>
+#if defined(_MSC_VER)
+    #pragma warning(push)
+    #pragma warning(disable: 4100)
+    #pragma warning(disable: 4505)
+    #pragma warning(disable: 4996)
+#endif
+
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_STATIC 1
+#include <MaterialXRender/External/StbImage/stb_image.h>
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_STATIC 1
+#include <MaterialXRender/External/StbImage/stb_image_write.h>
+
 #include <algorithm>
 #include <cstring>
 
@@ -212,7 +226,7 @@ static void WriteDescriptorBuffer(VulkanDevicePtr device, VkBuffer buffer, VkDev
 static std::shared_ptr<VulkanTexture> LoadTextureFromImageFile(VulkanDevicePtr device, std::string fileName, bool hdr)
 {
     //TODO: Add ImageHandler
-#if 0
+#if 1
     VkFormat textureFormat = VK_FORMAT_UNDEFINED;
     int channels;
     glm::ivec3 imageDimensions(1);
@@ -303,7 +317,7 @@ static std::shared_ptr<VulkanTexture> LoadTextureFromImageFile(VulkanDevicePtr d
 
     return texture;
 #endif
-    return nullptr;
+
 }
 
 template<class T>

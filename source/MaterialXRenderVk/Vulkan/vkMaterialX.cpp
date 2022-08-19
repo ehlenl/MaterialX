@@ -85,7 +85,7 @@ void VulkanMaterialX::LoadRadianceMaps()
     auto texture = device->RetrieveTextureFromCache("u_envIrradiance");
     if (!texture)
     {
-        texture = LoadTextureFromImageFile(this->device, "resources/san_giuseppe_bridge_split.hdr", true);
+        texture = LoadTextureFromImageFile(this->device, "F:/source/MaterialX-adsk-fork/resources/Lights/san_giuseppe_bridge_split.hdr", true);
         device->AddTextureToCache("u_envIrradiance", texture);
     }
     this->namedTextures["u_envIrradiance"] = texture;
@@ -93,7 +93,7 @@ void VulkanMaterialX::LoadRadianceMaps()
     texture = device->RetrieveTextureFromCache("u_envRadiance");
     if (!texture)
     {
-        texture = LoadTextureFromImageFile(this->device, "resources/san_giuseppe_bridge.hdr", true);
+        texture = LoadTextureFromImageFile(this->device, "F:/source/MaterialX-adsk-fork/resources/Lights/san_giuseppe_bridge.hdr", true);
         device->AddTextureToCache("u_envRadiance", texture);
     }
     this->namedTextures["u_envRadiance"] = texture;
@@ -123,7 +123,8 @@ void VulkanMaterialX::CompileMaterialXShader()
         }
         return doc;
     };
-    static std::string materialXBaseDir(MATERIALX_INSTALL_DIR);
+    
+    static std::string materialXBaseDir(R"(F:\source\MaterialX-adsk-fork)");
     assert(materialXBaseDir.length() > 0);
 
     // set search path

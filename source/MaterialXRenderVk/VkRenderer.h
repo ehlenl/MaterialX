@@ -82,6 +82,8 @@ class MX_RENDERVK_API VkRenderer : public ShaderRenderer
     /// Render the current program in texture space to an off-screen buffer.
     void renderTextureSpace(const Vector2& uvMin, const Vector2& uvMax);
 
+    void createGraphicsPipeline();
+    VkShaderModule createShaderModule(const std::vector<char>& code);
     /// @}
     /// @name Utilities
     /// @{
@@ -142,6 +144,13 @@ class MX_RENDERVK_API VkRenderer : public ShaderRenderer
     VkContextPtr _context;
     std::shared_ptr<VulkanRenderTarget> _renderTarget;
     Color3 _screenColor;
+
+    std::shared_ptr<VulkanRenderPass> _renderPass;
+
+    //HACK
+    VkExtent2D swapChainExtent;
+    VkPipelineLayout pipelineLayout;
+    VkPipeline graphicsPipeline;
 };
 
 MATERIALX_NAMESPACE_END
