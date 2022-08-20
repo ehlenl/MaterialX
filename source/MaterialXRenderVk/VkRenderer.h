@@ -82,8 +82,12 @@ class MX_RENDERVK_API VkRenderer : public ShaderRenderer
     /// Render the current program in texture space to an off-screen buffer.
     void renderTextureSpace(const Vector2& uvMin, const Vector2& uvMax);
 
+    //HACKS
     void createGraphicsPipeline();
     VkShaderModule createShaderModule(const std::vector<char>& code);
+    void createVertexBuffer();
+    uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+
     /// @}
     /// @name Utilities
     /// @{
@@ -148,9 +152,13 @@ class MX_RENDERVK_API VkRenderer : public ShaderRenderer
     std::shared_ptr<VulkanRenderPass> _renderPass;
 
     //HACK
+    VkShaderModule load_shader_module(const std::string& path, bool isVertex);
+
     VkExtent2D swapChainExtent;
     VkPipelineLayout pipelineLayout;
     VkPipeline graphicsPipeline;
+    VkBuffer vertexBuffer;
+    VkDeviceMemory vertexBufferMemory;
 };
 
 MATERIALX_NAMESPACE_END

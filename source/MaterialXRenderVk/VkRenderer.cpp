@@ -11,9 +11,12 @@
 #include <MaterialXRenderVk/Vulkan/vkBuffer.h>
 #include <MaterialXRenderVk/Vulkan/vkDeviceBuffer.h>
 #include <MaterialXRenderVk/Vulkan/vkMaterialX.h>
+#include <MaterialXRenderVk/Vulkan/vkHelpers.h>
 #include <iostream>
 #include <fstream>
 
+#include <shaderc/shaderc.h>
+#include <spirv_cross/spirv_reflect.hpp>
 //#include <iostream>
 //#include <algorithm>
 
@@ -68,6 +71,36 @@ VkRenderer::VkRenderer(unsigned int width, unsigned int height, Image::BaseType 
     _camera = Camera::create();
 }
 
+/// Load shader from glsl
+static std::vector<uint8_t> read_binary_file(const std::string& filename, const uint32_t count)
+{
+    std::vector<uint8_t> data;
+
+    std::ifstream file;
+
+    file.open(filename, std::ios::in | std::ios::binary);
+
+    if (!file.is_open())
+    {
+        throw std::runtime_error("Failed to open file: " + filename);
+    }
+
+    uint64_t read_count = count;
+    if (count == 0)
+    {
+        file.seekg(0, std::ios::end);
+        read_count = static_cast<uint64_t>(file.tellg());
+        file.seekg(0, std::ios::beg);
+    }
+
+    data.resize(static_cast<size_t>(read_count));
+    file.read(reinterpret_cast<char*>(data.data()), read_count);
+    file.close();
+
+    return data;
+}
+/// 
+
 static std::vector<char> readFile(const std::string& filename)
 {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
@@ -87,17 +120,153 @@ static std::vector<char> readFile(const std::string& filename)
 
     return buffer;
 }
+
+struct Vertex
+{
+    glm::vec2 pos;
+    glm::vec3 color;
+
+    static VkVertexInputBindingDescription getBindingDescription()
+    {
+        VkVertexInputBindingDescription bindingDescription = {};
+        bindingDescription.binding = 0;
+        bindingDescription.stride = sizeof(Vertex);
+        bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+        return bindingDescription;
+    }
+
+    static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions()
+    {
+        std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions = {};
+
+        attributeDescriptions[0].binding = 0;
+        attributeDescriptions[0].location = 0;
+        attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+        attributeDescriptions[0].offset = offsetof(Vertex, pos);
+
+        attributeDescriptions[1].binding = 0;
+        attributeDescriptions[1].location = 1;
+        attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[1].offset = offsetof(Vertex, color);
+
+        return attributeDescriptions;
+    }
+};
+
+const std::vector<Vertex> vertices = {
+    { { 0.0f, -0.5f }, { 1.0f, 0.0f, 0.0f } },
+    { { 0.5f, 0.5f }, { 1.0f, 0.0f, 0.0f } },
+    { { -0.5f, 0.5f }, { 0.0f, 0.0f, 1.0f } }
+};
+
+
+uint32_t VkRenderer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+{
+    VulkanDevicePtr device = _context->_device;
+    VkPhysicalDeviceMemoryProperties memProperties;
+    vkGetPhysicalDeviceMemoryProperties(device->GetPhysicalDevice(), &memProperties);
+
+    for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+    {
+        if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+        {
+            return i;
+        }
+    }
+
+    throw std::runtime_error("failed to find suitable memory type!");
+}
+
+void VkRenderer::createVertexBuffer()
+{
+    VulkanDevicePtr device = _context->_device;
+    VkBufferCreateInfo bufferInfo = {};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = sizeof(vertices[0]) * vertices.size();
+    bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    if (vkCreateBuffer(device->GetDevice(), &bufferInfo, nullptr, &vertexBuffer) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to create vertex buffer!");
+    }
+
+    VkMemoryRequirements memRequirements;
+    vkGetBufferMemoryRequirements(device->GetDevice(), vertexBuffer, &memRequirements);
+
+    VkMemoryAllocateInfo allocInfo = {};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+    if (vkAllocateMemory(device->GetDevice(), &allocInfo, nullptr, &vertexBufferMemory) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to allocate vertex buffer memory!");
+    }
+
+    vkBindBufferMemory(device->GetDevice(), vertexBuffer, vertexBufferMemory, 0);
+
+    void* data;
+    vkMapMemory(device->GetDevice(), vertexBufferMemory, 0, bufferInfo.size, 0, &data);
+    memcpy(data, vertices.data(), (size_t) bufferInfo.size);
+    vkUnmapMemory(device->GetDevice(), vertexBufferMemory);
+}
+
+VkShaderModule VkRenderer::load_shader_module(const std::string& path, bool isVertex)
+{
+    auto buffer = readFile(path);
+    std::string file_ext = path;
+    // Extract extension name from the glsl shader file
+    file_ext = file_ext.substr(file_ext.find_last_of(".") + 1);
+
+
+    // Compile GLSL to SPIRV
+    shaderc_compiler_t compiler = shaderc_compiler_initialize();
+    auto compileOptions = shaderc_compile_options_initialize();
+    shaderc_compile_options_set_auto_bind_uniforms(compileOptions, true);
+    shaderc_compile_options_set_auto_map_locations(compileOptions, true);
+    shaderc_shader_kind shaderKind = isVertex ? shaderc_shader_kind::shaderc_glsl_vertex_shader : shaderc_shader_kind::shaderc_glsl_fragment_shader;
+
+    std::vector<uint32_t> spirv;
+    std::string info_log;
+
+    // Compile the GLSL source
+    shaderc_compilation_result_t result = shaderc_compile_into_spv(compiler, buffer.data(), buffer.size(), shaderKind, path.c_str(), "main", compileOptions);
+
+    auto numErrors = shaderc_result_get_num_errors(result);
+    if (numErrors != 0)
+    {
+        VK_LOG << shaderc_result_get_error_message(result) << std::endl;
+        throw std::runtime_error("Error compiling shader.");
+    }
+
+    auto compiledShaderSize = static_cast<uint32_t>(shaderc_result_get_length(result));
+    auto compiledShaderBytes = reinterpret_cast<const uint32_t*>(shaderc_result_get_bytes(result));
+
+    VulkanDevicePtr device = _context->_device;
+    VkShaderModule shader_module = CreateShaderModule(device->GetDevice(), compiledShaderBytes, compiledShaderSize);
+
+    return shader_module;
+}
+
+
 void VkRenderer::createGraphicsPipeline()
 {
     VulkanDevicePtr device = _context->_device;
     swapChainExtent.width = _width;
     swapChainExtent.height = _height;
 
-    auto vertShaderCode = readFile("F:/source/MaterialX-adsk-fork/vert.spv");
-    auto fragShaderCode = readFile("F:/source/MaterialX-adsk-fork/frag.spv");
-
+    //Auto Vertex gen
+    /*
+    auto vertShaderCode = readFile("F:/source/MaterialX-adsk-fork/auto_vert.spv");
+    auto fragShaderCode = readFile("F:/source/MaterialX-adsk-fork/auto_frag.spv");
     VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
     VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
+    */
+
+    VkShaderModule vertShaderModule = load_shader_module(R"(F:\source\MaterialX-adsk-fork\test_shader.vert)", true);
+    VkShaderModule fragShaderModule = load_shader_module(R"(F:\source\MaterialX-adsk-fork\test_shader.frag)", false);
 
     VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
     vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -114,10 +283,22 @@ void VkRenderer::createGraphicsPipeline()
     VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
 
     
+
     VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertexInputInfo.vertexBindingDescriptionCount = 0;
-    vertexInputInfo.vertexAttributeDescriptionCount = 0;
+
+    auto bindingDescription = Vertex::getBindingDescription();
+    auto attributeDescriptions = Vertex::getAttributeDescriptions();
+
+    vertexInputInfo.vertexBindingDescriptionCount = 1;
+    vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+    vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+    vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+
+
+    //For auto
+    //vertexInputInfo.vertexBindingDescriptionCount = 0;
+    //vertexInputInfo.vertexAttributeDescriptionCount = 0;
 
     VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
     inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -276,6 +457,8 @@ void VkRenderer::initialize()
         _renderPass = device->CreateRenderPass();
         _renderPass->Initialize(_renderTarget);
 
+#if 0 
+        //Does not WORK YET
         // Create Buffer
         std::vector<float> vertices = {
             0.0f, -0.75f, 0.0f,
@@ -293,9 +476,13 @@ void VkRenderer::initialize()
                 
         indexBuffer = device->CreateDeviceBuffer(VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_FORMAT_R32_UINT);
         indexBuffer->Write(indices.data(), indices.size() * sizeof(uint32_t));
+#endif        
 
         // Create pipeline 1
         createGraphicsPipeline();
+
+        // Create custom vertex buffer
+        createVertexBuffer();
 
         // Create Pipeline
         std::shared_ptr<VulkanMaterialXCache> materialCache;
@@ -331,6 +518,14 @@ void VkRenderer::initialize()
         VK_ERROR_CHECK(vkBeginCommandBuffer(commandBuffer, &beginInfo));
         _renderPass->BeginRenderPass(0);
 
+            vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+            VkBuffer vertexBuffers[] = { vertexBuffer };
+            VkDeviceSize offsets[] = { 0 };
+            vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+            vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
+
+#if 0 
+        //DOES NOT WORK YET
         std::vector<VkDescriptorSet> descriptorSetArray;
         for (auto& ds : material->GetDescriptorSets())
             descriptorSetArray.push_back(ds.second);
@@ -343,6 +538,7 @@ void VkRenderer::initialize()
         //vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout /* material->GetPipelineLayout()*/,
         //    0, static_cast<uint32_t>(descriptorSetArray.size()), descriptorSetArray.data(), 0, nullptr);
         vkCmdDrawIndexed(commandBuffer, 3, 1, 0, 0, 0);
+#endif
         
         _renderPass->EndRenderPass();
         VK_ERROR_CHECK(vkEndCommandBuffer(commandBuffer));
