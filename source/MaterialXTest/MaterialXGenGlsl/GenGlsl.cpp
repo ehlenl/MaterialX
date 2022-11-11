@@ -98,6 +98,15 @@ TEST_CASE("GenShader: GLSL Unique Names", "[genglsl]")
     GenShaderUtil::testUniqueNames(context, mx::Stage::PIXEL);
 }
 
+TEST_CASE("GenShader: Scalabilty Check", "[genglsl]")
+{
+    mx::GenContext context(mx::GlslShaderGenerator::create());
+    BENCHMARK("Load documents, validate and generate shader") 
+    {
+            return GenShaderUtil::scalabilityTest(context);
+    };
+}
+
 TEST_CASE("GenShader: Bind Light Shaders", "[genglsl]")
 {
     mx::DocumentPtr doc = mx::createDocument();

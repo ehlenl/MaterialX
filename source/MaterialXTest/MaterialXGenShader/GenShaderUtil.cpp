@@ -276,6 +276,86 @@ void checkImplementations(mx::GenContext& context,
     implDumpBuffer.close();
 }
 
+void scalabilityTest(mx::GenContext& context)
+{
+    mx::DocumentPtr nodeLibrary = mx::createDocument();
+    mx::FilePath currentPath = mx::FilePath::getCurrentPath();
+    const mx::FileSearchPath libSearchPath(currentPath);
+
+    // Load the standard libraries.
+    loadLibraries({ "libraries" }, libSearchPath, nodeLibrary);
+    context.registerSourceCodeSearchPath(libSearchPath);
+
+    // Enable Color Management
+    mx::ColorManagementSystemPtr colorManagementSystem =
+        mx::DefaultColorManagementSystem::create(context.getShaderGenerator().getTarget());
+
+    REQUIRE(colorManagementSystem);
+    if (colorManagementSystem)
+    {
+        context.getShaderGenerator().setColorManagementSystem(colorManagementSystem);
+        colorManagementSystem->loadLibrary(nodeLibrary);
+    }
+
+    // Enable Unit System
+    mx::UnitSystemPtr unitSystem = mx::UnitSystem::create(context.getShaderGenerator().getTarget());
+    REQUIRE(unitSystem);
+    if (unitSystem)
+    {
+        context.getShaderGenerator().setUnitSystem(unitSystem);
+        unitSystem->loadLibrary(nodeLibrary);
+        // Setup Unit converters
+        unitSystem->setUnitConverterRegistry(mx::UnitConverterRegistry::create());
+        mx::UnitTypeDefPtr distanceTypeDef = nodeLibrary->getUnitTypeDef("distance");
+        unitSystem->getUnitConverterRegistry()->addUnitConverter(distanceTypeDef, mx::LinearUnitConverter::create(distanceTypeDef));
+        mx::UnitTypeDefPtr angleTypeDef = nodeLibrary->getUnitTypeDef("angle");
+        unitSystem->getUnitConverterRegistry()->addUnitConverter(angleTypeDef, mx::LinearUnitConverter::create(angleTypeDef));
+        context.getOptions().targetDistanceUnit = "meter";
+    }
+
+    // Read mtlx documents
+    mx::FilePathVec testRootPaths;
+    testRootPaths.push_back("resources/Materials/Examples/StandardSurface");
+
+    std::vector<mx::DocumentPtr> loadedDocuments;
+    mx::StringVec documentsPaths;
+    mx::StringVec errorLog;
+
+    for (const auto& testRoot : testRootPaths)
+    {
+        mx::loadDocuments(testRoot, libSearchPath, {}, {}, loadedDocuments, documentsPaths,
+                          nullptr, &errorLog);
+    }
+
+    REQUIRE(loadedDocuments.size() > 0);
+    REQUIRE(loadedDocuments.size() == documentsPaths.size());
+
+    // Shuffle the order of documents and perform document library import validatation and shadergen
+    std::random_device random_dev;
+    std::mt19937 generator(random_dev());
+    std::shuffle(loadedDocuments.begin(), loadedDocuments.end(), generator);
+    for (const auto& doc : loadedDocuments)
+    {
+        doc->importLibrary(nodeLibrary);
+        std::vector<mx::TypedElementPtr> elements;
+        mx::findRenderableElements(doc, elements);
+
+        REQUIRE(elements.size() > 0);
+
+        std::string message;
+        bool docValid = doc->validate(&message);
+
+        REQUIRE(docValid == true);
+
+        mx::StringVec sourceCode;
+        mx::ShaderPtr shader = nullptr;
+        shader = context.getShaderGenerator().generate(elements[0]->getName(), elements[0], context);
+
+        REQUIRE(shader != nullptr);
+        REQUIRE(shader->getSourceCode(mx::Stage::PIXEL).length() > 0);
+    }
+}
+
 void testUniqueNames(mx::GenContext& context, const std::string& stage)
 {
     mx::DocumentPtr doc = mx::createDocument();
