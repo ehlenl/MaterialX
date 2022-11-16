@@ -98,8 +98,11 @@ NodeDefPtr Node::getNodeDef(const string& target, bool allowRoughMatch) const
     {
         return resolveNameReference<NodeDef>(getNodeDefString());
     }
-    vector<NodeDefPtr> nodeDefs = getDocument()->getMatchingNodeDefs(getQualifiedName(getCategory()));
-    vector<NodeDefPtr> secondary = getDocument()->getMatchingNodeDefs(getCategory());
+    
+    // If a nodelibrary is not registered, use the document to locate nodedefs
+    ConstDocumentPtr nodelibrary = Document::hasNodeLibrary() ? Document::getNodeLibrary() : getDocument();
+    vector<NodeDefPtr> nodeDefs = nodelibrary->getMatchingNodeDefs(getQualifiedName(getCategory()));
+    vector<NodeDefPtr> secondary = nodelibrary->getMatchingNodeDefs(getCategory());
     vector<NodeDefPtr> roughMatches;
     nodeDefs.insert(nodeDefs.end(), secondary.begin(), secondary.end());
     for (NodeDefPtr nodeDef : nodeDefs)

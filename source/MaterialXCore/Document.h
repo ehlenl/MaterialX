@@ -668,6 +668,29 @@ class MX_CORE_API Document : public GraphElement
     void invalidateCache();
 
     /// @}
+    /// @name MaterialX Node library 
+    /// @{
+
+    /// Register the given document as the MaterialX Node libaray for all documents
+    /// The MaterialX node libary can be created using the MaterialX::loadLibraries utility 
+    /// @param Node library document to register. 
+    static void setNodeLibrary(ConstDocumentPtr nodeLibrary)
+    {
+        _nodelibrary = nodeLibrary;
+    }
+
+    /// Gets the registered node library
+    static ConstDocumentPtr getNodeLibrary()
+    {
+        return _nodelibrary;
+    }
+
+    /// Returns true if a node libary is registered.
+    static bool hasNodeLibrary()
+    {
+        return (_nodelibrary!=nullptr);
+    }
+    /// @}
 
   public:
     static const string CATEGORY;
@@ -677,6 +700,9 @@ class MX_CORE_API Document : public GraphElement
   private:
     class Cache;
     std::unique_ptr<Cache> _cache;
+
+    // Shared node library used across documents.
+    static ConstDocumentPtr _nodelibrary;
 };
 
 /// Create a new Document.

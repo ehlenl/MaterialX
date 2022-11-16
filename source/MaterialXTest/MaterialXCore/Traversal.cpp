@@ -20,8 +20,8 @@ TEST_CASE("IntraGraph Traversal", "[traversal]")
     REQUIRE(*nullGraph == mx::NULL_EDGE);
     ++nullTree;
     ++nullGraph;
-    REQUIRE(*nullTree == nullptr);
-    REQUIRE(*nullGraph == mx::NULL_EDGE);
+    REQUIRE((nullTree == mx::NULL_TREE_ITERATOR));
+    REQUIRE((nullGraph == mx::NULL_GRAPH_ITERATOR));
 
     // Create a document.
     mx::DocumentPtr doc = mx::createDocument();

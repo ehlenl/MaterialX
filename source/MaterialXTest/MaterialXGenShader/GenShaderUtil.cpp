@@ -282,9 +282,18 @@ void scalabilityTest(mx::GenContext& context)
     mx::FilePath currentPath = mx::FilePath::getCurrentPath();
     const mx::FileSearchPath libSearchPath(currentPath);
 
-    // Load the standard libraries.
+    // Load the materialx node library.
     loadLibraries({ "libraries" }, libSearchPath, nodeLibrary);
-    context.registerSourceCodeSearchPath(libSearchPath);
+
+
+    // Validate node library
+    std::string message;
+    bool docValid = nodeLibrary->validate(&message);
+    REQUIRE(docValid == true);
+
+    // Register node library
+    mx::Document::setNodeLibrary(nodeLibrary);
+
 
     // Enable Color Management
     mx::ColorManagementSystemPtr colorManagementSystem =
@@ -336,15 +345,13 @@ void scalabilityTest(mx::GenContext& context)
     std::shuffle(loadedDocuments.begin(), loadedDocuments.end(), generator);
     for (const auto& doc : loadedDocuments)
     {
-        doc->importLibrary(nodeLibrary);
         std::vector<mx::TypedElementPtr> elements;
         mx::findRenderableElements(doc, elements);
 
         REQUIRE(elements.size() > 0);
 
-        std::string message;
-        bool docValid = doc->validate(&message);
-
+        // Validate current document
+        docValid = doc->validate(&message);
         REQUIRE(docValid == true);
 
         mx::StringVec sourceCode;
