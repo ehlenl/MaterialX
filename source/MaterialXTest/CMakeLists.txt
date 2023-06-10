@@ -81,7 +81,7 @@ if(MATERIALX_BUILD_RENDER)
     ${Vulkan_INCLUDE_DIR}
     #for glm
     ${Vulkan_INCLUDE_DIR}/../Third-Party/Include)
-    add_definitions(-DVK_USE_PLATFORM_WIN32_KHR)
+    add_definitions(-DVK_USE_PLATFORM_WIN32_KHR -DVULKAN_EXPORTED -DVULKAN_HPP_STORAGE_SHARED_EXPORT -DVULKAN_HPP_STORAGE_SHARED)
     #Get vulkan lib folder
     get_filename_component(Vulkan_LIB_PATH ${Vulkan_LIBRARIES} DIRECTORY)
     target_link_libraries(MaterialXTest 

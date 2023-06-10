@@ -102,6 +102,11 @@ bool SimpleWindow::initialize(const char* title,
 
     _windowWrapper = WindowWrapper::create(hWnd);
 
+    // TODO: REMOVE ME
+    ShowWindow(hWnd, SW_SHOW);
+    SetForegroundWindow(hWnd);
+    SetFocus(hWnd);
+
     return true;
 }
 

@@ -9,6 +9,15 @@
 #include <MaterialXGenShader/HwShaderGenerator.h>
 #include <iostream>
 
+#define _USE_VULKAN_C
+#ifdef _USE_VULKAN_C
+    #include <MaterialXRenderVk/Vulkan/vkDevice.h>
+#endif
+
+// TODO: Abstract Vulkan header
+//#include <vulkan/vulkan.hpp>
+//#include <vulkan/vulkan_win32.h>
+
 //TODO
 /*
 #include <MaterialXRenderVk/Vulkan/vkSwapchain.h>
@@ -29,6 +38,14 @@ const float FOV_PERSP = 45.0f; // degrees
 const float NEAR_PLANE_PERSP = 0.05f;
 const float FAR_PLANE_PERSP = 100.0f;
 
+// GLOBALS for now
+
+#ifdef _USE_VULKAN_C
+    VulkanDevicePtr _device;
+#endif
+    vk::Instance _instance;
+    vk::SurfaceKHR _surface;
+
 //
 // VkRenderer methods
 //
@@ -37,14 +54,6 @@ VkRendererPtr VkRenderer::create(unsigned int width, unsigned int height, Image:
 {
     return VkRendererPtr(new VkRenderer(width, height, baseType));
 }
-
-//TODO: Vulkan
-/*
-id<MTLDevice> MslRenderer::getMetalDevice() const
-{
-    return _device;
-}
-*/
 
 VkRenderer::VkRenderer(unsigned int width, unsigned int height, Image::BaseType baseType) :
     ShaderRenderer(width, height, baseType),
@@ -75,14 +84,31 @@ void VkRenderer::initialize(RenderContextHandle)
             throw ExceptionRenderError("Failed to initialize renderer window");
         }
 
-        //TODO:: VULKAN
-        //_device = MTLCreateSystemDefaultDevice();
-        //_cmdQueue = [_device newCommandQueue];
+        
+        
+        // Create and initialize Device. 
+        #ifdef _USE_VULKAN_C
+        _device = VulkanDevice::create();
+            // Create Surface
+            HINSTANCE hInstance = GetModuleHandle(NULL);
+            auto const createInfo = vk::Win32SurfaceCreateInfoKHR()
+                                        .setHinstance(hInstance)
+                                        .setHwnd(_window->getWindowWrapper()->externalHandle());
+            _surface = vk::SurfaceKHR();
+            _instance = _device->GetInstanceCPP();
+            
+            vk::Result sresult = _instance.createWin32SurfaceKHR(&createInfo, nullptr, &_surface);
+            assert(sresult == vk::Result::eSuccess);
+
+        _device->InitializeDevice(_surface);
+        _device->CreateCommandPoolCPP();
+        #endif
+        
         createFrameBuffer(true);
         
         _initialized = true;
     }
-}
+ }
 
 void VkRenderer::createProgram(ShaderPtr shader)
 {
