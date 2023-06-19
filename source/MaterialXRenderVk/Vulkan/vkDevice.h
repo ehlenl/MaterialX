@@ -38,12 +38,19 @@ class VulkanDevice : public std::enable_shared_from_this<VulkanDevice>
     
     virtual ~VulkanDevice();
 
+    //REQUIRED Methods:
     void InitializeDevice(vk::SurfaceKHR windowSurface);
-
+    vk::Instance GetInstanceCPP() { return _instance; }
+    vk::Device GetDeviceCPP() { return _device; }
+    vk::PhysicalDevice GetPhysicalDeviceCPP() { return _physicalDevice; }
+    void CreateCommandPoolCPP();
+    uint32_t FindMemoryTypeCPP(uint32_t memoryTypeBits, vk::MemoryPropertyFlags properties);
+    
+    // REMOVE
     VkDevice GetDevice(){ return device; }
     VkPhysicalDevice GetPhysicalDevice(){ return physicalDevice; }
     VkInstance GetInstance(){ return instance; }
-    vk::Instance GetInstanceCPP() { return _instance; }
+
     VkSurfaceKHR GetSurface(){ return surface; }
     VkQueue GetDefaultQueue(){ return queue; }
     VkCommandPool GetCommandPool(){ return commandPool; }
@@ -83,21 +90,22 @@ class VulkanDevice : public std::enable_shared_from_this<VulkanDevice>
     std::shared_ptr<VulkanTexture> RetrieveTextureFromCache(std::string textureName) { auto it = textureCache.find(textureName); return (it == textureCache.end() ? nullptr : it->second); }
     
     void CreateCommandPool();
-    void CreateCommandPoolCPP();
 
     protected:
     VulkanDevice(std::vector<const char*> requestedExtensions);
-    void AppendValidationLayerExtension();
-    void CreateInstance();
-    void FindPhysicalDevice();
-    void CreateDevice();
-
+    
+    // REQUIRED METHODS
     void AppendValidationLayerExtensionCPP();
     void CreateInstanceCPP();
     void FindPhysicalDeviceCPP();
     void CreateDeviceCPP();
     
-    
+    // REMOVE
+    void AppendValidationLayerExtension();
+    void CreateInstance();
+    void FindPhysicalDevice();
+    void CreateDevice();
+
     
     uint32_t GetQueueFamilyIndex(VkQueueFlagBits flags);
     
@@ -111,6 +119,7 @@ class VulkanDevice : public std::enable_shared_from_this<VulkanDevice>
     vk::Device _device;
     vk::Queue _queue;
     vk::CommandPool _commandPool;
+    vk::CommandBuffer _commandBuffer;
     std::pair<uint32_t, uint32_t> _graphicsandPresentQueueIndex;  
 
     VkQueue queue;

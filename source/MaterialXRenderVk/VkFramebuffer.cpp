@@ -11,15 +11,15 @@ MATERIALX_NAMESPACE_BEGIN
 // VkFrameBuffer methods
 //
 
-VkFrameBufferPtr VkFrameBuffer::create(
+VkFrameBufferPtr VkFrameBuffer::create(VulkanDevicePtr vulkanDevice,
     unsigned int width, unsigned int height,
     unsigned channelCount,
     Image::BaseType baseType)
 {
-    return VkFrameBufferPtr(new VkFrameBuffer(width, height, channelCount, baseType));
+    return VkFrameBufferPtr(new VkFrameBuffer(vulkanDevice, width, height, channelCount, baseType));
 }
 
-VkFrameBuffer::VkFrameBuffer(
+VkFrameBuffer::VkFrameBuffer(VulkanDevicePtr vulkanDevice,
     unsigned int width, unsigned int height,
     unsigned int channelCount,
     Image::BaseType baseType) :
@@ -28,14 +28,14 @@ VkFrameBuffer::VkFrameBuffer(
     _channelCount(channelCount),
     _baseType(baseType),
     //_encodeSrgb(encodeSrgb),
-    //_device(device),
+    _vulkanDevice(vulkanDevice),
     //_colorTexture(colorTexture),
     _depthTexture(0)
 {
     StringVec errors;
     const string errorType("Vulkan target creation failure.");
 
-    // resize(width, height, true, pixelFormat, colorTexture);
+    resize(width, height);
 }
 
 VkFrameBuffer::~VkFrameBuffer()
@@ -44,12 +44,93 @@ VkFrameBuffer::~VkFrameBuffer()
     //[_depthTexture release];
 }
 
-void VkFrameBuffer::resize(unsigned int width, unsigned int height, bool forceRecreate)
+void VkFrameBuffer::resize(unsigned int width, unsigned int height)
 {
     if (width * height <= 0)
     {
         return;
     }
+
+    //NOTES:
+    //  VkFramebuffer + VkRenderPass defines the render target.
+    //  Renderpass defines which attachment will be written with colors.
+    //  VkFramebuffer defines which VkImageView is to be which attachment.
+    //  VkImageView defines which part of VkImage to use.
+    //  VkImage defines which VkDeviceMemory is used and a format of the texel.
+    
+    //TODO: 
+    
+
+    vk::Device deviceHandle = _vulkanDevice->GetDeviceCPP(); 
+    // Create Image
+    const vk::Format colorFormat = vk::Format::eR8G8B8A8Unorm;
+    _colorBufferAttachment._image = deviceHandle.createImage(vk::ImageCreateInfo(vk::ImageCreateFlags(),
+                                                                                 vk::ImageType::e2D,
+                                                                                 colorFormat,
+                                                                                 vk::Extent3D(width, height, 1),
+                                                                                 1,
+                                                                                 1,
+                                                                                 vk::SampleCountFlagBits::e1,
+                                                                                 vk::ImageTiling::eOptimal,
+                                                                                 vk::ImageUsageFlagBits::eColorAttachment |
+                                                                                 vk::ImageUsageFlagBits::eTransferSrc));
+    // Allocate 
+    vk::MemoryRequirements colormemoryRequirements = deviceHandle.getImageMemoryRequirements(_colorBufferAttachment._image);
+    uint32_t memoryTypeIndex = _vulkanDevice->FindMemoryTypeCPP(colormemoryRequirements.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal);
+    _colorBufferAttachment._deviceMemory = deviceHandle.allocateMemory(vk::MemoryAllocateInfo(colormemoryRequirements.size, memoryTypeIndex));
+    // Bind memory to image
+    deviceHandle.bindImageMemory(_colorBufferAttachment._image, _colorBufferAttachment._deviceMemory, 0);
+    // Create View
+    _colorBufferAttachment._imageView = deviceHandle.createImageView(vk::ImageViewCreateInfo(
+                                                                                vk::ImageViewCreateFlags(), 
+                                                                                _colorBufferAttachment._image, 
+                                                                                vk::ImageViewType::e2D, 
+                                                                                colorFormat,
+                                                                                {},
+                                                                                { vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 }));
+
+
+    // For depth format, get tiling property
+    //TODO: Try other ones vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint or vk::Format::eD16Unorm
+    const vk::Format depthFormat = vk::Format::eD16Unorm;
+    vk::FormatProperties formatProperties = _vulkanDevice->GetPhysicalDeviceCPP().getFormatProperties(depthFormat);
+    vk::ImageTiling tiling;
+    if (formatProperties.linearTilingFeatures & vk::FormatFeatureFlagBits::eDepthStencilAttachment)
+    {
+        tiling = vk::ImageTiling::eLinear;
+    }
+    else if (formatProperties.optimalTilingFeatures & vk::FormatFeatureFlagBits::eDepthStencilAttachment)
+    {
+        tiling = vk::ImageTiling::eOptimal;
+    }
+    else
+    {
+        throw std::runtime_error("DepthStencilAttachment is not supported for eD32Sfloat depth format.");
+    }
+
+    //////////////////////////////////////////////////////////////////////////
+    // Create Image
+    vk::ImageCreateInfo depthimageCreateInfo(vk::ImageCreateFlags(),
+                                        vk::ImageType::e2D,
+                                        depthFormat,
+                                        vk::Extent3D(width, height, 1),
+                                        1,
+                                        1,
+                                        vk::SampleCountFlagBits::e1,
+                                        tiling,
+                                        vk::ImageUsageFlagBits::eDepthStencilAttachment);
+    _depthBufferAttachment._image = deviceHandle.createImage(depthimageCreateInfo);
+    
+    // Allocate
+    vk::MemoryRequirements depthMemoryRequirements = deviceHandle.getImageMemoryRequirements(_depthBufferAttachment._image);
+    uint32_t depthmemoryTypeIndex = _vulkanDevice->FindMemoryTypeCPP(depthMemoryRequirements.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal);
+    _depthBufferAttachment._deviceMemory = deviceHandle.allocateMemory(vk::MemoryAllocateInfo(depthMemoryRequirements.size, depthmemoryTypeIndex));
+    // Bind image to memory 
+    deviceHandle.bindImageMemory(_depthBufferAttachment._image, _depthBufferAttachment._deviceMemory, 0);
+    // Create View
+    _depthBufferAttachment._imageView = deviceHandle.createImageView(vk::ImageViewCreateInfo(
+        vk::ImageViewCreateFlags(), _depthBufferAttachment._image, vk::ImageViewType::e2D, depthFormat, {}, { vk::ImageAspectFlagBits::eDepth, 0, 1, 0, 1 }));
+    
 #if 0    
     if (width != _width || _height != height || forceRecreate)
     {

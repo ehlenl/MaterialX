@@ -176,35 +176,35 @@ void VulkanDevice::CreateInstance()
     applicationInfo.engineVersion = 0;
     applicationInfo.apiVersion = VK_API_VERSION_1_2;
     
-    VkInstanceCreateInfo createInfo = {};
-    createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    createInfo.flags = 0;
-    createInfo.pApplicationInfo = &applicationInfo;
+    VkInstanceCreateInfo instanceCreateInfo = {};
+    instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    instanceCreateInfo.flags = 0;
+    instanceCreateInfo.pApplicationInfo = &applicationInfo;
     
     // provide requested layers and extensions
     if( enableValidationLayers )
         AppendValidationLayerExtension();
 
-    createInfo.enabledLayerCount = static_cast<uint32_t>(layers.size());
-    createInfo.ppEnabledLayerNames = layers.data();
-    createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
-    createInfo.ppEnabledExtensionNames = extensions.data();
+    instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(layers.size());
+    instanceCreateInfo.ppEnabledLayerNames = layers.data();
+    instanceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+    instanceCreateInfo.ppEnabledExtensionNames = extensions.data();
 
-    VK_ERROR_CHECK( vkCreateInstance(&createInfo, NULL, &instance) );
+    VK_ERROR_CHECK(vkCreateInstance(&instanceCreateInfo, NULL, &instance));
 
     if (enableValidationLayers)
     {
-        VkDebugReportCallbackCreateInfoEXT createInfo = {};
-        createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
-        createInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
-        createInfo.pfnCallback = &debugReportCallbackFn;
+        VkDebugReportCallbackCreateInfoEXT debugReportCreateInfo = {};
+        debugReportCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
+        debugReportCreateInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
+        debugReportCreateInfo.pfnCallback = &debugReportCallbackFn;
 
         auto vkCreateDebugReportCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugReportCallbackEXT");
         if (vkCreateDebugReportCallbackEXT == nullptr) {
             throw std::runtime_error("Could not load vkCreateDebugReportCallbackEXT");
         }
 
-        VK_ERROR_CHECK(vkCreateDebugReportCallbackEXT(instance, &createInfo, NULL, &debugReportCallback));
+        VK_ERROR_CHECK(vkCreateDebugReportCallbackEXT(instance, &debugReportCreateInfo, NULL, &debugReportCallback));
     }
 }
 
@@ -234,20 +234,20 @@ void VulkanDevice::FindPhysicalDevice()
 
     std::vector<VkPhysicalDevice> supportedDevices;
 
-    for (VkPhysicalDevice device : devices)
+    for (VkPhysicalDevice phydevice : devices)
     {
         SwapChainSupportDetails swapChainSupport;
-        if( this->QuerySwapChainSupport(swapChainSupport, device) )
+        if (this->QuerySwapChainSupport(swapChainSupport, phydevice))
         {
             if( !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty() )
             {
-                physicalDevice = device;
-                supportedDevices.push_back(device);
+                physicalDevice = phydevice;
+                supportedDevices.push_back(phydevice);
             }
         }
         else
         {
-            physicalDevice = device;
+            physicalDevice = phydevice;
             break;
         }
     }
@@ -341,6 +341,9 @@ void VulkanDevice::CreateCommandPoolCPP()
 {
     vk::CommandPoolCreateInfo commandPoolCreateInfo(vk::CommandPoolCreateFlagBits::eResetCommandBuffer, _graphicsandPresentQueueIndex.first);
     _commandPool = _device.createCommandPool(commandPoolCreateInfo);
+
+    _commandBuffer = _device.allocateCommandBuffers(vk::CommandBufferAllocateInfo(_commandPool, vk::CommandBufferLevel::ePrimary, 1)).front();
+    
 }
 
 void VulkanDevice::CreateDevice()
@@ -505,6 +508,7 @@ bool VulkanDevice::QuerySwapChainSupport(SwapChainSupportDetails &details, VkPhy
     return true;
 }
 
+
 VkFormat VulkanDevice::FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
 {
     for (VkFormat format : candidates)
@@ -549,6 +553,20 @@ VkFormat VulkanDevice::FindSupportedDepthFormat()
         VK_IMAGE_TILING_OPTIMAL,
         VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
     );
+}
+
+uint32_t VulkanDevice::FindMemoryTypeCPP(uint32_t memoryTypeBits, vk::MemoryPropertyFlags properties)
+{
+    vk::PhysicalDeviceMemoryProperties memoryProperties = _physicalDevice.getMemoryProperties();
+
+    for (uint32_t i = 0; i < memoryProperties.memoryTypeCount; ++i)
+    {
+        if ((memoryTypeBits & (1 << i)) &&
+            ((memoryProperties.memoryTypes[i].propertyFlags & properties) == properties))
+            return i;
+    }
+
+    throw std::runtime_error("Appropriate memory type not found.");
 }
 
 uint32_t VulkanDevice::FindMemoryType(uint32_t memoryTypeBits, VkMemoryPropertyFlags properties)

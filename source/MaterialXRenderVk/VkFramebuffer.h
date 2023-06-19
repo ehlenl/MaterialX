@@ -13,6 +13,9 @@
 
 #include <MaterialXRender/ImageHandler.h>
 
+#ifdef _USE_VULKAN_CPP
+#include <MaterialXRenderVk/Vulkan/vkDevice.h>
+#endif
 
 MATERIALX_NAMESPACE_BEGIN
 
@@ -25,7 +28,8 @@ class MX_RENDERVK_API VkFrameBuffer
 {
   public:
     /// Create a new framebuffer
-    static VkFrameBufferPtr create(unsigned int width, 
+    static VkFrameBufferPtr create(VulkanDevicePtr vulkanDevice,
+                                   unsigned int width, 
                                    unsigned int height, 
                                    unsigned int channelCount, 
                                    Image::BaseType baseType);
@@ -34,7 +38,7 @@ class MX_RENDERVK_API VkFrameBuffer
     virtual ~VkFrameBuffer();
 
     /// Resize the framebuffer
-    void resize(unsigned int width, unsigned int height, bool forceRecreate = false);
+    void resize(unsigned int width, unsigned int height);
     
     /// Return the framebuffer width
     unsigned int getWidth() const { return _width; }
@@ -85,7 +89,7 @@ class MX_RENDERVK_API VkFrameBuffer
     ImagePtr getColorImage(ImagePtr image = nullptr);
 
   protected:
-    VkFrameBuffer(unsigned int width, unsigned int height, 
+    VkFrameBuffer(VulkanDevicePtr vulkanDevice, unsigned int width, unsigned int height, 
         unsigned int channelCount, Image::BaseType baseType);
 
   protected:
@@ -98,8 +102,17 @@ class MX_RENDERVK_API VkFrameBuffer
     unsigned int _framebuffer;
     unsigned int _colorTexture;
     unsigned int _depthTexture;
+    VulkanDevicePtr _vulkanDevice = nullptr;
 
-    // id<MTLDevice>  _device = nil;
+    // FrameBufferAttachment needs VkImage, VkDeviceMemory, VkImageView
+    struct FrameBufferAttachment
+    {
+        vk::Image _image = nullptr;
+        vk::DeviceMemory _deviceMemory = nullptr;
+        vk::ImageView _imageView = nullptr;
+    };
+
+    FrameBufferAttachment _colorBufferAttachment, _depthBufferAttachment;
     // id<MTLTexture> _colorTexture = nil;
     // id<MTLTexture> _depthTexture = nil;
 

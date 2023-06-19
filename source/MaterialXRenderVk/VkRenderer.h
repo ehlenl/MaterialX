@@ -132,7 +132,6 @@ class MX_RENDERVK_API VkRenderer : public ShaderRenderer
     id<MTLCommandQueue>  _cmdQueue = nil;
     id<MTLCommandBuffer> _cmdBuffer = nil;
     */ 
-    // MetalFramebufferPtr  _framebuffer;
 
     bool _initialized;
 

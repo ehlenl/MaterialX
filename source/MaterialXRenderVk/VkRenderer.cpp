@@ -9,9 +9,13 @@
 #include <MaterialXGenShader/HwShaderGenerator.h>
 #include <iostream>
 
-#define _USE_VULKAN_C
-#ifdef _USE_VULKAN_C
-    #include <MaterialXRenderVk/Vulkan/vkDevice.h>
+#ifdef _USE_VULKAN_CPP
+// Vulkan layer
+#include <MaterialXRenderVk/Vulkan/vkDevice.h>
+
+// Render module
+#include <MaterialXRenderVk/VkFramebuffer.h>
+
 #endif
 
 // TODO: Abstract Vulkan header
@@ -40,8 +44,9 @@ const float FAR_PLANE_PERSP = 100.0f;
 
 // GLOBALS for now
 
-#ifdef _USE_VULKAN_C
-    VulkanDevicePtr _device;
+#ifdef _USE_VULKAN_CPP
+    VulkanDevicePtr _vkDevice;
+    VkFrameBufferPtr _framebuffer;
 #endif
     vk::Instance _instance;
     vk::SurfaceKHR _surface;
@@ -87,21 +92,21 @@ void VkRenderer::initialize(RenderContextHandle)
         
         
         // Create and initialize Device. 
-        #ifdef _USE_VULKAN_C
-        _device = VulkanDevice::create();
+        #ifdef _USE_VULKAN_CPP
+        _vkDevice = VulkanDevice::create();
             // Create Surface
             HINSTANCE hInstance = GetModuleHandle(NULL);
             auto const createInfo = vk::Win32SurfaceCreateInfoKHR()
                                         .setHinstance(hInstance)
                                         .setHwnd(_window->getWindowWrapper()->externalHandle());
             _surface = vk::SurfaceKHR();
-            _instance = _device->GetInstanceCPP();
+            _instance = _vkDevice->GetInstanceCPP();
             
             vk::Result sresult = _instance.createWin32SurfaceKHR(&createInfo, nullptr, &_surface);
             assert(sresult == vk::Result::eSuccess);
 
-        _device->InitializeDevice(_surface);
-        _device->CreateCommandPoolCPP();
+        _vkDevice->InitializeDevice(_surface);
+        _vkDevice->CreateCommandPoolCPP();
         #endif
         
         createFrameBuffer(true);
@@ -182,14 +187,10 @@ void VkRenderer::validateInputs()
    #endif
 }
 
-void VkRenderer::createFrameBuffer(bool encodeSrgb)
+void VkRenderer::createFrameBuffer(bool /*encodeSrgb*/)
 {
-   #if 0
-    _framebuffer = MetalFramebuffer::create(_device,
-                                            _width, _height, 4,
-                                            _baseType,
-                                            nil, encodeSrgb);
-   #endif
+    _framebuffer = VkFrameBuffer::create(_vkDevice, _width, _height, 4,
+                                         _baseType);
 }
 
 void VkRenderer::setSize(unsigned int width, unsigned int height)
