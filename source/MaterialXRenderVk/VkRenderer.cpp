@@ -92,34 +92,43 @@ void VkRenderer::initialize(RenderContextHandle)
         
         
         // Create and initialize Device. 
+        // Create a presentable swapchain for testing 
         #ifdef _USE_VULKAN_CPP
         _vkDevice = VulkanDevice::create();
-            // Create Surface
-            HINSTANCE hInstance = GetModuleHandle(NULL);
-            auto const createInfo = vk::Win32SurfaceCreateInfoKHR()
-                                        .setHinstance(hInstance)
-                                        .setHwnd(_window->getWindowWrapper()->externalHandle());
-            _surface = vk::SurfaceKHR();
-            _instance = _vkDevice->GetInstanceCPP();
-            
-            vk::Result sresult = _instance.createWin32SurfaceKHR(&createInfo, nullptr, &_surface);
-            assert(sresult == vk::Result::eSuccess);
 
-        _vkDevice->InitializeDevice(_surface);
-        _vkDevice->CreateCommandPoolCPP();
+        // Create Surface
+        HINSTANCE hInstance = GetModuleHandle(NULL);
+        auto const createInfo = vk::Win32SurfaceCreateInfoKHR()
+                                    .setHinstance(hInstance)
+                                    .setHwnd(_window->getWindowWrapper()->externalHandle());
+        _surface = vk::SurfaceKHR();
+        _instance = _vkDevice->GetInstance();
+
+        vk::Result sresult = _instance.createWin32SurfaceKHR(&createInfo, nullptr, &_surface);
+        assert(sresult == vk::Result::eSuccess);
+
+        _vkDevice->InitializeDevice(_surface, _width, _height);
+        _vkDevice->CreateCommandPool();
         #endif
         
         createFrameBuffer(true);
         
+        // Create a default program
+        // createProgram(nullptr);
+
         _initialized = true;
+
+        render();
     }
  }
 
 void VkRenderer::createProgram(ShaderPtr shader)
 {
+
     //_program = VkProgram::create();
     //_program->setStages(shader);
-    //_program->build(_device, _framebuffer);
+    // _program->build(_vkDevice, _framebuffer);
+
 }
 
 void VkRenderer::createProgram(const StageMap& stages)
@@ -195,7 +204,7 @@ void VkRenderer::createFrameBuffer(bool /*encodeSrgb*/)
 
 void VkRenderer::setSize(unsigned int width, unsigned int height)
 {
-   #if 0
+
     if (_framebuffer)
     {
         _framebuffer->resize(width, height);
@@ -206,7 +215,6 @@ void VkRenderer::setSize(unsigned int width, unsigned int height)
         _height = height;
         createFrameBuffer(true);
     }
-  #endif  
 }
 
 void VkRenderer::updateViewInformation()
@@ -304,6 +312,14 @@ void VkRenderer::render()
     if(captureFrame)
         stopProgrammaticCapture();
 #endif
+
+
+
+    /// Simple clear screen
+    _vkDevice->clearScreen();
+
+
+
 }
 
 ImagePtr VkRenderer::captureImage(ImagePtr /*image*/)

@@ -112,9 +112,8 @@ class MX_RENDERVK_API VkFrameBuffer
         vk::ImageView _imageView = nullptr;
     };
 
-    FrameBufferAttachment _colorBufferAttachment, _depthBufferAttachment;
-    // id<MTLTexture> _colorTexture = nil;
-    // id<MTLTexture> _depthTexture = nil;
+    FrameBufferAttachment _colorBufferAttachment;
+    FrameBufferAttachment _depthBufferAttachment;
 
     bool _colorTextureOwned = false;
 };

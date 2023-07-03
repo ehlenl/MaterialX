@@ -10,10 +10,12 @@
 /// Glsl Vulkan code renderer
 
 #include <MaterialXRenderVk/Export.h>
+#include <MaterialXRenderVk/VkProgram.h>
 // TODO:
 //#include <MaterialXRenderVk/Vulkan/vkContext.h>
 
 #include <MaterialXRender/ShaderRenderer.h>
+
 MATERIALX_NAMESPACE_BEGIN
 
 using SimpleWindowPtr = std::shared_ptr<class SimpleWindow>;
@@ -126,7 +128,7 @@ class MX_RENDERVK_API VkRenderer : public ShaderRenderer
     void createFrameBuffer(bool encodeSrgb);
 
   private:
-    //VkProgramPtr _program;
+    VkProgramPtr _program;
     /*
     id<MTLDevice>        _device = nil;
     id<MTLCommandQueue>  _cmdQueue = nil;

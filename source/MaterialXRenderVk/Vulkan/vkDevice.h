@@ -39,21 +39,37 @@ class VulkanDevice : public std::enable_shared_from_this<VulkanDevice>
     virtual ~VulkanDevice();
 
     //REQUIRED Methods:
-    void InitializeDevice(vk::SurfaceKHR windowSurface);
-    vk::Instance GetInstanceCPP() { return _instance; }
-    vk::Device GetDeviceCPP() { return _device; }
-    vk::PhysicalDevice GetPhysicalDeviceCPP() { return _physicalDevice; }
-    void CreateCommandPoolCPP();
-    uint32_t FindMemoryTypeCPP(uint32_t memoryTypeBits, vk::MemoryPropertyFlags properties);
-    
-    // REMOVE
-    VkDevice GetDevice(){ return device; }
-    VkPhysicalDevice GetPhysicalDevice(){ return physicalDevice; }
-    VkInstance GetInstance(){ return instance; }
+    /// InitializeDevice creates a swapchain for now, todo move it out 
+    void InitializeDevice(vk::SurfaceKHR windowSurface, uint32_t width, uint32_t height);
+    vk::Instance GetInstance() { return _instance; }
+    vk::Device GetDevice() { return _device; }
+    vk::PhysicalDevice GetPhysicalDevice() { return _physicalDevice; }
+    void CreateCommandPool();
+    uint32_t FindMemoryType(uint32_t memoryTypeBits, vk::MemoryPropertyFlags properties);
+    vk::SurfaceKHR GetSurface() { return _surface; }
 
-    VkSurfaceKHR GetSurface(){ return surface; }
-    VkQueue GetDefaultQueue(){ return queue; }
-    VkCommandPool GetCommandPool(){ return commandPool; }
+    struct SwapChainData
+    {
+        SwapChainData(vk::PhysicalDevice const& physicalDevice,
+                      vk::Device const& device,
+                      vk::SurfaceKHR const& surface,
+                      vk::Extent2D const& extent,
+                      vk::ImageUsageFlags usage,
+                      vk::SwapchainKHR const& oldSwapChain,
+                      uint32_t graphicsFamilyIndex,
+                      uint32_t presentFamilyIndex);
+        SwapChainData(){};
+
+        void clear(vk::Device const& device);
+        vk::Format _colorFormat;
+        vk::SwapchainKHR _swapChain;
+        std::vector<vk::Image> _images;
+        std::vector<vk::ImageView> _imageViews;
+    };
+
+
+    VkSurfaceKHR GetSurface_C(){ return surface_C; }
+
     VkDescriptorPool GetDescriptorPool(VkCommandBuffer commandBuffer);
     void AllocateNewDescriptorPool(VkCommandBuffer commandBuffer);
     void FreeDescriptorPools(VkCommandBuffer commandBuffer);
@@ -66,15 +82,9 @@ class VulkanDevice : public std::enable_shared_from_this<VulkanDevice>
     std::shared_ptr<VulkanRenderTarget> CreateRenderTarget(std::vector<std::pair<VkFormat, VkImageUsageFlags>> colorFormats, bool depthTexture, glm::uvec3 targetExtents, bool multisampled=false);
     std::shared_ptr<VulkanRenderTarget> CreateRenderTarget(std::vector<std::pair<VkFormat, VkImageUsageFlags>> colorFormats, bool depthTexture, glm::uvec3 targetExtents, std::vector<VkSurfaceFormatKHR> requestedSurfaceFormats, bool multisampled=false);
 
-    VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
-    VkFormat FindSupportedDepthFormat();
-    uint32_t FindMemoryType(uint32_t memoryTypeBits, VkMemoryPropertyFlags properties);
-
     VkFormatProperties FindFormatProperties(VkFormat format);
 
     VkSampleCountFlagBits GetMaxMultisampleCount();
-
-    void AllocateMemory(const VkMemoryRequirements &memRequirements, const VkMemoryPropertyFlags &memoryProperties, VkDeviceMemory *memory);
 
     struct SwapChainSupportDetails
     {
@@ -89,30 +99,29 @@ class VulkanDevice : public std::enable_shared_from_this<VulkanDevice>
     void AddTextureToCache(std::string textureName, std::shared_ptr<VulkanTexture> texture) { textureCache[textureName] = texture; }
     std::shared_ptr<VulkanTexture> RetrieveTextureFromCache(std::string textureName) { auto it = textureCache.find(textureName); return (it == textureCache.end() ? nullptr : it->second); }
     
-    void CreateCommandPool();
+    
+    // HELPER TEST
+    vk::Semaphore _imageAvailableSemaphore;
+    vk::Semaphore _renderingFinishedSemaphore;
+    void clearScreen();
 
     protected:
     VulkanDevice(std::vector<const char*> requestedExtensions);
     
     // REQUIRED METHODS
-    void AppendValidationLayerExtensionCPP();
-    void CreateInstanceCPP();
-    void FindPhysicalDeviceCPP();
-    void CreateDeviceCPP();
-    
-    // REMOVE
     void AppendValidationLayerExtension();
     void CreateInstance();
     void FindPhysicalDevice();
     void CreateDevice();
-
     
     uint32_t GetQueueFamilyIndex(VkQueueFlagBits flags);
     
 
-    VkInstance instance;
-    VkPhysicalDevice physicalDevice;
-    VkDevice device;
+    VkInstance instance_C;
+    VkPhysicalDevice physicalDevice_C;
+    VkDevice device_C;
+    VkQueue queue_C;
+    VkCommandPool commandPool_C;
 
     vk::Instance _instance;
     vk::PhysicalDevice _physicalDevice;
@@ -120,13 +129,17 @@ class VulkanDevice : public std::enable_shared_from_this<VulkanDevice>
     vk::Queue _queue;
     vk::CommandPool _commandPool;
     vk::CommandBuffer _commandBuffer;
-    std::pair<uint32_t, uint32_t> _graphicsandPresentQueueIndex;  
+    std::pair<uint32_t, uint32_t> _graphicsandPresentQueueIndex;
 
-    VkQueue queue;
-    VkCommandPool commandPool;
+    
+    // set by renderer on InitializeDevice
+    vk::SurfaceKHR _surface;
+    SwapChainData _swapChainData;
+    vk::Extent2D _surfaceExtent;
+
     std::map<VkCommandBuffer, std::vector<VkDescriptorPool>> _commandBufferDescriptorPools;
-    VkSurfaceKHR surface;
-
+    VkSurfaceKHR surface_C;
+    
     VkExtent2D windowExtent;
 
     std::vector<const char *> layers;
