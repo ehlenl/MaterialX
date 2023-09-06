@@ -265,6 +265,79 @@ TEST_CASE("GenShader: Deterministic Generation", "[genshader]")
 #endif
 }
 
+void testShaderReflection(mx::DocumentPtr libraries, mx::GenContext& context)
+{
+    mx::FileSearchPath searchPath = mx::getDefaultDataSearchPath();
+    mx::FilePath testFile = searchPath.find("resources/Materials/TestSuite/usd_usage/surfacematerial.mtlx");
+
+    mx::StringVec sourceCode(2);
+
+    mx::DocumentPtr testDoc = mx::createDocument();
+    mx::readFromXmlFile(testDoc, testFile);
+    testDoc->importLibrary(libraries);
+
+    mx::string testSurfaceOne = "USD_PlasticOne";
+    mx::ElementPtr element = testDoc->getChild(testSurfaceOne);
+    CHECK(element);
+
+    mx::ShaderPtr shaderOne = context.getShaderGenerator().generate(testSurfaceOne, element, context);
+    sourceCode[0] = shaderOne->getSourceCode();
+
+    mx::string testSurfaceTwo = "USD_PlasticTwo";
+    element = testDoc->getChild(testSurfaceTwo);
+    CHECK(element);
+
+    mx::ShaderPtr shaderTwo = context.getShaderGenerator().generate(testSurfaceTwo, element, context);
+    sourceCode[1] = shaderTwo->getSourceCode();
+
+    // Shader code is different
+    CHECK(sourceCode[0] != sourceCode[1]);
+
+    // Check paths
+    mx::ShaderStage& stage1 = shaderOne->getStage(mx::Stage::PIXEL);
+    mx::VariableBlock& block1 = stage1.getUniformBlock(mx::HW::PUBLIC_UNIFORMS);
+
+    printf("Shader one input paths:\n");
+    for (mx::ShaderPort* variable : block1.getVariableOrder())
+    {
+        std::string parameterPath = variable->getPath();
+        if (!parameterPath.empty())
+            printf("%s\n", parameterPath.c_str());
+    }
+
+    mx::ShaderStage& stage2 = shaderTwo->getStage(mx::Stage::PIXEL);
+    mx::VariableBlock& block2 = stage2.getUniformBlock(mx::HW::PUBLIC_UNIFORMS);
+    printf("Shader two input paths:\n");
+    for (mx::ShaderPort* variable : block2.getVariableOrder())
+    {
+        std::string parameterPath = variable->getPath();
+        if (!parameterPath.empty())
+            printf("%s\n", parameterPath.c_str());
+    }
+}
+
+TEST_CASE("GenShader: Shader reflection", "[genshader]")
+{
+    mx::FileSearchPath searchPath = mx::getDefaultDataSearchPath();
+    mx::DocumentPtr libraries = mx::createDocument();
+    mx::loadLibraries({ "libraries" }, searchPath, libraries);
+
+#ifdef MATERIALX_BUILD_GEN_GLSL
+    {
+        mx::GenContext context(mx::GlslShaderGenerator::create());
+        context.registerSourceCodeSearchPath(searchPath);
+        testShaderReflection(libraries, context);
+    }
+#endif
+#ifdef MATERIALX_BUILD_GEN_MSL
+    {
+        mx::GenContext context(mx::MslShaderGenerator::create());
+        context.registerSourceCodeSearchPath(searchPath);
+        testShaderReflection(libraries, context);
+    }
+#endif
+}
+
 void checkPixelDependencies(mx::DocumentPtr libraries, mx::GenContext& context)
 {
     mx::FileSearchPath searchPath = mx::getDefaultDataSearchPath();
