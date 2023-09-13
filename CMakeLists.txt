@@ -55,6 +55,8 @@ option(MATERIALX_WARNINGS_AS_ERRORS "Interpret all compiler warnings as errors."
 option(MATERIALX_DYNAMIC_ANALYSIS "Build MaterialX libraries with dynamic analysis on supporting platforms." OFF)
 option(MATERIALX_OSL_LEGACY_CLOSURES "Build OSL shader generation supporting the legacy OSL closures." ON)
 
+option(MATERIALX_CONTRIB "Build MaterialX Contrib." ON) 
+
 option(MATERIALX_BUILD_IOS "Build MaterialX for iOS." OFF)
 if (MATERIALX_BUILD_IOS)
     set(CMAKE_SYSTEM_NAME iOS)
@@ -326,6 +328,10 @@ endif()
 
 if(MATERIALX_BUILD_JS)
     add_subdirectory(source/JsMaterialX)
+endif()
+
+if(MATERIALX_CONTRIB)
+    add_subdirectory(contrib)
 endif()
 
 if(${CMAKE_VERSION} VERSION_GREATER "3.6.2")
