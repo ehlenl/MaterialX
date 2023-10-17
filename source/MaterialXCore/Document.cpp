@@ -83,7 +83,7 @@ class Document::Cache
             implementationMap.clear();
 
             // Traverse the document to build a new cache.
-            for (ElementPtr elem : doc.lock()->traverseTree())
+            for (ElementPtr elem : doc->traverseTree())
             {
                 const string& nodeName = elem->getAttribute(PortElement::NODE_NAME_ATTRIBUTE);
                 const string& nodeGraphName = elem->getAttribute(PortElement::NODE_GRAPH_ATTRIBUTE);
@@ -151,7 +151,7 @@ class Document::Cache
     }
 
   public:
-    weak_ptr<Document> doc;
+    ConstDocumentPtr doc;
     std::mutex mutex;
     bool valid;
     std::unordered_multimap<string, PortElementPtr> portElementMap;
@@ -162,10 +162,11 @@ class Document::Cache
 //
 // Document methods
 //
+ConstDocumentPtr Document::_dataLibrary(nullptr);
 
 Document::Document(ElementPtr parent, const string& name) :
     GraphElement(parent, CATEGORY, name),
-    _cache(std::make_unique<Cache>())
+    _cache(std::unique_ptr<Cache>(new Cache))
 {
 }
 
@@ -228,7 +229,7 @@ NodeDefPtr Document::addNodeDefFromGraph(const NodeGraphPtr nodeGraph, const str
     return nodeDef;
 }
 
-void Document::importLibrary(const ConstDocumentPtr& library)
+void Document::importDocument(const ConstDocumentPtr& library)
 {
     if (!library)
     {

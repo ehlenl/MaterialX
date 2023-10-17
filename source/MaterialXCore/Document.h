@@ -53,11 +53,11 @@ class MX_CORE_API Document : public GraphElement
         return doc;
     }
 
-    /// Import the given document as a library within this document.
+    /// Import the given document within this document.
     /// The contents of the library document are copied into this one, and
     /// are assigned the source URI of the library.
     /// @param library The library document to be imported.
-    void importLibrary(const ConstDocumentPtr& library);
+    void importDocument(const ConstDocumentPtr& library);
 
     /// Get a list of source URI's referenced by the document
     StringSet getReferencedSourceUris() const;
@@ -668,6 +668,29 @@ class MX_CORE_API Document : public GraphElement
     void invalidateCache();
 
     /// @}
+    /// @name MaterialX Node library 
+    /// @{
+
+    /// Register the given document as the MaterialX Data libaray for all documents
+    /// The MaterialX data libary can be created using the MaterialX::loadLibraries utility 
+    /// @param MaterialX data library document to register. 
+    static void setDataLibrary(ConstDocumentPtr dataLibrary)
+    {
+        _dataLibrary = dataLibrary;
+    }
+
+    /// Gets the registered data library
+    static ConstDocumentPtr getDataLibrary()
+    {
+        return _dataLibrary;
+    }
+
+    /// Returns true if a data libary is registered.
+    static bool hasDataLibrary()
+    {
+        return (_dataLibrary!=nullptr);
+    }
+    /// @}
 
   public:
     static const string CATEGORY;
@@ -677,6 +700,9 @@ class MX_CORE_API Document : public GraphElement
   private:
     class Cache;
     std::unique_ptr<Cache> _cache;
+
+    // Shared node library used across documents.
+    static ConstDocumentPtr _dataLibrary;
 };
 
 /// Create a new Document.
