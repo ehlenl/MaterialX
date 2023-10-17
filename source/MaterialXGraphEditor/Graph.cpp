@@ -233,7 +233,7 @@ mx::DocumentPtr Graph::loadDocument(mx::FilePath filename)
         if (!filename.isEmpty())
         {
             mx::readFromXmlFile(doc, filename, _searchPath, &readOptions);
-            doc->importLibrary(_stdLib);
+            mx::Document::setDataLibrary(_stdLib);
             std::string message;
             if (!doc->validate(&message))
             {
@@ -3060,7 +3060,7 @@ void Graph::clearGraph()
     _newLinks.clear();
     _currPins.clear();
     _graphDoc = mx::createDocument();
-    _graphDoc->importLibrary(_stdLib);
+    _graphDoc->importDocument(_stdLib);
     _currGraphElem = _graphDoc;
 
     if (_currUiNode != nullptr)

@@ -20,24 +20,24 @@ TEST_CASE("Load content", "[xmlio]")
     searchPath.append(libraryPath);
     searchPath.append(examplesPath);
 
-    // Read the standard library.
-    std::vector<mx::DocumentPtr> libs;
+    // Create data library
+    mx::DocumentPtr dataLibraryDoc = mx::createDocument();
     for (const mx::FilePath& filename : libraryPath.getFilesInDirectory(mx::MTLX_EXTENSION))
     {
         mx::DocumentPtr lib = mx::createDocument();
         mx::readFromXmlFile(lib, filename, searchPath);
-        libs.push_back(lib);
+        dataLibraryDoc->importDocument(lib);
     }
+
+    // Register data library
+    mx::Document::setDataLibrary(dataLibraryDoc);
 
     // Read and validate each example document.
     for (const mx::FilePath& filename : examplesPath.getFilesInDirectory(mx::MTLX_EXTENSION))
     {
         mx::DocumentPtr doc = mx::createDocument();
         mx::readFromXmlFile(doc, filename, searchPath);
-        for (mx::DocumentPtr lib : libs)
-        {
-            doc->importLibrary(lib);
-        }
+
         std::string message;
         bool docValid = doc->validate(&message);
         if (!docValid)
@@ -65,6 +65,9 @@ TEST_CASE("Load content", "[xmlio]")
         // Verify that the serialized document is identical.
         mx::DocumentPtr writtenDoc = mx::createDocument();
         mx::readFromXmlString(writtenDoc, xmlString);
+        
+        // HACK: Need to make sure data library is available
+        doc->importDocument(dataLibraryDoc);
         REQUIRE(*writtenDoc == *doc);
         mx::readFromXmlBuffer(writtenDoc, xmlString.c_str());
         REQUIRE(*writtenDoc == *doc);
@@ -119,13 +122,24 @@ TEST_CASE("Load content", "[xmlio]")
     mx::readFromXmlFile(doc, filename, searchPath);
     REQUIRE(doc->validate());
 
+    // Read the standard library.
+    mx::FilePath libPath = searchPath.find("libraries/stdlib");
+    searchPath.append(libPath);
+    std::vector<mx::DocumentPtr> libs;
+    for (const mx::FilePath& file : libPath.getFilesInDirectory(mx::MTLX_EXTENSION))
+    {
+        mx::DocumentPtr lib = mx::createDocument();
+        mx::readFromXmlFile(lib, file, searchPath);
+        libs.push_back(lib);
+    }
+
     // Import libraries twice and verify that duplicate elements are
     // skipped.
     mx::DocumentPtr libDoc = doc->copy();
     for (mx::DocumentPtr lib : libs)
     {
-        libDoc->importLibrary(lib);
-        libDoc->importLibrary(lib);
+        libDoc->importDocument(lib);
+        libDoc->importDocument(lib);
     }
     REQUIRE(libDoc->validate());
 

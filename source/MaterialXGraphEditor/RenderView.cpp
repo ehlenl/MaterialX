@@ -669,7 +669,7 @@ void RenderView::applyDirectLights(mx::DocumentPtr doc)
 {
     if (_lightRigDoc)
     {
-        doc->importLibrary(_lightRigDoc);
+        doc->importDocument(_lightRigDoc);
         _xincludeFiles.insert(_lightRigFilename);
     }
 

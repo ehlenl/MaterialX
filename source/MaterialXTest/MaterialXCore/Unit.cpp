@@ -128,14 +128,16 @@ TEST_CASE("UnitDocument", "[unit]")
 
     static const std::string DISTANCE_DEFAULT("meter");
 
+    // Set the shared data library
+    mx::Document::setDataLibrary(stdlib);
     // Read and validate each example document.
     for (std::string filename : examplesPath.getFilesInDirectory(mx::MTLX_EXTENSION))
     {
         mx::DocumentPtr doc = mx::createDocument();
         mx::readFromXmlFile(doc, filename, searchPath);
-        doc->importLibrary(stdlib);
 
-        mx::UnitTypeDefPtr distanceTypeDef = doc->getUnitTypeDef("distance");
+        mx::UnitTypeDefPtr distanceTypeDef = mx::Document::hasDataLibrary() ? 
+            mx::Document::getDataLibrary()->getUnitTypeDef("distance") : doc->getUnitTypeDef("distance");
         REQUIRE(distanceTypeDef);
 
         mx::UnitConverterPtr uconverter = mx::LinearUnitConverter::create(distanceTypeDef);

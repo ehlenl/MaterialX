@@ -515,7 +515,7 @@ void Viewer::applyDirectLights(mx::DocumentPtr doc)
 {
     if (_lightRigDoc)
     {
-        doc->importLibrary(_lightRigDoc);
+        doc->importDocument(_lightRigDoc);
         _xincludeFiles.insert(_lightRigFilename);
     }
 
@@ -1233,7 +1233,7 @@ void Viewer::loadDocument(const mx::FilePath& filename, mx::DocumentPtr librarie
         _materialSearchPath = mx::getSourceSearchPath(doc);
 
         // Import libraries.
-        doc->importLibrary(libraries);
+        doc->importDocument(libraries);
 
         // Apply direct lights.
         applyDirectLights(doc);

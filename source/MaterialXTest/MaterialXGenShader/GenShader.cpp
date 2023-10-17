@@ -148,6 +148,9 @@ TEST_CASE("GenShader: Transparency Regression Check", "[genshader]")
     mx::DocumentPtr libraries = mx::createDocument();
     mx::loadLibraries({ "libraries" }, searchPath, libraries);
 
+    // Register data library
+    mx::Document::setDataLibrary(libraries);
+
     const mx::FilePath resourcePath = searchPath.find("resources");
     mx::StringVec failedTests;
     mx::FilePathVec testFiles = { 
@@ -162,8 +165,6 @@ TEST_CASE("GenShader: Transparency Regression Check", "[genshader]")
         bool testValue = transparencyTest[i];
 
         mx::DocumentPtr testDoc = mx::createDocument();
-        testDoc->importLibrary(libraries);
-
         try
         {
             mx::readFromXmlFile(testDoc, testFile, searchPath);
@@ -204,11 +205,13 @@ void testDeterministicGeneration(mx::DocumentPtr libraries, mx::GenContext& cont
     mx::vector<mx::DocumentPtr> testDocs(numRuns);
     mx::StringVec sourceCode(numRuns);
 
+    // Register data library
+    mx::Document::setDataLibrary(libraries);
+
     for (size_t i = 0; i < numRuns; ++i)
     {
         mx::DocumentPtr testDoc = mx::createDocument();
         mx::readFromXmlFile(testDoc, testFile);
-        testDoc->importLibrary(libraries);
 
         // Keep the document alive to make sure
         // new memory is allocated for each run
@@ -271,9 +274,11 @@ void checkPixelDependencies(mx::DocumentPtr libraries, mx::GenContext& context)
     mx::FilePath testFile = searchPath.find("resources/Materials/Examples/GltfPbr/gltf_pbr_boombox.mtlx");
     mx::string testElement = "Material_boombox";
 
+    // Register data library
+    mx::Document::setDataLibrary(libraries);
+
     mx::DocumentPtr testDoc = mx::createDocument();
     mx::readFromXmlFile(testDoc, testFile);
-    testDoc->importLibrary(libraries);
 
     mx::ElementPtr element = testDoc->getChild(testElement);
     CHECK(element);
@@ -384,10 +389,12 @@ TEST_CASE("GenShader: Track Application Variables", "[genshader]")
     mx::DocumentPtr libraries = mx::createDocument();
     mx::loadLibraries({ "libraries" }, searchPath, libraries);
 
+    // Register data library
+    mx::Document::setDataLibrary(libraries);
+
     mx::DocumentPtr testDoc = mx::createDocument();
     mx::readFromXmlString(testDoc, testDocumentString);
-    testDoc->importLibrary(libraries);
-
+    
     mx::ElementPtr element = testDoc->getChild(testElement);
     CHECK(element);
 

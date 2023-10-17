@@ -77,7 +77,7 @@ void loadLibrary(const FilePath& file, DocumentPtr doc, const FileSearchPath& se
 {
     DocumentPtr libDoc = createDocument();
     readFromXmlFile(libDoc, file, searchPath, readOptions);
-    doc->importLibrary(libDoc);
+    doc->importDocument(libDoc);
 }
 
 StringSet loadLibraries(const FilePathVec& libraryFolders,

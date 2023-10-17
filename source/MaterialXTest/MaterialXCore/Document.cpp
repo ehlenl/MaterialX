@@ -96,7 +96,7 @@ TEST_CASE("Document", "[document]")
     REQUIRE(customLibrary->validate());
 
     // Import the custom library.
-    doc->importLibrary(customLibrary);
+    doc->importDocument(customLibrary);
     mx::NodeGraphPtr importedNodeGraph = doc->getNodeGraph("custom:NG_custom");
     mx::NodeDefPtr importedNodeDef = doc->getNodeDef("custom:ND_simpleSrf");
     mx::ImplementationPtr importedImpl = doc->getImplementation("custom:IM_custom");

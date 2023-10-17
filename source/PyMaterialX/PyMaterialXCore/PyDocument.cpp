@@ -17,7 +17,7 @@ void bindPyDocument(py::module& mod)
     py::class_<mx::Document, mx::DocumentPtr, mx::GraphElement>(mod, "Document")
         .def("initialize", &mx::Document::initialize)
         .def("copy", &mx::Document::copy)
-        .def("importLibrary", &mx::Document::importLibrary)
+        .def("importDocument", &mx::Document::importDocument)
         .def("getReferencedSourceUris", &mx::Document::getReferencedSourceUris)
         .def("addNodeGraph", &mx::Document::addNodeGraph,
             py::arg("name") = mx::EMPTY_STRING)

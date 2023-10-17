@@ -206,7 +206,7 @@ void processXIncludes(DocumentPtr doc, xml_node& xmlNode, const FileSearchPath& 
                 readXIncludeFunction(library, filename, includeSearchPath, &xiReadOptions);
 
                 // Import the library document.
-                doc->importLibrary(library);
+                doc->importDocument(library);
             }
 
             // Remove include directive.
@@ -368,6 +368,10 @@ void writeToXmlStream(DocumentPtr doc, std::ostream& stream, const XmlWriteOptio
     xml_document xmlDoc;
     xml_node xmlRoot = xmlDoc.append_child("materialx");
     elementToXml(doc, xmlRoot, writeOptions);
+    if (MaterialX::Document::hasDataLibrary())
+    {
+        elementToXml(MaterialX::Document::getDataLibrary(), xmlRoot, writeOptions);
+    }
     xmlDoc.save(stream, "  ");
 }
 

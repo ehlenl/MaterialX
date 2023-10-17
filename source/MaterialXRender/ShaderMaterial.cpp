@@ -68,10 +68,10 @@ bool ShaderMaterial::generateEnvironmentShader(GenContext& context,
 {
     // Read in the environment nodegraph.
     DocumentPtr doc = createDocument();
-    doc->importLibrary(stdLib);
+    doc->importDocument(stdLib);
     DocumentPtr envDoc = createDocument();
     readFromXmlFile(envDoc, filename);
-    doc->importLibrary(envDoc);
+    doc->importDocument(envDoc);
 
     NodeGraphPtr envGraph = doc->getNodeGraph("environmentDraw");
     if (!envGraph)
