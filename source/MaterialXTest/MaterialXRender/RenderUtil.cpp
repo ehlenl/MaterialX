@@ -134,8 +134,8 @@ bool ShaderRenderTester::validate(const mx::FilePath optionsFilePath)
     // Load in the library dependencies once
     // This will be imported in each test document below
     ioTimer.startTimer();
-    mx::DocumentPtr dependLib;
-    loadDependentLibraries(options, searchPath, dependLib);
+    mx::DocumentPtr dataLibrary;
+    loadDependentLibraries(options, searchPath, dataLibrary);
     ioTimer.endTimer();
 
     // Create renderers and generators
@@ -144,18 +144,18 @@ bool ShaderRenderTester::validate(const mx::FilePath optionsFilePath)
     createRenderer(log);
 
     mx::ColorManagementSystemPtr colorManagementSystem = mx::DefaultColorManagementSystem::create(_shaderGenerator->getTarget());
-    colorManagementSystem->loadLibrary(dependLib);
+    colorManagementSystem->loadLibrary(dataLibrary);
     _shaderGenerator->setColorManagementSystem(colorManagementSystem);
 
     // Setup Unit system and working space
     mx::UnitSystemPtr unitSystem = mx::UnitSystem::create(_shaderGenerator->getTarget());
     _shaderGenerator->setUnitSystem(unitSystem);
     mx::UnitConverterRegistryPtr registry = mx::UnitConverterRegistry::create();
-    mx::UnitTypeDefPtr distanceTypeDef = dependLib->getUnitTypeDef("distance");
+    mx::UnitTypeDefPtr distanceTypeDef = dataLibrary->getUnitTypeDef("distance");
     registry->addUnitConverter(distanceTypeDef, mx::LinearUnitConverter::create(distanceTypeDef));
-    mx::UnitTypeDefPtr angleTypeDef = dependLib->getUnitTypeDef("angle");
+    mx::UnitTypeDefPtr angleTypeDef = dataLibrary->getUnitTypeDef("angle");
     registry->addUnitConverter(angleTypeDef, mx::LinearUnitConverter::create(angleTypeDef));
-    _shaderGenerator->getUnitSystem()->loadLibrary(dependLib);
+    _shaderGenerator->getUnitSystem()->loadLibrary(dataLibrary);
     _shaderGenerator->getUnitSystem()->setUnitConverterRegistry(registry);
 
     mx::GenContext context(_shaderGenerator);
@@ -169,7 +169,7 @@ bool ShaderRenderTester::validate(const mx::FilePath optionsFilePath)
     context.getOptions().emitColorTransforms = _emitColorTransforms;
 
     // Register shader metadata defined in the libraries.
-    _shaderGenerator->registerShaderMetadata(dependLib, context);
+    _shaderGenerator->registerShaderMetadata(dataLibrary, context);
 
     setupTime.endTimer();
 
@@ -177,7 +177,10 @@ bool ShaderRenderTester::validate(const mx::FilePath optionsFilePath)
     {
         context.getOptions().hwMaxActiveLightSources = 0;
     }
-    registerLights(dependLib, options, context);
+    registerLights(dataLibrary, options, context);
+
+    // Register the data library
+    mx::Document::setDataLibrary(dataLibrary);
 
     // Map to replace "/" in Element path and ":" in namespaced names with "_".
     mx::StringMap pathMap;
@@ -227,7 +230,6 @@ bool ShaderRenderTester::validate(const mx::FilePath optionsFilePath)
             // colliding with implementations in previous test cases.
             context.clearNodeImplementations();
 
-            doc->importLibrary(dependLib);
             ioTimer.endTimer();
 
             validateTimer.startTimer();
@@ -403,7 +405,7 @@ bool ShaderRenderTester::validate(const mx::FilePath optionsFilePath)
 
     // Dump out profiling information
     totalTime.endTimer();
-    printRunLog(profileTimes, options, profilingLog, dependLib);
+    printRunLog(profileTimes, options, profilingLog, dataLibrary);
 
     return true;
 }

@@ -98,10 +98,24 @@ NodeDefPtr Node::getNodeDef(const string& target, bool allowRoughMatch) const
     {
         return resolveNameReference<NodeDef>(getNodeDefString());
     }
-    vector<NodeDefPtr> nodeDefs = getDocument()->getMatchingNodeDefs(getQualifiedName(getCategory()));
-    vector<NodeDefPtr> secondary = getDocument()->getMatchingNodeDefs(getCategory());
-    vector<NodeDefPtr> roughMatches;
+
+    // If a datalibrary is not registered, use the document to locate nodedefs
+    ConstDocumentPtr datalibrary = Document::hasDataLibrary() ? Document::getDataLibrary() : getDocument();
+    vector<NodeDefPtr> nodeDefs = datalibrary->getMatchingNodeDefs(getQualifiedName(getCategory()));
+    vector<NodeDefPtr> secondary = datalibrary->getMatchingNodeDefs(getCategory());
     nodeDefs.insert(nodeDefs.end(), secondary.begin(), secondary.end());
+    
+    // NEED CLARIFICATION: It is possible that the node is defined in the document :-<
+    //       data library takes presedence over local (?)
+    if (nodeDefs.empty())
+    {
+        nodeDefs = getDocument()->getMatchingNodeDefs(getQualifiedName(getCategory()));
+        secondary = getDocument()->getMatchingNodeDefs(getCategory());
+        nodeDefs.insert(nodeDefs.end(), secondary.begin(), secondary.end());
+    }
+
+    vector<NodeDefPtr> roughMatches;
+
     for (NodeDefPtr nodeDef : nodeDefs)
     {
         if (!targetStringsMatch(nodeDef->getTarget(), target) ||
