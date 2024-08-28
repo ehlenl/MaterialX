@@ -1559,18 +1559,22 @@
       <input name="in2" type="float" interfacename="diffuse_lobe_weight" />
       <input name="in1" type="color3" nodename="wood_color_2" />
     </multiply>
+    <max name="pore_cell_dim_limited" type="float" xpos="-45.217392" ypos="-43.862068">
+      <input name="in1" type="float" interfacename="pore_cell_dim" />
+      <input name="in2" type="float" value="0.01" />
+    </max>
     <wood3d_util_pore_impulse name="pore_weight" type="float" xpos="-43.391304" ypos="-45.879311">
       <input name="position" type="vector3" nodename="wood_position" />
       <input name="wood_weight" type="float" nodename="pore_ratio" />
       <input name="seed" type="float" nodename="adjusted_seed" />
-      <input name="pore_cell_dim" type="float" interfacename="pore_cell_dim" />
+      <input name="pore_cell_dim" type="float" nodename="pore_cell_dim_limited" />
       <input name="pore_radius" type="float" interfacename="pore_radius" />
     </wood3d_util_pore_impulse>
     <wood3d_util_pore_impulse name="pore_bump_weight" type="float" xpos="-43.768116" ypos="-41.534481">
       <input name="position" type="vector3" nodename="wood_position" />
       <input name="wood_weight" type="float" nodename="pore_ratio" />
       <input name="seed" type="float" nodename="adjusted_seed" />
-      <input name="pore_cell_dim" type="float" interfacename="pore_cell_dim" />
+      <input name="pore_cell_dim" type="float" nodename="pore_cell_dim_limited"/>
       <input name="pore_radius" type="float" interfacename="pore_radius" />
     </wood3d_util_pore_impulse>
     <ifequal name="wood_color_1" type="color3" xpos="-38.086956" ypos="-48.551723">

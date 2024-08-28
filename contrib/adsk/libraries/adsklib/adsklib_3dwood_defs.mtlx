@@ -37,7 +37,7 @@
     <input name="position" type="vector3" value="0.0, 0.0, 0.0" />
     <input name="wood_weight" type="float" value="0.0" />    
     <input name="seed" type="float" value="0.0" />    
-    <input name="pore_cell_dim" type="float" value="0.0" />    
+    <input name="pore_cell_dim" type="float" value="0.5" />    
     <input name="pore_radius" type="float" value="0.0" />    
     <output name="weight" type="float" default="0.0" />
   </nodedef>
@@ -203,14 +203,14 @@
     <input name="seed" uiname="Wood generation seed" uifolder="Wood Space Settings" type="float" value="2" uimin="0" uisoftmax="4096" xpos="-107.971016" ypos="-45.672413" />
     <input name="scale" unittype="distance" uivisible="false" uiname="Scale (should not be changed by user)" uifolder="Wood Space Settings" type="float" value="0.1" uimin="0" uisoftmax="10" xpos="-110.057968" ypos="-47.879311" />
     <input name="axis" uiname="Wood axis" uifolder="Wood Space Settings" enum="xyz, yzx, zxy" enumvalues="0,1,2" uimin="0" uimax="2" type="float" value="1" xpos="-112.681160" ypos="-48.689655" />
-    <input name="ring_thickness" uiname="Ring thickness" uifolder="Wood Growth Params" uimin="0" uisoftmax="10" type="float" value="0.9" xpos="-74.579712" ypos="-44.551723" />
+    <input name="ring_thickness" uiname="Ring thickness" uifolder="Wood Growth Params" uimin="0.01" uisoftmax="1" type="float" value="0.9" xpos="-74.579712" ypos="-44.551723" />
     <input name="early_wood_sharpness" uiname="Early wood sharpness" uifolder="Wood Growth Params" uimin="0" uisoftmax="1" type="float" value="0.793" xpos="-75.144928" ypos="-42.637932" />
     <input name="late_wood_sharpness" uiname="Late wood sharpness" uifolder="Wood Growth Params" uimin="0" uisoftmax="1" type="float" value="0.527" xpos="-75.043480" ypos="-43.603447" />
     <input name="late_wood_ratio" uiname="Late wood ratio" uifolder="Wood Growth Params" uimin="0" uisoftmax="1" type="float" value="0.059" xpos="-74.652176" ypos="-41.672413" />
     <input name="use_fiber_perlin" uiname="Use fiber perlin distortion" uifolder="Wood Growth Params" type="boolean" value="true" xpos="-89.681160" ypos="-51.741379" />
     <input name="fiber_perlin_frequencies" uiname="Fiber perlin frequencies(cm)" uifolder="Wood Growth Params" uimin="0" uisoftmax="100" type="vector4" value="23.5, 8, 2, 0" xpos="-95.101448" ypos="-52.827587" />
     <input name="fiber_perlin_weights" uiname="Fiber perlin weights" uifolder="Wood Growth Params" uimin="0" uisoftmax="10" type="vector4" value="1.25, 0.75, 0.15, 0" xpos="-94.753624" ypos="-51.862068" />
-    <input name="fiber_perlin_scale_z" uiname="Fiber perlin scale z" uifolder="Wood Growth Params" uimin="0" uisoftmax="1" type="float" value="0.3" xpos="-94.739128" ypos="-53.793102" />
+    <input name="fiber_perlin_scale_z" uiname="Fiber perlin scale z" uifolder="Wood Growth Params" uimin="0.05" uisoftmax="1" type="float" value="0.3" xpos="-94.739128" ypos="-53.793102" />
     <input name="use_fiber_cosine" uiname="Use fiber cosine distortion" uifolder="Wood Growth Params" type="boolean" value="true" xpos="-97.101448" ypos="-51.862068" />
     <input name="fiber_cosine_frequencies" uiname="Fiber cosine frequencies(cm)" uifolder="Wood Growth Params" uimin="0" uisoftmax="100" type="vector4" value="15, 2, 0, 0" xpos="-102.057968" ypos="-52.965519" />
     <input name="fiber_cosine_weights" uiname="Fiber cosine weights" uifolder="Wood Growth Params" uimin="0" uisoftmax="10" type="vector4" value="0.5, 0.5, 0, 0" xpos="-101.710144" ypos="-52.000000" />
@@ -230,20 +230,20 @@
     <input name="use_diffuse_perlin" uiname="Use diffuse color perlin" uifolder="Color Params" type="boolean" value="true" xpos="-45.920288" ypos="-49.931034" />
     <input name="diffuse_perlin_frequencies" uiname="Diffuse color perlin frequencies(cm)" uifolder="Color Params" uimin="0" uisoftmax="100" type="vector4" value="0.1, 0.4, 5, 0.01" xpos="-51.536232" ypos="-49.258621" />
     <input name="diffuse_perlin_weights" uiname="Diffuse color perlin weights" uifolder="Color Params" uimin="0" uisoftmax="10" type="vector4" value="0.1, 0.15, 0.2, 0.4" xpos="-51.210144" ypos="-51.172413" />
-    <input name="diffuse_perlin_scale_z" uiname="Diffuse color perlin scale z" uifolder="Color Params" uimin="0" uisoftmax="1" type="float" value="0.1" xpos="-51.210144" ypos="-50.224136" />
+    <input name="diffuse_perlin_scale_z" uiname="Diffuse color perlin scale z" uifolder="Color Params" uimin="0.01" uisoftmax="1" type="float" value="0.1" xpos="-51.210144" ypos="-50.224136" />
     <input name="diffuse_lobe_weight" uiname="Diffuse lobe weight" uifolder="Color Params" uimin="0" uisoftmax="1" type="float" value="0.8" xpos="-28.000000" ypos="-46.482758" />
     <input name="use_pore_color" uiname="Use pore" uifolder="Pores Params" type="boolean" value="true" xpos="-39.818840" ypos="-49.948277" />
     <input name="pore_type" uiname="Pore type" uifolder="Pores Params" enum="both, early, late" enumvalues="0,1,2" uimin="0" uimax="2" type="integer" value="0" xpos="-46.869564" ypos="-44.844826" />
-    <input name="pore_cell_dim" uiname="Pore cell dim" uifolder="Pores Params" uimin="0" uisoftmax="10" type="float" value="1.5" xpos="-47.217392" ypos="-43.862068" />
-    <input name="pore_radius" uiname="Pore radius" uifolder="Pores Params" uimin="0" uisoftmax="1" type="float" value="0.06" xpos="-47.101448" ypos="-42.905174" />
+    <input name="pore_cell_dim" uiname="Pore cell dim" uifolder="Pores Params" uimin="0.01" uisoftmax="3" type="float" value="1.5" xpos="-47.217392" ypos="-43.862068" />
+    <input name="pore_radius" uiname="Pore radius" uifolder="Pores Params" uimin="0.01" uisoftmax="2" type="float" value="0.06" xpos="-47.101448" ypos="-42.905174" />
     <input name="pore_color_power" uiname="Pore color power" uifolder="Pores Params" uimin="0" uisoftmax="5" type="float" value="1.45" xpos="-42.753624" ypos="-49.948277" />
     <input name="use_ray_color" uiname="Use ray" uifolder="Rays Params" type="boolean" value="true" xpos="-31.166666" ypos="-50.637932" />
-    <input name="ray_seg_length_z" uiname="Ray seg length z" uifolder="Rays Params" uimin="0" uisoftmax="10" type="float" value="5" xpos="-36.376812" ypos="-53.948277" />
-    <input name="ray_ellipse_depth" uiname="Ray ellipse depth" uifolder="Rays Params" uimin="0" uisoftmax="10" type="float" value="2" xpos="-36.347828" ypos="-52.974136" />
+    <input name="ray_seg_length_z" uiname="Ray seg length z" uifolder="Rays Params" uimin="0.01" uisoftmax="10" type="float" value="5" xpos="-36.376812" ypos="-53.948277" />
+    <input name="ray_ellipse_depth" uiname="Ray ellipse depth" uifolder="Rays Params" uimin="0.01" uisoftmax="10" type="float" value="2" xpos="-36.347828" ypos="-52.974136" />
     <input name="ray_color_power" uiname="Ray color power" uifolder="Rays Params" uimin="0" uisoftmax="5" type="float" value="1.1" xpos="-36.347828" ypos="-52.034481" />
-    <input name="ray_ellipse_scale_x" uiname="Ray ellipse scale x" uifolder="Rays Params" uimin="0" uisoftmax="1" type="float" value="0.2" xpos="-36.347828" ypos="-51.051723" />
-    <input name="ray_num_slices" uiname="Ray num" uifolder="Rays Params" type="float" uimin="0" uisoftmax="500" value="160" xpos="-36.347828" ypos="-50.086208" />
-    <input name="ray_ellipse_z2x" uiname="Ray ellipse z2x" uifolder="Rays Params" uimin="0" uisoftmax="50" type="float" value="10" xpos="-36.304348" ypos="-49.112068" />
+    <input name="ray_ellipse_scale_x" uiname="Ray ellipse scale x" uifolder="Rays Params" uimin="0.01" uisoftmax="1" type="float" value="0.2" xpos="-36.347828" ypos="-51.051723" />
+    <input name="ray_num_slices" uiname="Ray num" uifolder="Rays Params" type="float" uimin="1" uisoftmax="400" value="160" xpos="-36.347828" ypos="-50.086208" />
+    <input name="ray_ellipse_z2x" uiname="Ray ellipse z2x" uifolder="Rays Params" uimin="0" uisoftmax="40" type="float" value="10" xpos="-36.304348" ypos="-49.112068" />
     <input name="use_groove_roughness" uiname="Use groove roughness" uifolder="Wood Roughness Params" type="boolean" value="true" xpos="-29.594202" ypos="-45.155174" />
     <input name="groove_roughness" uiname="Groove roughness" uifolder="Wood Roughness Params" uimin="0" uisoftmax="1" type="float" value="0.19" xpos="-29.246376" ypos="-44.189655" />
     <input name="roughness" uiname="Roughness" uifolder="Wood Roughness Params" uimin="0" uisoftmax="1" type="float" value="0.16" xpos="-28.666666" ypos="-41.551723" />
