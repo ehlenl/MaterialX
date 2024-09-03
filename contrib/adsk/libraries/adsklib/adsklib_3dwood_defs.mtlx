@@ -201,7 +201,7 @@
   -->
   <nodedef name="ND_wood3d" node="wood3d" nodegroup="texture3d">
     <input name="seed" uiname="Wood generation seed" uifolder="Wood Space Settings" type="float" value="2" uimin="0" uisoftmax="4096" xpos="-107.971016" ypos="-45.672413" />
-    <input name="scale" unittype="distance" uivisible="false" uiname="Scale (should not be changed by user)" uifolder="Wood Space Settings" type="float" value="0.1" uimin="0" uisoftmax="10" xpos="-110.057968" ypos="-47.879311" />
+    <input name="scale" unittype="distance" uivisible="false" uiname="Scale" uifolder="Wood Space Settings" type="float" value="1" uimin="0" uisoftmax="10" xpos="-110.057968" ypos="-47.879311" />
     <input name="axis" uiname="Wood axis" uifolder="Wood Space Settings" enum="xyz, yzx, zxy" enumvalues="0,1,2" uimin="0" uimax="2" type="float" value="1" xpos="-112.681160" ypos="-48.689655" />
     <input name="ring_thickness" uiname="Ring thickness" uifolder="Wood Growth Params" uimin="0.01" uisoftmax="1" type="float" value="0.9" xpos="-74.579712" ypos="-44.551723" />
     <input name="early_wood_sharpness" uiname="Early wood sharpness" uifolder="Wood Growth Params" uimin="0" uisoftmax="1" type="float" value="0.793" xpos="-75.144928" ypos="-42.637932" />
