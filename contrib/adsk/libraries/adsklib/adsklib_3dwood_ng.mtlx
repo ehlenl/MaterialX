@@ -10,8 +10,8 @@
       ================================================
   -->
   <nodegraph name="NG_wood3d_util_ratio" nodedef="ND_wood3d_util_ratio">
-    <divide name="ratio_divide_float_7" type="float" xpos="-38.934784" ypos="-51.327587">
-      <input name="in1" type="float" nodename="ratio_subtract_float" />
+    <divide name="ratio_divide2" type="float" xpos="-38.934784" ypos="-51.327587">
+      <input name="in1" type="float" nodename="ratio_subtract3" />
       <input name="in2" type="float" nodename="ratio_fall_width" />
     </divide>
     <multiply name="ratio_early_wood_to_fall" type="float" xpos="-45.130436" ypos="-48.258621">
@@ -20,16 +20,16 @@
     </multiply>
     <ifgreatereq name="_earlywood_ratio" type="float" xpos="-32.028984" ypos="-49.327587">
       <input name="in1" type="float" value="1" />
-      <input name="in2" type="float" nodename="ratio_ifgreatereq_float_2" />
+      <input name="in2" type="float" nodename="ratio_ifgreatereq2" />
       <input name="value2" type="float" nodename="ratio_fraction" />
       <input name="value1" type="float" nodename="ratio_early_wood_to_fall" />
     </ifgreatereq>
-    <floor name="ratio_floor_float" type="float" xpos="-45.826088" ypos="-50.206898">
-      <input name="in" type="float" nodename="ratio_divide_float_9" />
+    <floor name="ratio_floor" type="float" xpos="-45.826088" ypos="-50.206898">
+      <input name="in" type="float" nodename="ratio_divide1" />
     </floor>
     <subtract name="ratio_fraction" type="float" xpos="-43.963768" ypos="-51.189655">
-      <input name="in2" type="float" nodename="ratio_floor_float" />
-      <input name="in1" type="float" nodename="ratio_divide_float_9" />
+      <input name="in2" type="float" nodename="ratio_floor" />
+      <input name="in1" type="float" nodename="ratio_divide1" />
     </subtract>
     <subtract name="ratio_rise_width" type="float" xpos="-41.797100" ypos="-45.396553">
       <input name="in2" type="float" nodename="ratio_late_wood_to_rise" />
@@ -40,38 +40,38 @@
       <input name="in2" type="float" nodename="ratio_early_wood_to_fall" />
     </subtract>
     <add name="ratio_late_wood_to_rise" type="float" xpos="-45.347828" ypos="-46.189655">
-      <input name="in2" type="float" nodename="ratio_multiply_float_20" />
+      <input name="in2" type="float" nodename="ratio_multiply1" />
       <input name="in1" type="float" nodename="fall_to_late_wood" />
     </add>
-    <divide name="ratio_divide_float_8" type="float" xpos="-39.710144" ypos="-46.224136">
-      <input name="in1" type="float" nodename="ratio_subtract_float_3" />
+    <divide name="ratio_divide3" type="float" xpos="-39.710144" ypos="-46.224136">
+      <input name="in1" type="float" nodename="ratio_subtract1" />
       <input name="in2" type="float" nodename="ratio_rise_width" />
     </divide>
-    <subtract name="ratio_subtract_float_3" type="float" xpos="-42.181160" ypos="-46.741379">
+    <subtract name="ratio_subtract1" type="float" xpos="-42.181160" ypos="-46.741379">
       <input name="in1" type="float" nodename="ratio_fraction" />
       <input name="in2" type="float" nodename="ratio_late_wood_to_rise" />
     </subtract>
-    <ifgreatereq name="ratio_ifgreatereq_float_3" type="float" xpos="-37.536232" ypos="-46.775864">
+    <ifgreatereq name="ratio_ifgreatereq1" type="float" xpos="-37.536232" ypos="-46.775864">
       <input name="in1" type="float" value="0" />
-      <input name="in2" type="float" nodename="ratio_divide_float_8" />
+      <input name="in2" type="float" nodename="ratio_divide3" />
       <input name="value2" type="float" nodename="ratio_fraction" />
       <input name="value1" type="float" nodename="ratio_late_wood_to_rise" />
     </ifgreatereq>
-    <subtract name="ratio_subtract_float" type="float" xpos="-41.355072" ypos="-51.982758">
+    <subtract name="ratio_subtract3" type="float" xpos="-41.355072" ypos="-51.982758">
       <input name="in1" type="float" nodename="ratio_fraction" />
       <input name="in2" type="float" nodename="ratio_early_wood_to_fall" />
     </subtract>
-    <subtract name="ratio_subtract_float_2" type="float" xpos="-36.731884" ypos="-51.327587">
-      <input name="in2" type="float" nodename="ratio_divide_float_7" />
+    <subtract name="ratio_subtract2" type="float" xpos="-36.731884" ypos="-51.327587">
+      <input name="in2" type="float" nodename="ratio_divide2" />
       <input name="in1" type="float" value="1" />
     </subtract>
-    <multiply name="ratio_multiply_float_20" type="float" xpos="-47.702900" ypos="-46.189655">
+    <multiply name="ratio_multiply1" type="float" xpos="-47.702900" ypos="-46.189655">
       <input name="in1" type="float" interfacename="late_wood_ratio" />
       <input name="in2" type="float" interfacename="late_wood_sharpness" />
     </multiply>
-    <ifgreatereq name="ratio_ifgreatereq_float_2" type="float" xpos="-34.637680" ypos="-49.241379">
-      <input name="in1" type="float" nodename="ratio_subtract_float_2" />
-      <input name="in2" type="float" nodename="ratio_ifgreatereq_float_3" />
+    <ifgreatereq name="ratio_ifgreatereq2" type="float" xpos="-34.637680" ypos="-49.241379">
+      <input name="in1" type="float" nodename="ratio_subtract2" />
+      <input name="in2" type="float" nodename="ratio_ifgreatereq1" />
       <input name="value2" type="float" nodename="ratio_fraction" />
       <input name="value1" type="float" nodename="fall_to_late_wood" />
     </ifgreatereq>
@@ -79,7 +79,7 @@
       <input name="in2" type="float" interfacename="late_wood_ratio" />
       <input name="in1" type="float" value="1" />
     </subtract>
-    <divide name="ratio_divide_float_9" type="float" xpos="-48.007248" ypos="-50.905174">
+    <divide name="ratio_divide1" type="float" xpos="-48.007248" ypos="-50.905174">
       <input name="in1" type="float" interfacename="radius" />
       <input name="in2" type="float" interfacename="ring_thickness" />
     </divide>
@@ -87,7 +87,7 @@
   </nodegraph>
 
   <nodegraph name="NG_wood3d_util_fiber_cosine_distortion" nodedef="ND_wood3d_util_fiber_cosine_distortion">
-    <combine2 name="radius_combine2_vector_2" type="vector2" xpos="-66.811592" ypos="-30.603449">
+    <combine2 name="radius_combine" type="vector2" xpos="-66.811592" ypos="-30.603449">
       <input name="in1" type="float" output="outx" nodename="seperated_wood_position" />
       <input name="in2" type="float" output="outy" nodename="seperated_wood_position" />
     </combine2>
@@ -98,51 +98,51 @@
       <output name="outz" type="float" />
       <output name="outw" type="float" />
     </separate4>
-    <multiply name="fiber_multiply_float_5" type="float" xpos="-67.043480" ypos="-24.431034">
+    <multiply name="fiber_multiply5" type="float" xpos="-67.043480" ypos="-24.431034">
       <input name="in2" type="float" output="outx" nodename="fiber_separated_weight" />
-      <input name="in1" type="float" nodename="cos_float" />
+      <input name="in1" type="float" nodename="cos1" />
     </multiply>
-    <add name="fiber_add_float" type="float" xpos="-64.608696" ypos="-23.568966">
-      <input name="in1" type="float" nodename="fiber_multiply_float_5" />
-      <input name="in2" type="float" nodename="fiber_multiply_float_6" />
+    <add name="fiber_add1" type="float" xpos="-64.608696" ypos="-23.568966">
+      <input name="in1" type="float" nodename="fiber_multiply5" />
+      <input name="in2" type="float" nodename="fiber_multiply6" />
     </add>
-    <add name="fiber_add_float_2" type="float" xpos="-63.014492" ypos="-21.103449">
-      <input name="in2" type="float" nodename="fiber_multiply_float_7" />
-      <input name="in1" type="float" nodename="fiber_add_float" />
+    <add name="fiber_add2" type="float" xpos="-63.014492" ypos="-21.103449">
+      <input name="in2" type="float" nodename="fiber_multiply7" />
+      <input name="in1" type="float" nodename="fiber_add1" />
     </add>
-    <cos name="cos_float_3" type="float" xpos="-68.702896" ypos="-21.103449">
-      <input name="in" type="float" nodename="fiber_multiply_float_3" />
+    <cos name="cos3" type="float" xpos="-68.702896" ypos="-21.103449">
+      <input name="in" type="float" nodename="fiber_multiply3" />
     </cos>
-    <multiply name="fiber_multiply_float_14" type="float" xpos="-43.673912" ypos="-23.612068">
+    <multiply name="fiber_multiply14" type="float" xpos="-43.673912" ypos="-23.612068">
       <input name="in2" type="float" nodename="fiber_shift_weight" />
       <input name="in1" type="float" nodename="radius_sin_theta" />
     </multiply>
-    <multiply name="fiber_multiply_float_4" type="float" xpos="-71.101448" ypos="-19.844828">
+    <multiply name="fiber_multiply4" type="float" xpos="-71.101448" ypos="-19.844828">
       <input name="in2" type="float" nodename="inverse_freq_w" />
       <input name="in1" type="float" nodename="radius_angdist" />
     </multiply>
-    <multiply name="fiber_multiply_float_7" type="float" xpos="-66.992752" ypos="-21.224138">
-      <input name="in1" type="float" nodename="cos_float_3" />
+    <multiply name="fiber_multiply7" type="float" xpos="-66.992752" ypos="-21.224138">
+      <input name="in1" type="float" nodename="cos3" />
       <input name="in2" type="float" output="outz" nodename="fiber_separated_weight" />
     </multiply>
-    <multiply name="fiber_multiply_float_8" type="float" xpos="-66.927536" ypos="-19.844828">
-      <input name="in1" type="float" nodename="cos_float_4" />
+    <multiply name="fiber_multiply8" type="float" xpos="-66.927536" ypos="-19.844828">
+      <input name="in1" type="float" nodename="cos4" />
       <input name="in2" type="float" output="outw" nodename="fiber_separated_weight" />
     </multiply>
     <divide name="fiber_divide_float" type="float" xpos="-60.500000" ypos="-24.672413">
-      <input name="in1" type="float" nodename="radius_magnitude_vector_2" />
+      <input name="in1" type="float" nodename="radius_magnitude2" />
       <input name="in2" type="float" value="1.5" />
     </divide>
-    <multiply name="fiber_multiply_float_13" type="float" xpos="-43.413044" ypos="-25.810345">
+    <multiply name="fiber_multiply13" type="float" xpos="-43.413044" ypos="-25.810345">
       <input name="in2" type="float" nodename="fiber_shift_weight" />
       <input name="in1" type="float" nodename="radius_cos_theta" />
     </multiply>
-    <multiply name="fiber_multiply_float_11" type="float" xpos="-52.898552" ypos="-21.086206">
-      <input name="in2" type="float" nodename="fiber_subtract_float_2" />
+    <multiply name="fiber_multiply11" type="float" xpos="-52.898552" ypos="-21.086206">
+      <input name="in2" type="float" nodename="fiber_subtract2" />
       <input name="in1" type="float" nodename="saturate_float" />
     </multiply>
-    <ifgreatereq name="radius_ifgreatereq_vector_3" type="vector3" xpos="-36.471016" ypos="-27.887932">
-      <input name="value1" type="float" nodename="radius_magnitude_vector_2" />
+    <ifgreatereq name="radius_ifgreatereq3" type="vector3" xpos="-36.471016" ypos="-27.887932">
+      <input name="value1" type="float" nodename="radius_magnitude2" />
       <input name="value2" type="float" value="0.0001" />
       <input name="in2" type="vector3" value="0, 0, 0" />
       <input name="in1" type="vector3" nodename="fiber_p2" />
@@ -154,13 +154,13 @@
       <output name="outz" type="float" />
       <output name="outw" type="float" />
     </separate4>
-    <cos name="cos_float_2" type="float" xpos="-68.702896" ypos="-22.637932">
-      <input name="in" type="float" nodename="fiber_multiply_float_2" />
+    <cos name="cos2" type="float" xpos="-68.702896" ypos="-22.637932">
+      <input name="in" type="float" nodename="fiber_multiply2" />
     </cos>
-    <cos name="cos_float" type="float" xpos="-68.746376" ypos="-24.431034">
-      <input name="in" type="float" nodename="fiber_multiply_float" />
+    <cos name="cos1" type="float" xpos="-68.746376" ypos="-24.431034">
+      <input name="in" type="float" nodename="fiber_multiply1" />
     </cos>
-    <multiply name="fiber_multiply_float_9" type="float" xpos="-57.717392" ypos="-21.637932">
+    <multiply name="fiber_multiply9" type="float" xpos="-57.717392" ypos="-21.637932">
       <input name="in2" type="float" value="2" />
       <input name="in1" type="float" nodename="saturate_float" />
     </multiply>
@@ -168,70 +168,70 @@
       <input name="in1" type="float" output="outz" nodename="seperated_wood_position" />
       <input name="in2" type="float" value="6.28319" />
     </divide>
-    <multiply name="fiber_multiply_float_6" type="float" xpos="-66.992752" ypos="-22.775862">
-      <input name="in1" type="float" nodename="cos_float_2" />
+    <multiply name="fiber_multiply6" type="float" xpos="-66.992752" ypos="-22.775862">
+      <input name="in1" type="float" nodename="cos2" />
       <input name="in2" type="float" output="outy" nodename="fiber_separated_weight" />
     </multiply>
-    <subtract name="fiber_subtract_float_2" type="float" xpos="-55.565216" ypos="-21.086206">
-      <input name="in2" type="float" nodename="fiber_multiply_float_9" />
+    <subtract name="fiber_subtract2" type="float" xpos="-55.565216" ypos="-21.086206">
+      <input name="in2" type="float" nodename="fiber_multiply9" />
       <input name="in1" type="float" value="3" />
     </subtract>
     <ifgreater name="fiber_ifgreater_float" type="float" xpos="-47.797100" ypos="-22.982759">
       <input name="value1" type="float" nodename="saturate_float" />
       <input name="value2" type="float" value="0.5" />
       <input name="in2" type="float" nodename="saturate_float" />
-      <input name="in1" type="float" nodename="fiber_multiply_float_12" />
+      <input name="in1" type="float" nodename="fiber_multiply12" />
     </ifgreater>
-    <multiply name="fiber_multiply_float" type="float" xpos="-71.202896" ypos="-24.732759">
+    <multiply name="fiber_multiply1" type="float" xpos="-71.202896" ypos="-24.732759">
       <input name="in1" type="float" nodename="radius_angdist" />
       <input name="in2" type="float" nodename="inverse_freq_x" />
     </multiply>
-    <add name="fiber_add_float_6" type="float" xpos="-39.760868" ypos="-23.750000">
-      <input name="in2" type="float" nodename="fiber_multiply_float_14" />
+    <add name="fiber_add6" type="float" xpos="-39.760868" ypos="-23.750000">
+      <input name="in2" type="float" nodename="fiber_multiply14" />
       <input name="in1" type="float" output="outy" nodename="seperated_wood_position" />
     </add>
-    <add name="fiber_add_float_3" type="float" xpos="-61.275364" ypos="-19.465517">
-      <input name="in1" type="float" nodename="fiber_add_float_2" />
-      <input name="in2" type="float" nodename="fiber_multiply_float_8" />
+    <add name="fiber_add3" type="float" xpos="-61.275364" ypos="-19.465517">
+      <input name="in1" type="float" nodename="fiber_add2" />
+      <input name="in2" type="float" nodename="fiber_multiply8" />
     </add>
-    <multiply name="fiber_multiply_float_3" type="float" xpos="-71.166664" ypos="-21.241379">
+    <multiply name="fiber_multiply3" type="float" xpos="-71.166664" ypos="-21.241379">
       <input name="in2" type="float" nodename="inverse_freq_z" />
       <input name="in1" type="float" nodename="radius_angdist" />
     </multiply>
     <divide name="radius_cos_theta" type="float" xpos="-61.826088" ypos="-29.120689">
       <input name="in1" type="float" output="outx" nodename="seperated_wood_position" />
-      <input name="in2" type="float" nodename="radius_magnitude_vector_2" />
+      <input name="in2" type="float" nodename="radius_magnitude2" />
     </divide>
-    <cos name="cos_float_4" type="float" xpos="-68.586960" ypos="-19.724138">
-      <input name="in" type="float" nodename="fiber_multiply_float_4" />
+    <cos name="cos4" type="float" xpos="-68.586960" ypos="-19.724138">
+      <input name="in" type="float" nodename="fiber_multiply4" />
     </cos>
     <divide name="radius_sin_theta" type="float" xpos="-61.826088" ypos="-27.741379">
       <input name="in1" type="float" output="outy" nodename="seperated_wood_position" />
-      <input name="in2" type="float" nodename="radius_magnitude_vector_2" />
+      <input name="in2" type="float" nodename="radius_magnitude2" />
     </divide>
-    <multiply name="fiber_multiply_float_2" type="float" xpos="-71.217392" ypos="-22.879311">
+    <multiply name="fiber_multiply2" type="float" xpos="-71.217392" ypos="-22.879311">
       <input name="in2" type="float" nodename="inverse_freq_y" />
       <input name="in1" type="float" nodename="radius_angdist" />
     </multiply>
-    <multiply name="fiber_multiply_float_12" type="float" xpos="-50.485508" ypos="-20.965517">
+    <multiply name="fiber_multiply12" type="float" xpos="-50.485508" ypos="-20.965517">
       <input name="in1" type="float" nodename="saturate_float" />
-      <input name="in2" type="float" nodename="fiber_multiply_float_11" />
+      <input name="in2" type="float" nodename="fiber_multiply11" />
     </multiply>
     <combine3 name="fiber_p2" type="vector3" xpos="-36.833332" ypos="-25.215517">
       <input name="in3" type="float" output="outz" nodename="seperated_wood_position" />
-      <input name="in1" type="float" nodename="fiber_add_float_5" />
-      <input name="in2" type="float" nodename="fiber_add_float_6" />
+      <input name="in1" type="float" nodename="fiber_add5" />
+      <input name="in2" type="float" nodename="fiber_add6" />
     </combine3>
-    <add name="fiber_add_float_5" type="float" xpos="-39.811596" ypos="-26.474138">
-      <input name="in2" type="float" nodename="fiber_multiply_float_13" />
+    <add name="fiber_add5" type="float" xpos="-39.811596" ypos="-26.474138">
+      <input name="in2" type="float" nodename="fiber_multiply13" />
       <input name="in1" type="float" output="outx" nodename="seperated_wood_position" />
     </add>
     <multiply name="fiber_shift_weight" type="float" xpos="-45.710144" ypos="-19.310345">
       <input name="in1" type="float" nodename="fiber_ifgreater_float" />
-      <input name="in2" type="float" nodename="fiber_add_float_3" />
+      <input name="in2" type="float" nodename="fiber_add3" />
     </multiply>
-    <magnitude name="radius_magnitude_vector_2" type="float" xpos="-64.434784" ypos="-30.482759">
-      <input name="in" type="vector2" nodename="radius_combine2_vector_2" />
+    <magnitude name="radius_magnitude2" type="float" xpos="-64.434784" ypos="-30.482759">
+      <input name="in" type="vector2" nodename="radius_combine" />
     </magnitude>
     <clamp name="saturate_float" type="float" xpos="-58.347828" ypos="-24.336206">
       <input name="in" type="float" nodename="fiber_divide_float" />
@@ -275,12 +275,12 @@
       <input name="in1" type="float" nodename="inverse_w" />
     </ifgreater>
   
-    <output name="distorted_position" type="vector3" nodename="radius_ifgreatereq_vector_3" xpos="-33.057972" ypos="-27.310345" />
+    <output name="distorted_position" type="vector3" nodename="radius_ifgreatereq3" xpos="-33.057972" ypos="-27.310345" />
   </nodegraph>
 
   <nodegraph name="NG_wood3d_util_fiber_perlin_distortion" nodedef="ND_wood3d_util_fiber_perlin_distortion">
     <combine3 name="radius_p_aniso" type="vector3" xpos="-78.869568" ypos="-46.293102">
-      <input name="in3" type="float" nodename="radius_multiply_float_3" />
+      <input name="in3" type="float" nodename="radius_multiply3" />
       <input name="in2" type="float" output="outy" nodename="radius_separated" />
       <input name="in1" type="float" output="outx" nodename="radius_separated" />
     </combine3>
@@ -290,28 +290,28 @@
       <output name="outy" type="float" />
       <output name="outz" type="float" />
     </separate3>
-    <multiply name="radius_multiply_float_3" type="float" xpos="-81.710144" ypos="-45.905174">
+    <multiply name="radius_multiply3" type="float" xpos="-81.710144" ypos="-45.905174">
       <input name="in1" type="float" output="outz" nodename="radius_separated" />
       <input name="in2" type="float" interfacename="fiber_perlin_scale_z" />
     </multiply>
-    <multiply name="radius_multiply_vector3FA" type="vector3" xpos="-77.210144" ypos="-42.318966">
+    <multiply name="radius_multiply_x" type="vector3" xpos="-77.210144" ypos="-42.318966">
       <input name="in1" type="vector3" nodename="radius_p_aniso" />
       <input name="in2" type="float" nodename="inverse_freq_x" />
     </multiply>
-    <multiply name="radius_multiply_float_5" type="float" xpos="-67.543480" ypos="-37.836208">
-      <input name="in1" type="float" nodename="radius_multiply_float_11" />
+    <multiply name="radius_multiply5" type="float" xpos="-67.543480" ypos="-37.836208">
+      <input name="in1" type="float" nodename="radius_multiply11" />
       <input name="in2" type="float" output="outz" nodename="perlin_weights_separated" />
     </multiply>
-    <multiply name="radius_multiply_vector3FA_3" type="vector3" xpos="-77.231888" ypos="-39.051723">
+    <multiply name="radius_multiply_z" type="vector3" xpos="-77.231888" ypos="-39.051723">
       <input name="in1" type="vector3" nodename="radius_p_aniso" />
       <input name="in2" type="float" nodename="inverse_freq_z" />
     </multiply>
-    <add name="radius_add_float" type="float" xpos="-66.717392" ypos="-40.603447">
-      <input name="in1" type="float" nodename="radius_multiply_float_4" />
-      <input name="in2" type="float" nodename="radius_multiply_float_6" />
+    <add name="radius_add1" type="float" xpos="-66.717392" ypos="-40.603447">
+      <input name="in1" type="float" nodename="radius_multiply4" />
+      <input name="in2" type="float" nodename="radius_multiply6" />
     </add>
-    <noise3d name="radius_noise3d_float_2" type="float" xpos="-74.471016" ypos="-40.551723">
-      <input name="position" type="vector3" nodename="radius_multiply_vector3FA_2" />
+    <noise3d name="radius_noise3d2" type="float" xpos="-74.471016" ypos="-40.551723">
+      <input name="position" type="vector3" nodename="radius_multiply_y" />
     </noise3d>
     <separate4 name="perlin_frequencies_separated" type="multioutput" xpos="-84.963768" ypos="-42.172413">
       <input name="in" type="vector4" interfacename="fiber_perlin_frequencies" />
@@ -320,7 +320,7 @@
       <output name="outz" type="float" />
       <output name="outw" type="float" />
     </separate4>
-    <multiply name="radius_multiply_vector3FA_2" type="vector3" xpos="-77.260872" ypos="-40.801723">
+    <multiply name="radius_multiply_y" type="vector3" xpos="-77.260872" ypos="-40.801723">
       <input name="in1" type="vector3" nodename="radius_p_aniso" />
       <input name="in2" type="float" nodename="inverse_freq_y" />
     </multiply>
@@ -331,66 +331,66 @@
       <output name="outy" type="float" />
       <output name="outw" type="float" />
     </separate4>
-    <multiply name="radius_multiply_float_10" type="float" xpos="-66.260872" ypos="-35.732758">
+    <multiply name="radius_multiply10" type="float" xpos="-66.260872" ypos="-35.732758">
       <input name="in2" type="float" output="outw" nodename="perlin_weights_separated" />
-      <input name="in1" type="float" nodename="radius_multiply_float_13" />
+      <input name="in1" type="float" nodename="radius_multiply13" />
     </multiply>
-    <multiply name="radius_multiply_float_8" type="float" xpos="-72.173912" ypos="-42.353447">
+    <multiply name="radius_multiply8" type="float" xpos="-72.173912" ypos="-42.353447">
       <input name="in2" type="float" value="0.5" />
-      <input name="in1" type="float" nodename="radius_noise3d_float" />
+      <input name="in1" type="float" nodename="radius_noise3d1" />
     </multiply>
-    <multiply name="radius_multiply_vector3FA_5" type="vector3" xpos="-77.152176" ypos="-37.422413">
+    <multiply name="radius_multiply_w" type="vector3" xpos="-77.152176" ypos="-37.422413">
       <input name="in2" type="float" nodename="inverse_freq_w" />
       <input name="in1" type="vector3" nodename="radius_p_aniso" />
     </multiply>
-    <add name="radius_add_float_4" type="float" xpos="-64.173912" ypos="-39.870689">
-      <input name="in1" type="float" nodename="radius_add_float" />
-      <input name="in2" type="float" nodename="radius_multiply_float_5" />
+    <add name="radius_add4" type="float" xpos="-64.173912" ypos="-39.870689">
+      <input name="in1" type="float" nodename="radius_add1" />
+      <input name="in2" type="float" nodename="radius_multiply5" />
     </add>
-    <multiply name="radius_multiply_float_13" type="float" xpos="-71.934784" ypos="-36.870689">
-      <input name="in2" type="float" nodename="radius_noise3d_float_8" />
+    <multiply name="radius_multiply13" type="float" xpos="-71.934784" ypos="-36.870689">
+      <input name="in2" type="float" nodename="radius_noise3d4" />
       <input name="in1" type="float" value="0.5" />
     </multiply>
-    <multiply name="radius_multiply_float_11" type="float" xpos="-71.833336" ypos="-38.508621">
-      <input name="in2" type="float" nodename="radius_noise3d_float_3" />
+    <multiply name="radius_multiply11" type="float" xpos="-71.833336" ypos="-38.508621">
+      <input name="in2" type="float" nodename="radius_noise3d3" />
       <input name="in1" type="float" value="0.5" />
     </multiply>
-    <noise3d name="radius_noise3d_float_8" type="float" xpos="-74.188408" ypos="-37.232758">
-      <input name="position" type="vector3" nodename="radius_multiply_vector3FA_5" />
+    <noise3d name="radius_noise3d4" type="float" xpos="-74.188408" ypos="-37.232758">
+      <input name="position" type="vector3" nodename="radius_multiply_w" />
     </noise3d>
-    <multiply name="radius_multiply_float_14" type="float" xpos="-72.166664" ypos="-40.456898">
-      <input name="in2" type="float" nodename="radius_noise3d_float_2" />
+    <multiply name="radius_multiply14" type="float" xpos="-72.166664" ypos="-40.456898">
+      <input name="in2" type="float" nodename="radius_noise3d2" />
       <input name="in1" type="float" value="0.5" />
     </multiply>
-    <noise3d name="radius_noise3d_float" type="float" xpos="-74.478264" ypos="-42.215519">
-      <input name="position" type="vector3" nodename="radius_multiply_vector3FA" />
+    <noise3d name="radius_noise3d1" type="float" xpos="-74.478264" ypos="-42.215519">
+      <input name="position" type="vector3" nodename="radius_multiply_x" />
     </noise3d>
-    <noise3d name="radius_noise3d_float_3" type="float" xpos="-74.413040" ypos="-38.758621">
-      <input name="position" type="vector3" nodename="radius_multiply_vector3FA_3" />
+    <noise3d name="radius_noise3d3" type="float" xpos="-74.413040" ypos="-38.758621">
+      <input name="position" type="vector3" nodename="radius_multiply_z" />
     </noise3d>
-    <multiply name="radius_multiply_float_4" type="float" xpos="-69.862320" ypos="-42.232758">
-      <input name="in1" type="float" nodename="radius_multiply_float_8" />
+    <multiply name="radius_multiply4" type="float" xpos="-69.862320" ypos="-42.232758">
+      <input name="in1" type="float" nodename="radius_multiply8" />
       <input name="in2" type="float" output="outx" nodename="perlin_weights_separated" />
     </multiply>
-    <add name="radius_add_float_2" type="float" xpos="-58.811596" ypos="-42.224136">
+    <add name="radius_add2" type="float" xpos="-58.811596" ypos="-42.224136">
       <input name="in2" type="float" nodename="radius_radial_shift" />
       <input name="in1" type="float" output="outy" nodename="radius_separated" />
     </add>
-    <add name="radius_add_float_3" type="float" xpos="-59.934784" ypos="-44.672413">
+    <add name="radius_add3" type="float" xpos="-59.934784" ypos="-44.672413">
       <input name="in1" type="float" output="outx" nodename="radius_separated" />
       <input name="in2" type="float" nodename="radius_radial_shift" />
     </add>
     <combine3 name="radius_distorted_position" type="vector3" xpos="-55.978260" ypos="-41.129311">
       <input name="in3" type="float" output="outz" nodename="radius_separated" />
-      <input name="in2" type="float" nodename="radius_add_float_2" />
-      <input name="in1" type="float" nodename="radius_add_float_3" />
+      <input name="in2" type="float" nodename="radius_add2" />
+      <input name="in1" type="float" nodename="radius_add3" />
     </combine3>
     <add name="radius_radial_shift" type="float" xpos="-61.398552" ypos="-40.577587">
-      <input name="in1" type="float" nodename="radius_add_float_4" />
-      <input name="in2" type="float" nodename="radius_multiply_float_10" />
+      <input name="in1" type="float" nodename="radius_add4" />
+      <input name="in2" type="float" nodename="radius_multiply10" />
     </add>
-    <multiply name="radius_multiply_float_6" type="float" xpos="-69.420288" ypos="-40.068966">
-      <input name="in1" type="float" nodename="radius_multiply_float_14" />
+    <multiply name="radius_multiply6" type="float" xpos="-69.420288" ypos="-40.068966">
+      <input name="in1" type="float" nodename="radius_multiply14" />
       <input name="in2" type="float" output="outy" nodename="perlin_weights_separated" />
     </multiply>
     <ifgreater name="inverse_freq_x" type="float" xpos="-79.681160" ypos="-42.189655">
@@ -429,92 +429,92 @@
   </nodegraph>
 
   <nodegraph name="NG_wood3d_util_growth_perlin"  nodedef="ND_wood3d_util_growth_perlin">
-    <multiply name="radius_multiply_float_26" type="float" xpos="-60.695652" ypos="-31.732759">
+    <multiply name="radius_multiply26" type="float" xpos="-60.695652" ypos="-31.732759">
       <input name="in1" type="float" nodename="inverse_freq_y" />
       <input name="in2" type="float" interfacename="radius" />
     </multiply>
-    <multiply name="radius_multiply_float_24" type="float" xpos="-60.695652" ypos="-33.525864">
+    <multiply name="radius_multiply24" type="float" xpos="-60.695652" ypos="-33.525864">
       <input name="in1" type="float" nodename="inverse_freq_x" />
       <input name="in2" type="float" interfacename="radius" />
     </multiply>
     <add name="radius_growth" type="float" xpos="-42.275364" ypos="-29.836206">
-      <input name="in1" type="float" nodename="radius_add_float_8" />
-      <input name="in2" type="float" nodename="radius_multiply_float_12" />
+      <input name="in1" type="float" nodename="radius_add8" />
+      <input name="in2" type="float" nodename="radius_multiply12" />
     </add>
-    <add name="radius_add_float_7" type="float" xpos="-46.521740" ypos="-32.767242">
-      <input name="in1" type="float" nodename="radius_multiply_float_21" />
-      <input name="in2" type="float" nodename="radius_multiply_float_25" />
+    <add name="radius_add7" type="float" xpos="-46.521740" ypos="-32.767242">
+      <input name="in1" type="float" nodename="radius_multiply21" />
+      <input name="in2" type="float" nodename="radius_multiply25" />
     </add>
-    <multiply name="radius_multiply_float_21" type="float" xpos="-49.210144" ypos="-32.939655">
-      <input name="in1" type="float" nodename="radius_multiply_float_15" />
+    <multiply name="radius_multiply21" type="float" xpos="-49.210144" ypos="-32.939655">
+      <input name="in1" type="float" nodename="radius_multiply15" />
       <input name="in2" type="float" output="outx" nodename="growth_perlin_weights_separated" />
     </multiply>
-    <multiply name="radius_multiply_float_22" type="float" xpos="-60.826088" ypos="-29.836206">
+    <multiply name="radius_multiply22" type="float" xpos="-60.826088" ypos="-29.836206">
       <input name="in1" type="float" nodename="inverse_freq_z" />
       <input name="in2" type="float" interfacename="radius" />
     </multiply>
-    <multiply name="radius_multiply_float_23" type="float" xpos="-49.065216" ypos="-29.508621">
-      <input name="in1" type="float" nodename="radius_multiply_float_17" />
+    <multiply name="radius_multiply23" type="float" xpos="-49.065216" ypos="-29.508621">
+      <input name="in1" type="float" nodename="radius_multiply17" />
       <input name="in2" type="float" output="outz" nodename="growth_perlin_weights_separated" />
     </multiply>
-    <multiply name="radius_multiply_float_25" type="float" xpos="-49.173912" ypos="-31.387932">
-      <input name="in1" type="float" nodename="radius_multiply_float_16" />
+    <multiply name="radius_multiply25" type="float" xpos="-49.173912" ypos="-31.387932">
+      <input name="in1" type="float" nodename="radius_multiply16" />
       <input name="in2" type="float" output="outy" nodename="growth_perlin_weights_separated" />
     </multiply>
-    <add name="radius_add_float_8" type="float" xpos="-44.586956" ypos="-31.060345">
-      <input name="in1" type="float" nodename="radius_add_float_7" />
-      <input name="in2" type="float" nodename="radius_multiply_float_23" />
+    <add name="radius_add8" type="float" xpos="-44.586956" ypos="-31.060345">
+      <input name="in1" type="float" nodename="radius_add7" />
+      <input name="in2" type="float" nodename="radius_multiply23" />
     </add>
-    <combine3 name="radius_combine3_2" type="vector3" xpos="-57.681160" ypos="-31.767241">
-      <input name="in1" type="float" nodename="radius_multiply_float_26" />
+    <combine3 name="radius_combine3_y" type="vector3" xpos="-57.681160" ypos="-31.767241">
+      <input name="in1" type="float" nodename="radius_multiply26" />
     </combine3>
-    <noise3d name="radius_noise3d_float_4" type="float" xpos="-54.282608" ypos="-31.594828">
-      <input name="position" type="vector3" nodename="radius_combine3_2" />
+    <noise3d name="radius_noise3d_y" type="float" xpos="-54.282608" ypos="-31.594828">
+      <input name="position" type="vector3" nodename="radius_combine3_y" />
     </noise3d>
-    <noise3d name="radius_noise3d_float_6" type="float" xpos="-54.166668" ypos="-27.870689">
-      <input name="position" type="vector3" nodename="radius_combine3_4" />
+    <noise3d name="radius_noise3d_w" type="float" xpos="-54.166668" ypos="-27.870689">
+      <input name="position" type="vector3" nodename="radius_combine3_w" />
     </noise3d>
-    <noise3d name="radius_noise3d_float_7" type="float" xpos="-54.217392" ypos="-29.801723">
-      <input name="position" type="vector3" nodename="radius_combine3_3" />
+    <noise3d name="radius_noise3d_z" type="float" xpos="-54.217392" ypos="-29.801723">
+      <input name="position" type="vector3" nodename="radius_combine3_z" />
     </noise3d>
-    <combine3 name="radius_combine3_1" type="vector3" xpos="-57.579712" ypos="-33.801723">
-      <input name="in1" type="float" nodename="radius_multiply_float_24" />
+    <combine3 name="radius_combine3_x" type="vector3" xpos="-57.579712" ypos="-33.801723">
+      <input name="in1" type="float" nodename="radius_multiply24" />
     </combine3>
-    <combine3 name="radius_combine3_4" type="vector3" xpos="-57.804348" ypos="-28.025862">
-      <input name="in1" type="float" nodename="radius_multiply_float_9" />
+    <combine3 name="radius_combine3_w" type="vector3" xpos="-57.804348" ypos="-28.025862">
+      <input name="in1" type="float" nodename="radius_multiply9" />
     </combine3>
-    <combine3 name="radius_combine3_3" type="vector3" xpos="-57.681160" ypos="-29.956896">
-      <input name="in1" type="float" nodename="radius_multiply_float_22" />
+    <combine3 name="radius_combine3_z" type="vector3" xpos="-57.681160" ypos="-29.956896">
+      <input name="in1" type="float" nodename="radius_multiply22" />
     </combine3>
-    <multiply name="radius_multiply_float_9" type="float" xpos="-60.826088" ypos="-27.767241">
+    <multiply name="radius_multiply9" type="float" xpos="-60.826088" ypos="-27.767241">
       <input name="in1" type="float" nodename="inverse_freq_w" />
       <input name="in2" type="float" interfacename="radius" />
     </multiply>
-    <noise3d name="radius_noise3d_float_5" type="float" xpos="-54.333332" ypos="-33.801723">
-      <input name="position" type="vector3" nodename="radius_combine3_1" />
+    <noise3d name="radius_noise3d_x" type="float" xpos="-54.333332" ypos="-33.801723">
+      <input name="position" type="vector3" nodename="radius_combine3_x" />
     </noise3d>
-    <multiply name="radius_multiply_float_12" type="float" xpos="-49.101448" ypos="-27.474138">
+    <multiply name="radius_multiply12" type="float" xpos="-49.101448" ypos="-27.474138">
       <input name="in2" type="float" output="outw" nodename="growth_perlin_weights_separated" />
-      <input name="in1" type="float" nodename="radius_multiply_float_18" />
+      <input name="in1" type="float" nodename="radius_multiply18" />
     </multiply>
-    <multiply name="radius_multiply_float_17" type="float" xpos="-51.898552" ypos="-29.698277">
-      <input name="in2" type="float" nodename="radius_noise3d_float_7" />
+    <multiply name="radius_multiply17" type="float" xpos="-51.898552" ypos="-29.698277">
+      <input name="in2" type="float" nodename="radius_noise3d_z" />
       <input name="in1" type="float" value="0.5" />
     </multiply>
-    <add name="radius_add_float_5" type="float" xpos="-40.724636" ypos="-27.741379">
+    <add name="radius_add5" type="float" xpos="-40.724636" ypos="-27.741379">
       <input name="in2" type="float" interfacename="radius" />
       <input name="in1" type="float" nodename="radius_growth" />
     </add>
-    <multiply name="radius_multiply_float_15" type="float" xpos="-51.782608" ypos="-33.405174">
+    <multiply name="radius_multiply15" type="float" xpos="-51.782608" ypos="-33.405174">
       <input name="in2" type="float" value="0.5" />
-      <input name="in1" type="float" nodename="radius_noise3d_float_5" />
+      <input name="in1" type="float" nodename="radius_noise3d_x" />
     </multiply>
-    <multiply name="radius_multiply_float_18" type="float" xpos="-51.768116" ypos="-27.767241">
-      <input name="in2" type="float" nodename="radius_noise3d_float_6" />
+    <multiply name="radius_multiply18" type="float" xpos="-51.768116" ypos="-27.767241">
+      <input name="in2" type="float" nodename="radius_noise3d_w" />
       <input name="in1" type="float" value="0.5" />
     </multiply>
-    <multiply name="radius_multiply_float_16" type="float" xpos="-51.782608" ypos="-31.353449">
-      <input name="in2" type="float" nodename="radius_noise3d_float_4" />
+    <multiply name="radius_multiply16" type="float" xpos="-51.782608" ypos="-31.353449">
+      <input name="in2" type="float" nodename="radius_noise3d_y" />
       <input name="in1" type="float" value="0.5" />
     </multiply>
     <separate4 name="growth_frequencies_separated" type="multioutput" xpos="-69.594200" ypos="-34.327587">
@@ -563,79 +563,79 @@
       <input name="value1" type="float" output="outw" nodename="growth_frequencies_separated" />
       <input name="in1" type="float" nodename="inverse_w" />
     </ifgreater>
-    <output name="distorted_radius" type="float"  nodename="radius_add_float_5" xpos="-38.246376" ypos="-27.465517"   />
+    <output name="distorted_radius" type="float"  nodename="radius_add5" xpos="-38.246376" ypos="-27.465517"   />
   </nodegraph>
 
   <nodegraph name="NG_wood3d_util_latewood_color" nodedef="ND_wood3d_util_latewood_color">
-    <multiply name="late_color_multiply_float_2" type="float" xpos="-40.362320" ypos="-29.637932">
-      <input name="in2" type="float" nodename="latecolor_noise1d_float_2" />
+    <multiply name="latecolor_multiply12" type="float" xpos="-40.362320" ypos="-29.637932">
+      <input name="in2" type="float" nodename="latecolor_noise1d2" />
       <input name="in1" type="float" value="0.5" />
     </multiply>
-    <multiply name="late_color_multiply_float_4" type="float" xpos="-40.362320" ypos="-26.741379">
-      <input name="in2" type="float" nodename="latecolor_noise1d_float_4" />
+    <multiply name="latecolor_multiply14" type="float" xpos="-40.362320" ypos="-26.741379">
+      <input name="in2" type="float" nodename="latecolor_noise1d4" />
       <input name="in1" type="float" value="0.5" />
     </multiply>
-    <wood3d_util_noise1d name="latecolor_noise1d_float_3" type="float" xpos="-43.043480" ypos="-28.137932">
-      <input name="p" type="float" nodename="latecolor_multiply_float_3" />
+    <wood3d_util_noise1d name="latecolor_noise1d3" type="float" xpos="-43.043480" ypos="-28.137932">
+      <input name="p" type="float" nodename="latecolor_multiply3" />
     </wood3d_util_noise1d>
-    <wood3d_util_noise1d name="latecolor_noise1d_float" type="float" xpos="-43.144928" ypos="-30.775862">
-      <input name="p" type="float" nodename="latecolor_multiply_float" />
+    <wood3d_util_noise1d name="latecolor_noise1d1" type="float" xpos="-43.144928" ypos="-30.775862">
+      <input name="p" type="float" nodename="latecolor_multiply1" />
     </wood3d_util_noise1d>
-    <multiply name="late_color_multiply_float_3" type="float" xpos="-40.362320" ypos="-28.258621">
-      <input name="in2" type="float" nodename="latecolor_noise1d_float_3" />
+    <multiply name="latecolor_multiply13" type="float" xpos="-40.362320" ypos="-28.258621">
+      <input name="in2" type="float" nodename="latecolor_noise1d3" />
       <input name="in1" type="float" value="0.5" />
     </multiply>
-    <wood3d_util_noise1d name="latecolor_noise1d_float_4" type="float" xpos="-43.043480" ypos="-26.620689">
-      <input name="p" type="float" nodename="latecolor_multiply_float_4" />
+    <wood3d_util_noise1d name="latecolor_noise1d4" type="float" xpos="-43.043480" ypos="-26.620689">
+      <input name="p" type="float" nodename="latecolor_multiply4" />
     </wood3d_util_noise1d>
-    <wood3d_util_noise1d name="latecolor_noise1d_float_2" type="float" xpos="-43.101448" ypos="-29.534483">
-      <input name="p" type="float" nodename="latecolor_multiply_float_2" />
+    <wood3d_util_noise1d name="latecolor_noise1d2" type="float" xpos="-43.101448" ypos="-29.534483">
+      <input name="p" type="float" nodename="latecolor_multiply2" />
     </wood3d_util_noise1d>
-    <multiply name="late_color_multiply_float" type="float" xpos="-40.376812" ypos="-31.051723">
+    <multiply name="latecolor_multiply11" type="float" xpos="-40.376812" ypos="-31.051723">
       <input name="in2" type="float" value="0.5" />
-      <input name="in1" type="float" nodename="latecolor_noise1d_float" />
+      <input name="in1" type="float" nodename="latecolor_noise1d1" />
     </multiply>
     <add name="exponent2" type="float" xpos="-27.275362" ypos="-26.637932">
       <input name="in1" type="float" value="1" />
-      <input name="in2" type="float" nodename="latecolor_add_float_9" />
+      <input name="in2" type="float" nodename="latecolor_add9" />
     </add>
-    <multiply name="latecolor_multiply_float_17" type="float" xpos="-37.463768" ypos="-28.120689">
-      <input name="in1" type="float" nodename="late_color_multiply_float_3" />
+    <multiply name="latecolor_multiply17" type="float" xpos="-37.463768" ypos="-28.120689">
+      <input name="in1" type="float" nodename="latecolor_multiply13" />
       <input name="in2" type="float" output="outz" nodename="latecolor_perlin_weights_separated" />
     </multiply>
-    <add name="latecolor_add_float_9" type="float" xpos="-29.579710" ypos="-26.620689">
-      <input name="in1" type="float" nodename="latecolor_add_float" />
-      <input name="in2" type="float" nodename="latecolor_multiply_float_6" />
+    <add name="latecolor_add9" type="float" xpos="-29.579710" ypos="-26.620689">
+      <input name="in1" type="float" nodename="latecolor_add1" />
+      <input name="in2" type="float" nodename="latecolor_multiply6" />
     </add>
-    <add name="latecolor_add_float_6" type="float" xpos="-34.449276" ypos="-30.086206">
-      <input name="in1" type="float" nodename="latecolor_multiply_float_19" />
-      <input name="in2" type="float" nodename="latecolor_multiply_float_16" />
+    <add name="latecolor_add6" type="float" xpos="-34.449276" ypos="-30.086206">
+      <input name="in1" type="float" nodename="latecolor_multiply19" />
+      <input name="in2" type="float" nodename="latecolor_multiply16" />
     </add>
     <power name="latecolor_power" type="color3" xpos="-25.608696" ypos="-26.637932">
       <input name="in1" type="color3" interfacename="late_color" />
       <input name="in2" type="float" nodename="exponent2" />
     </power>
-    <multiply name="latecolor_multiply_float_19" type="float" xpos="-37.463768" ypos="-30.913794">
-      <input name="in1" type="float" nodename="late_color_multiply_float" />
+    <multiply name="latecolor_multiply19" type="float" xpos="-37.463768" ypos="-30.913794">
+      <input name="in1" type="float" nodename="latecolor_multiply11" />
       <input name="in2" type="float" output="outx" nodename="latecolor_perlin_weights_separated" />
     </multiply>
-    <multiply name="latecolor_multiply_float_16" type="float" xpos="-37.463768" ypos="-29.500000">
-      <input name="in1" type="float" nodename="late_color_multiply_float_2" />
+    <multiply name="latecolor_multiply16" type="float" xpos="-37.463768" ypos="-29.500000">
+      <input name="in1" type="float" nodename="latecolor_multiply12" />
       <input name="in2" type="float" output="outy" nodename="latecolor_perlin_weights_separated" />
     </multiply>
-    <multiply name="latecolor_multiply_float_6" type="float" xpos="-37.362320" ypos="-26.741379">
-      <input name="in1" type="float" nodename="late_color_multiply_float_4" />
+    <multiply name="latecolor_multiply6" type="float" xpos="-37.362320" ypos="-26.741379">
+      <input name="in1" type="float" nodename="latecolor_multiply14" />
       <input name="in2" type="float" output="outw" nodename="latecolor_perlin_weights_separated" />
     </multiply>
-    <multiply name="latecolor_multiply_float_2" type="float" xpos="-45.826088" ypos="-29.655172">
+    <multiply name="latecolor_multiply2" type="float" xpos="-45.826088" ypos="-29.655172">
       <input name="in2" type="float" nodename="inverse_freq_y" />
       <input name="in1" type="float" interfacename="radius" />
     </multiply>
-    <add name="latecolor_add_float" type="float" xpos="-32.028984" ypos="-28.137932">
-      <input name="in1" type="float" nodename="latecolor_add_float_6" />
-      <input name="in2" type="float" nodename="latecolor_multiply_float_17" />
+    <add name="latecolor_add1" type="float" xpos="-32.028984" ypos="-28.137932">
+      <input name="in1" type="float" nodename="latecolor_add6" />
+      <input name="in2" type="float" nodename="latecolor_multiply17" />
     </add>
-    <multiply name="latecolor_multiply_float_4" type="float" xpos="-45.826088" ypos="-26.879311">
+    <multiply name="latecolor_multiply4" type="float" xpos="-45.826088" ypos="-26.879311">
       <input name="in2" type="float" nodename="inverse_freq_w" />
       <input name="in1" type="float" interfacename="radius" />
     </multiply>
@@ -646,11 +646,11 @@
       <output name="outz" type="float" />
       <output name="outw" type="float" />
     </separate4>
-    <multiply name="latecolor_multiply_float" type="float" xpos="-45.768116" ypos="-30.913794">
+    <multiply name="latecolor_multiply1" type="float" xpos="-45.768116" ypos="-30.913794">
       <input name="in1" type="float" interfacename="radius" />
       <input name="in2" type="float" nodename="inverse_freq_x" />
     </multiply>
-    <multiply name="latecolor_multiply_float_3" type="float" xpos="-45.826088" ypos="-28.293104">
+    <multiply name="latecolor_multiply3" type="float" xpos="-45.826088" ypos="-28.293104">
       <input name="in2" type="float" nodename="inverse_freq_z" />
       <input name="in1" type="float" interfacename="radius" />
     </multiply>
@@ -697,35 +697,35 @@
   </nodegraph>
 
   <nodegraph name="NG_wood3d_util_earlywood_color" nodedef="ND_wood3d_util_earlywood_color">
-    <multiply name="earlycolor_multiply_float" type="float" xpos="-49.884056" ypos="-42.327587">
+    <multiply name="earlycolor_multiply1" type="float" xpos="-49.884056" ypos="-42.327587">
       <input name="in1" type="float" nodename="inverse_freq_w" />
       <input name="in2" type="float" interfacename="radius" />
     </multiply>
-    <multiply name="earlycolor_multiply_float_2" type="float" xpos="-39.681160" ypos="-42.051723">
-      <input name="in1" type="float" output="outw" nodename="earlycolor_separate4_vector_7" />
-      <input name="in2" type="float" nodename="earlycolor_multiply_float_7" />
+    <multiply name="earlycolor_multiply2" type="float" xpos="-39.681160" ypos="-42.051723">
+      <input name="in1" type="float" output="outw" nodename="earlycolor_weight_separated" />
+      <input name="in2" type="float" nodename="earlycolor_multiply7" />
     </multiply>
-    <add name="earlycolor_add_float" type="float" xpos="-34.000000" ypos="-43.706898">
-      <input name="in1" type="float" nodename="earlycolor_add_float_5" />
-      <input name="in2" type="float" nodename="earlycolor_multiply_float_13" />
+    <add name="earlycolor_add1" type="float" xpos="-34.000000" ypos="-43.706898">
+      <input name="in1" type="float" nodename="earlycolor_add5" />
+      <input name="in2" type="float" nodename="earlycolor_multiply13" />
     </add>
-    <multiply name="earlycolor_multiply_float_8" type="float" xpos="-49.869564" ypos="-46.189655">
+    <multiply name="earlycolor_multiply8" type="float" xpos="-49.869564" ypos="-46.189655">
       <input name="in1" type="float" nodename="inverse_freq_x" />
       <input name="in2" type="float" interfacename="radius" />
     </multiply>
-    <add name="earlycolor_add_float_8" type="float" xpos="-31.797102" ypos="-42.362068">
-      <input name="in1" type="float" nodename="earlycolor_add_float" />
-      <input name="in2" type="float" nodename="earlycolor_multiply_float_2" />
+    <add name="earlycolor_add8" type="float" xpos="-31.797102" ypos="-42.362068">
+      <input name="in1" type="float" nodename="earlycolor_add1" />
+      <input name="in2" type="float" nodename="earlycolor_multiply2" />
     </add>
-    <multiply name="earlycolor_multiply_float_10" type="float" xpos="-49.884056" ypos="-43.706898">
+    <multiply name="earlycolor_multiply10" type="float" xpos="-49.884056" ypos="-43.706898">
       <input name="in1" type="float" nodename="inverse_freq_z" />
       <input name="in2" type="float" interfacename="radius" />
     </multiply>
     <add name="exponent" type="float" xpos="-29.478260" ypos="-42.362068">
       <input name="in1" type="float" value="1" />
-      <input name="in2" type="float" nodename="earlycolor_add_float_8" />
+      <input name="in2" type="float" nodename="earlycolor_add8" />
     </add>
-    <multiply name="earlycolor_multiply_float_9" type="float" xpos="-49.869564" ypos="-44.948277">
+    <multiply name="earlycolor_multiply9" type="float" xpos="-49.869564" ypos="-44.948277">
       <input name="in1" type="float" nodename="inverse_freq_y" />
       <input name="in2" type="float" interfacename="radius" />
     </multiply>
@@ -733,20 +733,20 @@
       <input name="in1" type="color3" interfacename="early_color" />
       <input name="in2" type="float" nodename="exponent" />
     </power>
-    <separate4 name="earlycolor_separate4_vector_7" type="multioutput" xpos="-43.833332" ypos="-49.000000">
+    <separate4 name="earlycolor_weight_separated" type="multioutput" xpos="-43.833332" ypos="-49.000000">
       <input name="in" type="vector4" interfacename="earlycolor_perlin_weights" />
       <output name="outx" type="float" />
       <output name="outz" type="float" />
       <output name="outy" type="float" />
       <output name="outw" type="float" />
     </separate4>
-    <add name="earlycolor_add_float_5" type="float" xpos="-36.666668" ypos="-45.534481">
-      <input name="in1" type="float" nodename="earlycolor_multiply_float_11" />
-      <input name="in2" type="float" nodename="earlycolor_multiply_float_12" />
+    <add name="earlycolor_add5" type="float" xpos="-36.666668" ypos="-45.534481">
+      <input name="in1" type="float" nodename="earlycolor_multiply11" />
+      <input name="in2" type="float" nodename="earlycolor_multiply12" />
     </add>
-    <multiply name="earlycolor_multiply_float_11" type="float" xpos="-39.797100" ypos="-46.086208">
-      <input name="in1" type="float" output="outx" nodename="earlycolor_separate4_vector_7" />
-      <input name="in2" type="float" nodename="earlycolor_multiply_float_4" />
+    <multiply name="earlycolor_multiply11" type="float" xpos="-39.797100" ypos="-46.086208">
+      <input name="in1" type="float" output="outx" nodename="earlycolor_weight_separated" />
+      <input name="in2" type="float" nodename="earlycolor_multiply4" />
     </multiply>
     <separate4 name="earlycolor_perlin_frequencies_separated" type="multioutput" xpos="-57.652172" ypos="-46.155174">
       <input name="in" type="vector4" interfacename="earlycolor_perlin_frequencies" />
@@ -755,40 +755,40 @@
       <output name="outz" type="float" />
       <output name="outw" type="float" />
     </separate4>
-    <multiply name="earlycolor_multiply_float_12" type="float" xpos="-39.797100" ypos="-44.844826">
-      <input name="in1" type="float" output="outy" nodename="earlycolor_separate4_vector_7" />
-      <input name="in2" type="float" nodename="earlycolor_multiply_float_5" />
+    <multiply name="earlycolor_multiply12" type="float" xpos="-39.797100" ypos="-44.844826">
+      <input name="in1" type="float" output="outy" nodename="earlycolor_weight_separated" />
+      <input name="in2" type="float" nodename="earlycolor_multiply5" />
     </multiply>
-    <multiply name="earlycolor_multiply_float_13" type="float" xpos="-39.797100" ypos="-43.431034">
-      <input name="in1" type="float" output="outz" nodename="earlycolor_separate4_vector_7" />
-      <input name="in2" type="float" nodename="earlycolor_multiply_float_6" />
+    <multiply name="earlycolor_multiply13" type="float" xpos="-39.797100" ypos="-43.431034">
+      <input name="in1" type="float" output="outz" nodename="earlycolor_weight_separated" />
+      <input name="in2" type="float" nodename="earlycolor_multiply6" />
     </multiply>
-    <wood3d_util_noise1d name="earlycolor_noise1d_float_4" type="float" xpos="-47.101448" ypos="-42.086208">
-      <input name="p" type="float" nodename="earlycolor_multiply_float" />
+    <wood3d_util_noise1d name="earlycolor_noise1d4" type="float" xpos="-47.101448" ypos="-42.086208">
+      <input name="p" type="float" nodename="earlycolor_multiply1" />
     </wood3d_util_noise1d>
-    <wood3d_util_noise1d name="earlycolor_noise1d_float_3" type="float" xpos="-47.101448" ypos="-43.448277">
-      <input name="p" type="float" nodename="earlycolor_multiply_float_10" />
+    <wood3d_util_noise1d name="earlycolor_noise1d3" type="float" xpos="-47.101448" ypos="-43.448277">
+      <input name="p" type="float" nodename="earlycolor_multiply10" />
     </wood3d_util_noise1d>
-    <multiply name="earlycolor_multiply_float_7" type="float" xpos="-43.840580" ypos="-42.086208">
-      <input name="in2" type="float" nodename="earlycolor_noise1d_float_4" />
+    <multiply name="earlycolor_multiply7" type="float" xpos="-43.840580" ypos="-42.086208">
+      <input name="in2" type="float" nodename="earlycolor_noise1d4" />
       <input name="in1" type="float" value="0.5" />
     </multiply>
-    <multiply name="earlycolor_multiply_float_4" type="float" xpos="-43.840580" ypos="-46.224136">
+    <multiply name="earlycolor_multiply4" type="float" xpos="-43.840580" ypos="-46.224136">
       <input name="in2" type="float" value="0.5" />
-      <input name="in1" type="float" nodename="earlycolor_noise1d_float" />
+      <input name="in1" type="float" nodename="earlycolor_noise1d1" />
     </multiply>
-    <multiply name="earlycolor_multiply_float_5" type="float" xpos="-43.840580" ypos="-44.810345">
-      <input name="in2" type="float" nodename="earlycolor_noise1d_float_2" />
+    <multiply name="earlycolor_multiply5" type="float" xpos="-43.840580" ypos="-44.810345">
+      <input name="in2" type="float" nodename="earlycolor_noise1d2" />
       <input name="in1" type="float" value="0.5" />
     </multiply>
-    <wood3d_util_noise1d name="earlycolor_noise1d_float_2" type="float" xpos="-47.101448" ypos="-44.706898">
-      <input name="p" type="float" nodename="earlycolor_multiply_float_9" />
+    <wood3d_util_noise1d name="earlycolor_noise1d2" type="float" xpos="-47.101448" ypos="-44.706898">
+      <input name="p" type="float" nodename="earlycolor_multiply9" />
     </wood3d_util_noise1d>
-    <wood3d_util_noise1d name="earlycolor_noise1d_float" type="float" xpos="-47.101448" ypos="-45.810345">
-      <input name="p" type="float" nodename="earlycolor_multiply_float_8" />
+    <wood3d_util_noise1d name="earlycolor_noise1d1" type="float" xpos="-47.101448" ypos="-45.810345">
+      <input name="p" type="float" nodename="earlycolor_multiply8" />
     </wood3d_util_noise1d>
-    <multiply name="earlycolor_multiply_float_6" type="float" xpos="-43.840580" ypos="-43.431034">
-      <input name="in2" type="float" nodename="earlycolor_noise1d_float_3" />
+    <multiply name="earlycolor_multiply6" type="float" xpos="-43.840580" ypos="-43.431034">
+      <input name="in2" type="float" nodename="earlycolor_noise1d3" />
       <input name="in1" type="float" value="0.5" />
     </multiply>
     <ifgreater name="inverse_freq_x" type="float" xpos="-51.963768" ypos="-46.224136">
@@ -827,9 +827,9 @@
   </nodegraph>
 
   <nodegraph name="NG_wood3d_util_perlin_color" nodedef="ND_wood3d_util_perlin_color">
-    <add name="perlincolor_add_float_3" type="float" xpos="4.355072" ypos="-3.741379">
+    <add name="perlincolor_add3" type="float" xpos="4.355072" ypos="-3.741379">
       <input name="in2" type="float" value="1" />
-      <input name="in1" type="float" nodename="perlincolor_add_float_5" />
+      <input name="in1" type="float" nodename="perlincolor_add5" />
     </add>
     <separate3 name="wood_position_separated" type="multioutput" xpos="-24.260870" ypos="-9.206897">
       <input name="in" type="vector3" interfacename="wood_position" />
@@ -837,7 +837,7 @@
       <output name="outx" type="float" />
       <output name="outy" type="float" />
     </separate3>
-    <multiply name="perlincolor_multiply_float" type="float" xpos="-21.253624" ypos="-7.146552">
+    <multiply name="perlincolor_multiply1" type="float" xpos="-21.253624" ypos="-7.146552">
       <input name="in2" type="float" interfacename="diffuse_perlin_scale_z" />
       <input name="in1" type="float" output="outz" nodename="wood_position_separated" />
     </multiply>
@@ -855,85 +855,85 @@
       <output name="outz" type="float" />
       <output name="outw" type="float" />
     </separate4>
-    <add name="perlincolor_add_float_2" type="float" xpos="-2.927536" ypos="-7.327586">
-      <input name="in1" type="float" nodename="perlincolor_multiply_float_5" />
-      <input name="in2" type="float" nodename="perlincolor_multiply_float_7" />
+    <add name="perlincolor_add2" type="float" xpos="-2.927536" ypos="-7.327586">
+      <input name="in1" type="float" nodename="perlincolor_multiply5" />
+      <input name="in2" type="float" nodename="perlincolor_multiply7" />
     </add>
     <power name="perlin_color_power" type="color3" xpos="6.862319" ypos="-3.741379">
-      <input name="in2" type="float" nodename="perlincolor_add_float_3" />
+      <input name="in2" type="float" nodename="perlincolor_add3" />
       <input name="in1" type="color3" interfacename="color" />
     </power>
-    <multiply name="perlincolor_multiply_float_6" type="float" xpos="-6.057971" ypos="-4.948276">
+    <multiply name="perlincolor_multiply6" type="float" xpos="-6.057971" ypos="-4.948276">
       <input name="in1" type="float" output="outz" nodename="perlin_weights_separated" />
-      <input name="in2" type="float" nodename="perlincolor_multiply_float_8" />
+      <input name="in2" type="float" nodename="perlincolor_multiply8" />
     </multiply>
-    <multiply name="perlincolor_multiply_float_5" type="float" xpos="-6.115942" ypos="-8.017241">
+    <multiply name="perlincolor_multiply5" type="float" xpos="-6.115942" ypos="-8.017241">
       <input name="in1" type="float" output="outx" nodename="perlin_weights_separated" />
-      <input name="in2" type="float" nodename="perlincolor_multiply_float_4" />
+      <input name="in2" type="float" nodename="perlincolor_multiply4" />
     </multiply>
-    <multiply name="perlincolor_multiply_float_7" type="float" xpos="-6.115942" ypos="-6.637931">
+    <multiply name="perlincolor_multiply7" type="float" xpos="-6.115942" ypos="-6.637931">
       <input name="in1" type="float" output="outy" nodename="perlin_weights_separated" />
-      <input name="in2" type="float" nodename="perlincolor_multiply_float_10" />
+      <input name="in2" type="float" nodename="perlincolor_multiply10" />
     </multiply>
-    <add name="perlincolor_add_float" type="float" xpos="-0.376812" ypos="-5.672414">
-      <input name="in1" type="float" nodename="perlincolor_add_float_2" />
-      <input name="in2" type="float" nodename="perlincolor_multiply_float_6" />
+    <add name="perlincolor_add1" type="float" xpos="-0.376812" ypos="-5.672414">
+      <input name="in1" type="float" nodename="perlincolor_add2" />
+      <input name="in2" type="float" nodename="perlincolor_multiply6" />
     </add>
-    <multiply name="perlincolor_multiply_vector3FA" type="vector3" xpos="-15.579710" ypos="-8.017241">
-      <input name="in1" type="vector3" nodename="perlincolor_combine3_vector_3" />
+    <multiply name="perlincolor_multiply11" type="vector3" xpos="-15.579710" ypos="-8.017241">
+      <input name="in1" type="vector3" nodename="perlincolor_combine" />
       <input name="in2" type="float" nodename="inverse_freq_x" />
     </multiply>
-    <combine3 name="perlincolor_combine3_vector_3" type="vector3" xpos="-18.594202" ypos="-8.948276">
+    <combine3 name="perlincolor_combine" type="vector3" xpos="-18.594202" ypos="-8.948276">
       <input name="in1" type="float" output="outx" nodename="wood_position_separated" />
       <input name="in2" type="float" output="outy" nodename="wood_position_separated" />
-      <input name="in3" type="float" nodename="perlincolor_multiply_float" />
+      <input name="in3" type="float" nodename="perlincolor_multiply1" />
     </combine3>
-    <multiply name="perlincolor_multiply_vector3FA_2" type="vector3" xpos="-15.637681" ypos="-6.620690">
-      <input name="in1" type="vector3" nodename="perlincolor_combine3_vector_3" />
+    <multiply name="perlincolor_multiply12" type="vector3" xpos="-15.637681" ypos="-6.620690">
+      <input name="in1" type="vector3" nodename="perlincolor_combine" />
       <input name="in2" type="float" nodename="inverse_freq_y" />
     </multiply>
-    <multiply name="perlincolor_multiply_vector3FA_3" type="vector3" xpos="-15.579710" ypos="-5.112069">
-      <input name="in1" type="vector3" nodename="perlincolor_combine3_vector_3" />
+    <multiply name="perlincolor_multiply13" type="vector3" xpos="-15.579710" ypos="-5.112069">
+      <input name="in1" type="vector3" nodename="perlincolor_combine" />
       <input name="in2" type="float" nodename="inverse_freq_z" />
     </multiply>
-    <multiply name="perlincolor_multiply_vector3FA_4" type="vector3" xpos="-15.637681" ypos="-3.724138">
-      <input name="in1" type="vector3" nodename="perlincolor_combine3_vector_3" />
+    <multiply name="perlincolor_multiply14" type="vector3" xpos="-15.637681" ypos="-3.724138">
+      <input name="in1" type="vector3" nodename="perlincolor_combine" />
       <input name="in2" type="float" nodename="inverse_freq_w" />
     </multiply>
-    <noise3d name="perlincolor_noise3d_float" type="float" xpos="-12.456522" ypos="-7.879310">
-      <input name="position" type="vector3" nodename="perlincolor_multiply_vector3FA" />
+    <noise3d name="perlincolor_noise3d1" type="float" xpos="-12.456522" ypos="-7.879310">
+      <input name="position" type="vector3" nodename="perlincolor_multiply11" />
     </noise3d>
-    <noise3d name="perlincolor_noise3d_float_2" type="float" xpos="-12.434783" ypos="-6.500000">
-      <input name="position" type="vector3" nodename="perlincolor_multiply_vector3FA_2" />
+    <noise3d name="perlincolor_noise3d2" type="float" xpos="-12.434783" ypos="-6.500000">
+      <input name="position" type="vector3" nodename="perlincolor_multiply12" />
     </noise3d>
-    <noise3d name="perlincolor_noise3d_float_3" type="float" xpos="-12.434783" ypos="-4.982759">
-      <input name="position" type="vector3" nodename="perlincolor_multiply_vector3FA_3" />
+    <noise3d name="perlincolor_noise3d3" type="float" xpos="-12.434783" ypos="-4.982759">
+      <input name="position" type="vector3" nodename="perlincolor_multiply13" />
     </noise3d>
-    <noise3d name="perlincolor_noise3d_float_4" type="float" xpos="-12.434783" ypos="-3.586207">
-      <input name="position" type="vector3" nodename="perlincolor_multiply_vector3FA_4" />
+    <noise3d name="perlincolor_noise3d4" type="float" xpos="-12.434783" ypos="-3.586207">
+      <input name="position" type="vector3" nodename="perlincolor_multiply14" />
     </noise3d>
-    <multiply name="perlincolor_multiply_float_8" type="float" xpos="-9.594203" ypos="-5.103448">
-      <input name="in2" type="float" nodename="perlincolor_noise3d_float_3" />
+    <multiply name="perlincolor_multiply8" type="float" xpos="-9.594203" ypos="-5.103448">
+      <input name="in2" type="float" nodename="perlincolor_noise3d3" />
       <input name="in1" type="float" value="0.5" />
     </multiply>
-    <multiply name="perlincolor_multiply_float_9" type="float" xpos="-9.594203" ypos="-3.706897">
-      <input name="in2" type="float" nodename="perlincolor_noise3d_float_4" />
+    <multiply name="perlincolor_multiply9" type="float" xpos="-9.594203" ypos="-3.706897">
+      <input name="in2" type="float" nodename="perlincolor_noise3d4" />
       <input name="in1" type="float" value="0.5" />
     </multiply>
-    <multiply name="perlincolor_multiply_float_4" type="float" xpos="-9.652174" ypos="-8.120689">
+    <multiply name="perlincolor_multiply4" type="float" xpos="-9.652174" ypos="-8.120689">
       <input name="in2" type="float" value="0.5" />
-      <input name="in1" type="float" nodename="perlincolor_noise3d_float" />
+      <input name="in1" type="float" nodename="perlincolor_noise3d1" />
     </multiply>
-    <multiply name="perlincolor_multiply_float_3" type="float" xpos="-6.000000" ypos="-3.706897">
+    <multiply name="perlincolor_multiply3" type="float" xpos="-6.000000" ypos="-3.706897">
       <input name="in1" type="float" output="outw" nodename="perlin_weights_separated" />
-      <input name="in2" type="float" nodename="perlincolor_multiply_float_9" />
+      <input name="in2" type="float" nodename="perlincolor_multiply9" />
     </multiply>
-    <add name="perlincolor_add_float_5" type="float" xpos="1.826087" ypos="-3.741379">
-      <input name="in1" type="float" nodename="perlincolor_add_float" />
-      <input name="in2" type="float" nodename="perlincolor_multiply_float_3" />
+    <add name="perlincolor_add5" type="float" xpos="1.826087" ypos="-3.741379">
+      <input name="in1" type="float" nodename="perlincolor_add1" />
+      <input name="in2" type="float" nodename="perlincolor_multiply3" />
     </add>
-    <multiply name="perlincolor_multiply_float_10" type="float" xpos="-9.673913" ypos="-6.637931">
-      <input name="in2" type="float" nodename="perlincolor_noise3d_float_2" />
+    <multiply name="perlincolor_multiply10" type="float" xpos="-9.673913" ypos="-6.637931">
+      <input name="in2" type="float" nodename="perlincolor_noise3d2" />
       <input name="in1" type="float" value="0.5" />
     </multiply>
     <ifgreater name="inverse_freq_x" type="float" xpos="-19.152174" ypos="-5.362069">
@@ -972,428 +972,408 @@
   </nodegraph>
   
   <nodegraph name="NG_wood3d_util_ray" nodedef="ND_wood3d_util_ray">
-    <subtract name="ray_subtract_float_2" type="float" xpos="-29.391304" ypos="-58.327587">
+    <subtract name="ray_subtract2" type="float" xpos="-29.978260" ypos="-60.431034">
       <input name="in2" type="float" value="1" />
       <input name="in1" type="float" interfacename="ray_color_power" />
     </subtract>
-    <multiply name="ray_multiply_float" type="float" xpos="-27.572464" ypos="-55.879311">
-      <input name="in1" type="float" nodename="ray_subtract_float_2" />
+    <multiply name="ray_multiply1" type="float" xpos="-28.268116" ypos="-58.051723">
+      <input name="in1" type="float" nodename="ray_subtract2" />
       <input name="in2" type="float" nodename="ray_weight_sum" />
     </multiply>
-    <max name="ray_max_float" type="float" xpos="-84.123192" ypos="-54.913792">
+    <max name="ray_max1" type="float" xpos="-83.115944" ypos="-55.275864">
       <input name="in1" type="float" interfacename="ray_ellipse_depth" />
       <input name="in2" type="float" value="1e-05" />
     </max>
-    <add name="ray_add_float" type="float" xpos="-25.536232" ypos="-55.896553">
-      <input name="in1" type="float" nodename="ray_multiply_float" />
+    <add name="ray_add1" type="float" xpos="-26.579710" ypos="-58.068966">
+      <input name="in1" type="float" nodename="ray_multiply1" />
       <input name="in2" type="float" value="1" />
     </add>
-    <divide name="ray_divide_float" type="float" xpos="-81.797104" ypos="-54.879311">
+    <divide name="ray_divide1" type="float" xpos="-81.956520" ypos="-55.275864">
       <input name="in1" type="float" output="outz" nodename="wood_position_separated" />
-      <input name="in2" type="float" nodename="ray_max_float" />
+      <input name="in2" type="float" nodename="ray_max1" />
     </divide>
-    <floor name="segment_id_0" type="float" xpos="-74.797104" ypos="-61.491379">
+    <floor name="segment_id_0" type="float" xpos="-77.318840" ypos="-54.482758">
       <input name="in" type="float" nodename="ray_floor_float" />
     </floor>
-    <divide name="ray_divide_float_4" type="float" xpos="-69.942032" ypos="-54.482758">
-      <input name="in1" type="float" nodename="ray_add_float_4" />
+    <divide name="ray_divide4" type="float" xpos="-78.985504" ypos="-57.775864">
+      <input name="in1" type="float" nodename="ray_add4" />
       <input name="in2" type="float" value="6.28319" />
     </divide>
-    <subtract name="ray_factor" type="float" xpos="-76.362320" ypos="-50.224136">
-      <input name="in1" type="float" nodename="ray_divide_float_3" />
+    <subtract name="ray_factor" type="float" xpos="-71.173912" ypos="-54.793102">
+      <input name="in1" type="float" nodename="ray_divide3" />
       <input name="in2" type="float" nodename="segment_id_0" />
     </subtract>
-    <add name="ray_add_float_4" type="float" xpos="-71.797104" ypos="-54.517242">
+    <add name="ray_add4" type="float" xpos="-80.144928" ypos="-57.775864">
       <input name="in1" type="float" nodename="ray_theta" />
       <input name="in2" type="float" value="3.14159" />
     </add>
-    <multiply name="ray_pos_z_0" type="float" xpos="-63.217392" ypos="-60.155174">
-      <input name="in1" type="float" nodename="ray_add_float_7" />
+    <multiply name="ray_pos_z_0" type="float" xpos="-58.637680" ypos="-59.568966">
+      <input name="in1" type="float" nodename="ray_add7" />
       <input name="in2" type="float" interfacename="ray_seg_length_z" />
     </multiply>
-    <subtract name="ray_theta_0" type="float" xpos="-59.043480" ypos="-61.810345">
-      <input name="in1" type="float" nodename="ray_multiply_float_6" />
+    <subtract name="ray_theta_0" type="float" xpos="-54.463768" ypos="-61.224136">
+      <input name="in1" type="float" nodename="ray_multiply6" />
       <input name="in2" type="float" value="3.14159" />
     </subtract>
-    <subtract name="ray_subtract_float_5" type="float" xpos="-63.797100" ypos="-54.344826">
+    <subtract name="ray_subtract5" type="float" xpos="-74.695656" ypos="-57.775864">
       <input name="in2" type="float" value="1" />
       <input name="in1" type="float" nodename="slice_id" />
     </subtract>
-    <multiply name="ray_multiply_float_4" type="float" xpos="-65.768112" ypos="-63.189655">
+    <multiply name="ray_multiply4" type="float" xpos="-61.181160" ypos="-62.603447">
       <input name="in2" type="float" value="5" />
-      <input name="in1" type="float" output="outx" nodename="ray_separate3_vector_6" />
+      <input name="in1" type="float" output="outx" nodename="ray_separate6" />
     </multiply>
-    <ifequal name="final_slice_id" type="float" xpos="-61.471016" ypos="-54.741379">
+    <ifequal name="final_slice_id" type="float" xpos="-72.949272" ypos="-58.172413">
       <input name="value1" type="float" nodename="slice_id" />
       <input name="value2" type="float" interfacename="ray_num_slices" />
       <input name="in2" type="float" nodename="slice_id" />
-      <input name="in1" type="float" nodename="ray_subtract_float_5" />
+      <input name="in1" type="float" nodename="ray_subtract5" />
     </ifequal>
-    <crossproduct name="ray_crossproduct_vector_3" type="vector3" xpos="-52.898552" ypos="-60.120689">
+    <crossproduct name="ray_crossproduct3" type="vector3" xpos="-48.485508" ypos="-60.396553">
       <input name="in1" type="vector3" nodename="ray_direction_0" />
       <input name="in2" type="vector3" nodename="p_normalized_0" />
     </crossproduct>
-    <max name="ray_max_float_3" type="float" xpos="-84.079712" ypos="-49.224136">
+    <max name="ray_max3" type="float" xpos="-45.710144" ypos="-50.620689">
       <input name="in1" type="float" interfacename="ray_ellipse_scale_x" />
       <input name="in2" type="float" value="1e-05" />
     </max>
-    <divide name="ray_divide_float_3" type="float" xpos="-79.913040" ypos="-53.637932">
-      <input name="in1" type="float" nodename="ray_divide_float" />
+    <divide name="ray_divide3" type="float" xpos="-80.492752" ypos="-53.810345">
+      <input name="in1" type="float" nodename="ray_divide1" />
       <input name="in2" type="float" interfacename="ray_seg_length_z" />
     </divide>
-    <cos name="ray_cos_float" type="float" xpos="-56.992752" ypos="-62.637932">
+    <cos name="ray_cos1" type="float" xpos="-52.413044" ypos="-62.051723">
       <input name="in" type="float" nodename="ray_theta_0" />
     </cos>
-    <combine3 name="p_normalized_0" type="vector3" xpos="-56.949276" ypos="-60.293102">
+    <combine3 name="p_normalized_0" type="vector3" xpos="-52.369564" ypos="-59.706898">
       <input name="in1" type="float" output="outx" nodename="wood_position_separated" />
       <input name="in2" type="float" output="outy" nodename="wood_position_separated" />
-      <input name="in3" type="float" nodename="ray_divide_float_2" />
+      <input name="in3" type="float" nodename="ray_divide2" />
     </combine3>
-    <divide name="ray_divide_float_2" type="float" xpos="-59.043480" ypos="-60.258621">
-      <input name="in2" type="float" nodename="ray_max_float_2" />
-      <input name="in1" type="float" nodename="ray_subtract_float_6" />
+    <divide name="ray_divide2" type="float" xpos="-54.463768" ypos="-59.672413">
+      <input name="in2" type="float" nodename="ray_max2" />
+      <input name="in1" type="float" nodename="ray_subtract6" />
     </divide>
-    <subtract name="wyvill_subtract_float_2" type="float" xpos="-41.420288" ypos="-59.982758">
-      <input name="in2" type="float" nodename="wyvill_multiply_float" />
+    <subtract name="wyvill_subtract2" type="float" xpos="-40.057972" ypos="-61.500000">
+      <input name="in2" type="float" nodename="wyvill_multiply1" />
       <input name="in1" type="float" value="1" />
     </subtract>
-    <multiply name="ray_multiply_float_6" type="float" xpos="-61.391304" ypos="-61.810345">
-      <input name="in1" type="float" nodename="ray_divide_float_5" />
+    <multiply name="ray_multiply6" type="float" xpos="-56.811596" ypos="-61.224136">
+      <input name="in1" type="float" nodename="ray_divide5" />
       <input name="in2" type="float" value="6.28319" />
     </multiply>
-    <multiply name="wyvill_multiply_float" type="float" xpos="-43.739132" ypos="-60.017242">
-      <input name="in1" type="float" nodename="ray_divide_float_10" />
-      <input name="in2" type="float" nodename="ray_divide_float_10" />
+    <multiply name="wyvill_multiply1" type="float" xpos="-41.884056" ypos="-61.517242">
+      <input name="in1" type="float" nodename="ray_divide10" />
+      <input name="in2" type="float" nodename="ray_divide10" />
     </multiply>
-    <ifgreatereq name="wyvill_ifgreatereq_float" type="float" xpos="-37.130436" ypos="-61.396553">
-      <input name="value1" type="float" nodename="ray_divide_float_10" />
+    <ifgreatereq name="wyvill_ifgreatereq_float" type="float" xpos="-36.898552" ypos="-61.637932">
+      <input name="value1" type="float" nodename="ray_divide10" />
       <input name="value2" type="float" value="1" />
-      <input name="in2" type="float" nodename="power_float" />
+      <input name="in2" type="float" nodename="power1" />
     </ifgreatereq>
-    <multiply name="ray_multiply_float_2" type="float" xpos="-67.275360" ypos="-54.344826">
-      <input name="in1" type="float" nodename="ray_divide_float_4" />
+    <multiply name="ray_multiply2" type="float" xpos="-77.594200" ypos="-57.775864">
+      <input name="in1" type="float" nodename="ray_divide4" />
       <input name="in2" type="float" interfacename="ray_num_slices" />
     </multiply>
-    <atan2 name="ray_theta" type="float" xpos="-73.036232" ypos="-54.500000">
+    <atan2 name="ray_theta" type="float" xpos="-81.420288" ypos="-57.775864">
       <input name="in2" type="float" output="outx" nodename="wood_position_separated" />
       <input name="in1" type="float" output="outy" nodename="wood_position_separated" />
     </atan2>
-    <add name="ray_slice_id_add_seed" type="float" xpos="-57.536232" ypos="-54.086208">
-      <input name="in1" type="float" nodename="ray_multiply_float_3" />
+    <add name="ray_slice_id_add_seed" type="float" xpos="-70.869568" ypos="-57.775864">
+      <input name="in1" type="float" nodename="ray_multiply3" />
       <input name="in2" type="float" nodename="final_slice_id" />
     </add>
-    <ifgreatereq name="ray_ifgreatereq_float" type="float" xpos="-34.463768" ypos="-63.310345">
-      <input name="value2" type="float" nodename="ray_multiply_float_4" />
-      <input name="value1" type="float" nodename="ray_magnitude_vector_2" />
+    <ifgreatereq name="ray_ifgreatereq1" type="float" xpos="-34.144928" ypos="-61.620689">
+      <input name="value2" type="float" nodename="ray_multiply4" />
+      <input name="value1" type="float" nodename="ray_magnitude2" />
       <input name="in1" type="float" nodename="wyvill_ifgreatereq_float" />
     </ifgreatereq>
-    <add name="ray_add_float_2" type="float" xpos="-76.702896" ypos="-51.500000">
+    <add name="ray_add2" type="float" xpos="-71.057968" ypos="-53.551723">
       <input name="in1" type="float" nodename="segment_id_0" />
       <input name="in2" type="float" value="1" />
     </add>
-    <divide name="ray_divide_float_5" type="float" xpos="-63.326088" ypos="-61.810345">
-      <input name="in1" type="float" nodename="ray_add_float_3" />
+    <divide name="ray_divide5" type="float" xpos="-58.746376" ypos="-61.224136">
+      <input name="in1" type="float" nodename="ray_add3" />
       <input name="in2" type="float" interfacename="ray_num_slices" />
     </divide>
-    <magnitude name="ray_magnitude_vector_3" type="float" xpos="-50.297100" ypos="-60.000000">
-      <input name="in" type="vector3" nodename="ray_crossproduct_vector_3" />
+    <magnitude name="ray_magnitude3" type="float" xpos="-46.521740" ypos="-60.275864">
+      <input name="in" type="vector3" nodename="ray_crossproduct3" />
     </magnitude>
-    <divide name="ray_divide_float_7" type="float" xpos="-48.028984" ypos="-61.913792">
-      <input name="in1" type="float" nodename="ray_magnitude_vector_3" />
-      <input name="in2" type="float" nodename="ray_magnitude_vector_5" />
+    <divide name="ray_divide7" type="float" xpos="-44.782608" ypos="-61.500000">
+      <input name="in1" type="float" nodename="ray_magnitude3" />
+      <input name="in2" type="float" nodename="ray_magnitude5" />
     </divide>
-    <sin name="ray_sin_float" type="float" xpos="-56.978260" ypos="-61.482758">
+    <sin name="ray_sin1" type="float" xpos="-52.398552" ypos="-60.896553">
       <input name="in" type="float" nodename="ray_theta_0" />
     </sin>
-    <subtract name="ray_subtract_float_3" type="float" xpos="-77.057968" ypos="-49.017242">
+    <subtract name="ray_subtract3" type="float" xpos="-71.405800" ypos="-52.431034">
       <input name="in1" type="float" nodename="segment_id_0" />
       <input name="in2" type="float" value="1" />
     </subtract>
-    <combine2 name="ray_combine2_vector2_3" type="vector2" xpos="-81.420288" ypos="-59.862068">
+    <combine2 name="ray_combine3" type="vector2" xpos="-81.420288" ypos="-63.862068">
       <input name="in1" type="float" output="outx" nodename="wood_position_separated" />
       <input name="in2" type="float" output="outy" nodename="wood_position_separated" />
     </combine2>
-    <add name="ray_add_float_3" type="float" xpos="-65.760872" ypos="-61.672413">
-      <input name="in1" type="float" output="outx" nodename="ray_separate3_vector_6" />
+    <add name="ray_add3" type="float" xpos="-61.181160" ypos="-61.086208">
+      <input name="in1" type="float" output="outx" nodename="ray_separate6" />
       <input name="in2" type="float" nodename="final_slice_id" />
     </add>
-    <combine3 name="ray_direction_0" type="vector3" xpos="-55.057972" ypos="-62.189655">
-      <input name="in1" type="float" nodename="ray_cos_float" />
-      <input name="in2" type="float" nodename="ray_sin_float" />
+    <combine3 name="ray_direction_0" type="vector3" xpos="-50.478260" ypos="-61.603447">
+      <input name="in1" type="float" nodename="ray_cos1" />
+      <input name="in2" type="float" nodename="ray_sin1" />
     </combine3>
-    <floor name="slice_id" type="float" xpos="-65.188408" ypos="-54.344826">
-      <input name="in" type="float" nodename="ray_multiply_float_2" />
+    <floor name="slice_id" type="float" xpos="-75.971016" ypos="-57.655174">
+      <input name="in" type="float" nodename="ray_multiply2" />
     </floor>
-    <separate3 name="wood_position_separated" type="multioutput" xpos="-84.318840" ypos="-58.034481">
+    <separate3 name="wood_position_separated" type="multioutput" xpos="-84.304344" ypos="-61.206898">
       <output name="outz" type="float" />
       <output name="outy" type="float" />
       <output name="outx" type="float" />
       <input name="in" type="vector3" interfacename="wood_position" />
     </separate3>
-    <multiply name="ray_multiply_float_3" type="float" xpos="-59.652172" ypos="-56.534481">
+    <multiply name="ray_multiply3" type="float" xpos="-72.376808" ypos="-59.982758">
       <input name="in2" type="float" value="39" />
       <input name="in1" type="float" interfacename="seed" />
     </multiply>
-    <ifgreater name="segment_id_1" type="float" xpos="-74.695656" ypos="-49.913792">
+    <ifgreater name="segment_id_1" type="float" xpos="-69.434784" ypos="-54.068966">
       <input name="value1" type="float" nodename="ray_factor" />
       <input name="value2" type="float" value="0.5" />
-      <input name="in1" type="float" nodename="ray_add_float_2" />
-      <input name="in2" type="float" nodename="ray_subtract_float_3" />
+      <input name="in1" type="float" nodename="ray_add2" />
+      <input name="in2" type="float" nodename="ray_subtract3" />
     </ifgreater>
-    <subtract name="ray_subtract_float_6" type="float" xpos="-61.362320" ypos="-60.258621">
-      <input name="in1" type="float" nodename="ray_divide_float" />
+    <subtract name="ray_subtract6" type="float" xpos="-56.782608" ypos="-59.672413">
+      <input name="in1" type="float" nodename="ray_divide1" />
       <input name="in2" type="float" nodename="ray_pos_z_0" />
     </subtract>
-    <max name="ray_max_float_2" type="float" xpos="-84.079712" ypos="-51.293102">
+    <max name="ray_max2" type="float" xpos="-56.260868" ypos="-50.206898">
       <input name="in1" type="float" interfacename="ray_ellipse_z2x" />
       <input name="in2" type="float" value="1e-05" />
     </max>
-    <magnitude name="ray_magnitude_vector_5" type="float" xpos="-52.898552" ypos="-61.948277">
+    <magnitude name="ray_magnitude5" type="float" xpos="-48.485508" ypos="-61.931034">
       <input name="in" type="vector3" nodename="ray_direction_0" />
     </magnitude>
-    <add name="ray_add_float_7" type="float" xpos="-65.760872" ypos="-60.155174">
+    <add name="ray_add7" type="float" xpos="-61.181160" ypos="-59.568966">
       <input name="in1" type="float" nodename="segment_id_0" />
-      <input name="in2" type="float" output="outy" nodename="ray_separate3_vector_6" />
+      <input name="in2" type="float" output="outy" nodename="ray_separate6" />
     </add>
-    <magnitude name="ray_magnitude_vector_2" type="float" xpos="-79.050728" ypos="-59.603447">
-      <input name="in" type="vector2" nodename="ray_combine2_vector2_3" />
+    <magnitude name="ray_magnitude2" type="float" xpos="-36.086956" ypos="-63.741379">
+      <input name="in" type="vector2" nodename="ray_combine3" />
     </magnitude>
-    <ifgreatereq name="wyvill_ifgreatereq_float_2" type="float" xpos="-36.108696" ypos="-48.241379">
-      <input name="value1" type="float" nodename="ray_divide_float_12" />
+    <ifgreatereq name="wyvill_ifgreatereq_float_2" type="float" xpos="-36.884056" ypos="-55.275864">
+      <input name="value1" type="float" nodename="ray_divide12" />
       <input name="value2" type="float" value="1" />
-      <input name="in2" type="float" nodename="power_float_2" />
+      <input name="in2" type="float" nodename="power2" />
     </ifgreatereq>
-    <power name="power_float" type="float" xpos="-38.753624" ypos="-59.982758">
+    <power name="power1" type="float" xpos="-38.057972" ypos="-60.844826">
       <input name="in2" type="float" value="3" />
-      <input name="in1" type="float" nodename="wyvill_subtract_float_2" />
+      <input name="in1" type="float" nodename="wyvill_subtract2" />
     </power>
-    <subtract name="ray_subtract_float_8" type="float" xpos="-61.014492" ypos="-47.706898">
+    <subtract name="ray_subtract8" type="float" xpos="-56.608696" ypos="-53.637932">
       <input name="in1" type="float" value="0" />
       <input name="in2" type="float" nodename="ray_pos_z_1" />
     </subtract>
-    <separate3 name="ray_separate3_vector_6" type="multioutput" xpos="-68.500000" ypos="-61.775864">
+    <separate3 name="ray_separate6" type="multioutput" xpos="-63.920288" ypos="-61.189655">
       <input name="in" type="vector3" nodename="ray_hashnoise2d_1" />
       <output name="outx" type="float" />
       <output name="outy" type="float" />
     </separate3>
-    <divide name="ray_divide_float_9" type="float" xpos="-48.376812" ypos="-49.655174">
-      <input name="in1" type="float" nodename="ray_magnitude_vector_4" />
-      <input name="in2" type="float" nodename="ray_magnitude_vector_6" />
+    <divide name="ray_divide9" type="float" xpos="-44.782608" ypos="-55.293102">
+      <input name="in1" type="float" nodename="ray_magnitude4" />
+      <input name="in2" type="float" nodename="ray_magnitude6" />
     </divide>
-    <combine2 name="ray_combine2_vector2_2" type="vector2" xpos="-72.760872" ypos="-49.672413">
+    <combine2 name="ray_combine2" type="vector2" xpos="-67.739128" ypos="-55.448277">
       <input name="in2" type="float" nodename="segment_id_1" />
       <input name="in1" type="float" nodename="ray_slice_id_add_seed" />
     </combine2>
-    <floor name="ray_floor_float" type="float" xpos="-77.826088" ypos="-53.379311">
-      <input name="in" type="float" nodename="ray_divide_float_3" />
+    <floor name="ray_floor_float" type="float" xpos="-78.942032" ypos="-54.465519">
+      <input name="in" type="float" nodename="ray_divide3" />
     </floor>
-    <add name="ray_weight_sum" type="float" xpos="-31.326086" ypos="-56.120689">
-      <input name="in1" type="float" nodename="ray_ifgreatereq_float" />
-      <input name="in2" type="float" nodename="ray_ifgreatereq_float_2" />
+    <add name="ray_weight_sum" type="float" xpos="-31.485508" ypos="-58.293102">
+      <input name="in1" type="float" nodename="ray_ifgreatereq1" />
+      <input name="in2" type="float" nodename="ray_ifgreatereq2" />
     </add>
-    <divide name="ray_divide_float_8" type="float" xpos="-58.572464" ypos="-47.568966">
-      <input name="in2" type="float" nodename="ray_max_float_2" />
-      <input name="in1" type="float" nodename="ray_subtract_float_8" />
+    <divide name="ray_divide8" type="float" xpos="-54.166668" ypos="-53.500000">
+      <input name="in2" type="float" nodename="ray_max2" />
+      <input name="in1" type="float" nodename="ray_subtract8" />
     </divide>
-    <subtract name="wyvill_subtract_float_3" type="float" xpos="-40.260868" ypos="-47.982758">
-      <input name="in2" type="float" nodename="wyvill_multiply_float_2" />
+    <subtract name="wyvill_subtract3" type="float" xpos="-39.913044" ypos="-55.293102">
+      <input name="in2" type="float" nodename="wyvill_multiply2" />
       <input name="in1" type="float" value="1" />
     </subtract>
-    <wood3d_util_hashnoise2d name="ray_hashnoise2d_1" type="vector3" xpos="-70.514496" ypos="-61.396553">
-      <input name="texcoord" type="vector2" nodename="ray_combine2_vector2_4" />
+    <wood3d_util_hashnoise2d name="ray_hashnoise2d_1" type="vector3" xpos="-65.934784" ypos="-60.810345">
+      <input name="texcoord" type="vector2" nodename="ray_combine4" />
     </wood3d_util_hashnoise2d>
-    <add name="ray_add_float_6" type="float" xpos="-65.442032" ypos="-49.568966">
-      <input name="in1" type="float" output="outx" nodename="ray_separate3_vector_5" />
+    <add name="ray_add6" type="float" xpos="-61.130436" ypos="-55.155174">
+      <input name="in1" type="float" output="outx" nodename="ray_separate5" />
       <input name="in2" type="float" nodename="final_slice_id" />
     </add>
-    <wood3d_util_hashnoise2d name="ray_hashnoise2d_2" type="vector3" xpos="-70.449272" ypos="-49.551723">
-      <input name="texcoord" type="vector2" nodename="ray_combine2_vector2_2" />
+    <wood3d_util_hashnoise2d name="ray_hashnoise2d_2" type="vector3" xpos="-66.000000" ypos="-55.310345">
+      <input name="texcoord" type="vector2" nodename="ray_combine2" />
     </wood3d_util_hashnoise2d>
-    <multiply name="ray_multiply_float_7" type="float" xpos="-61.043480" ypos="-49.534481">
-      <input name="in1" type="float" nodename="ray_divide_float_6" />
+    <multiply name="ray_multiply7" type="float" xpos="-56.637680" ypos="-55.465519">
+      <input name="in1" type="float" nodename="ray_divide6" />
       <input name="in2" type="float" value="6.28319" />
     </multiply>
-    <combine3 name="p_normalized_1" type="vector3" xpos="-56.492752" ypos="-47.689655">
+    <combine3 name="p_normalized_1" type="vector3" xpos="-52.086956" ypos="-53.758621">
       <input name="in1" type="float" output="outx" nodename="wood_position_separated" />
       <input name="in2" type="float" output="outy" nodename="wood_position_separated" />
-      <input name="in3" type="float" nodename="ray_divide_float_8" />
+      <input name="in3" type="float" nodename="ray_divide8" />
     </combine3>
-    <combine2 name="ray_combine2_vector2_4" type="vector2" xpos="-72.826088" ypos="-61.534481">
+    <combine2 name="ray_combine4" type="vector2" xpos="-67.724640" ypos="-60.827587">
       <input name="in2" type="float" nodename="segment_id_0" />
       <input name="in1" type="float" nodename="ray_slice_id_add_seed" />
     </combine2>
-    <ifgreatereq name="ray_ifgreatereq_float_2" type="float" xpos="-34.115944" ypos="-50.500000">
-      <input name="value2" type="float" nodename="ray_multiply_float_5" />
-      <input name="value1" type="float" nodename="ray_magnitude_vector_2" />
+    <ifgreatereq name="ray_ifgreatereq2" type="float" xpos="-33.884056" ypos="-55.275864">
+      <input name="value2" type="float" nodename="ray_multiply5" />
+      <input name="value1" type="float" nodename="ray_magnitude2" />
       <input name="in1" type="float" nodename="wyvill_ifgreatereq_float_2" />
     </ifgreatereq>
-    <magnitude name="ray_magnitude_vector_4" type="float" xpos="-50.297100" ypos="-47.448277">
-      <input name="in" type="vector3" nodename="ray_crossproduct_vector_4" />
+    <magnitude name="ray_magnitude4" type="float" xpos="-46.514492" ypos="-53.931034">
+      <input name="in" type="vector3" nodename="ray_crossproduct4" />
     </magnitude>
-    <divide name="ray_divide_float_6" type="float" xpos="-63.239132" ypos="-49.534481">
-      <input name="in1" type="float" nodename="ray_add_float_6" />
+    <divide name="ray_divide6" type="float" xpos="-58.833332" ypos="-55.465519">
+      <input name="in1" type="float" nodename="ray_add6" />
       <input name="in2" type="float" interfacename="ray_num_slices" />
     </divide>
-    <crossproduct name="ray_crossproduct_vector_4" type="vector3" xpos="-52.898552" ypos="-47.603447">
+    <crossproduct name="ray_crossproduct4" type="vector3" xpos="-48.376812" ypos="-54.051723">
       <input name="in1" type="vector3" nodename="ray_direction_1" />
       <input name="in2" type="vector3" nodename="p_normalized_1" />
     </crossproduct>
-    <add name="ray_add_float_8" type="float" xpos="-65.449272" ypos="-47.879311">
+    <add name="ray_add8" type="float" xpos="-61.130436" ypos="-53.913792">
       <input name="in1" type="float" nodename="segment_id_1" />
-      <input name="in2" type="float" output="outy" nodename="ray_separate3_vector_5" />
+      <input name="in2" type="float" output="outy" nodename="ray_separate5" />
     </add>
-    <combine3 name="ray_direction_1" type="vector3" xpos="-54.637680" ypos="-49.793102">
-      <input name="in1" type="float" nodename="ray_cos_float_2" />
-      <input name="in2" type="float" nodename="ray_sin_float_2" />
+    <combine3 name="ray_direction_1" type="vector3" xpos="-50.231884" ypos="-55.724136">
+      <input name="in1" type="float" nodename="ray_cos2" />
+      <input name="in2" type="float" nodename="ray_sin2" />
     </combine3>
-    <multiply name="wyvill_multiply_float_2" type="float" xpos="-44.137680" ypos="-47.879311">
-      <input name="in1" type="float" nodename="ray_divide_float_12" />
-      <input name="in2" type="float" nodename="ray_divide_float_12" />
+    <multiply name="wyvill_multiply2" type="float" xpos="-41.768116" ypos="-55.310345">
+      <input name="in1" type="float" nodename="ray_divide12" />
+      <input name="in2" type="float" nodename="ray_divide12" />
     </multiply>
-    <cos name="ray_cos_float_2" type="float" xpos="-56.485508" ypos="-50.224136">
+    <cos name="ray_cos2" type="float" xpos="-52.079712" ypos="-56.155174">
       <input name="in" type="float" nodename="ray_theta_1" />
     </cos>
-    <sin name="ray_sin_float_2" type="float" xpos="-56.485508" ypos="-48.982758">
+    <sin name="ray_sin2" type="float" xpos="-52.079712" ypos="-54.913792">
       <input name="in" type="float" nodename="ray_theta_1" />
     </sin>
-    <magnitude name="ray_magnitude_vector_6" type="float" xpos="-52.847828" ypos="-49.672413">
+    <magnitude name="ray_magnitude6" type="float" xpos="-48.369564" ypos="-56.155174">
       <input name="in" type="vector3" nodename="ray_direction_1" />
     </magnitude>
-    <divide name="ray_divide_float_10" type="float" xpos="-46.007248" ypos="-60.120689">
-      <input name="in1" type="float" nodename="ray_divide_float_7" />
-      <input name="in2" type="float" nodename="ray_max_float_3" />
+    <divide name="ray_divide10" type="float" xpos="-43.347828" ypos="-61.500000">
+      <input name="in1" type="float" nodename="ray_divide7" />
+      <input name="in2" type="float" nodename="ray_max3" />
     </divide>
-    <power name="power_float_2" type="float" xpos="-37.898552" ypos="-47.982758">
+    <power name="power2" type="float" xpos="-37.942028" ypos="-54.362068">
       <input name="in2" type="float" value="3" />
-      <input name="in1" type="float" nodename="wyvill_subtract_float_3" />
+      <input name="in1" type="float" nodename="wyvill_subtract3" />
     </power>
-    <multiply name="ray_pos_z_1" type="float" xpos="-63.217392" ypos="-47.844826">
-      <input name="in1" type="float" nodename="ray_add_float_8" />
+    <multiply name="ray_pos_z_1" type="float" xpos="-58.811596" ypos="-53.775864">
+      <input name="in1" type="float" nodename="ray_add8" />
       <input name="in2" type="float" interfacename="ray_seg_length_z" />
     </multiply>
-    <divide name="ray_divide_float_12" type="float" xpos="-46.434784" ypos="-47.896553">
-      <input name="in1" type="float" nodename="ray_divide_float_9" />
-      <input name="in2" type="float" nodename="ray_max_float_3" />
+    <divide name="ray_divide12" type="float" xpos="-43.275364" ypos="-55.293102">
+      <input name="in1" type="float" nodename="ray_divide9" />
+      <input name="in2" type="float" nodename="ray_max3" />
     </divide>
-    <subtract name="ray_theta_1" type="float" xpos="-58.601448" ypos="-49.379311">
-      <input name="in1" type="float" nodename="ray_multiply_float_7" />
+    <subtract name="ray_theta_1" type="float" xpos="-54.195652" ypos="-55.310345">
+      <input name="in1" type="float" nodename="ray_multiply7" />
       <input name="in2" type="float" value="3.14159" />
     </subtract>
-    <separate3 name="ray_separate3_vector_5" type="multioutput" xpos="-68.434784" ypos="-49.655174">
+    <separate3 name="ray_separate5" type="multioutput" xpos="-63.717392" ypos="-55.551723">
       <input name="in" type="vector3" nodename="ray_hashnoise2d_2" />
       <output name="outx" type="float" />
       <output name="outy" type="float" />
     </separate3>
-    <multiply name="ray_multiply_float_5" type="float" xpos="-65.478264" ypos="-51.068966">
+    <multiply name="ray_multiply5" type="float" xpos="-61.166668" ypos="-56.672413">
       <input name="in2" type="float" value="5" />
-      <input name="in1" type="float" output="outx" nodename="ray_separate3_vector_5" />
+      <input name="in1" type="float" output="outx" nodename="ray_separate5" />
     </multiply>
-    <power name="raycolor_power" type="color3" xpos="-23.101450" ypos="-55.913792">
+    <power name="raycolor_power" type="color3" xpos="-25.065218" ypos="-58.086208">
       <input name="in1" type="color3" interfacename="color" />
-      <input name="in2" type="float" nodename="ray_add_float" />
+      <input name="in2" type="float" nodename="ray_add1" />
     </power>
-    <output name="ray_color" type="color3" nodename="raycolor_power" xpos="-21.485508" ypos="-55.775864" />
-    <output name="ray_weight" type="float" nodename="ray_weight_sum" xpos="-29.826086" ypos="-53.517242" />
-  </nodegraph>
-
-  <nodegraph name="NG_wood3d_util_pore_color" nodedef="ND_wood3d_util_pore_color">
-    <subtract name="pore_subtract_float_2" type="float" xpos="-29.840580" ypos="-50.137932">
-      <input name="in1" type="float" interfacename="pore_color_power" />
-      <input name="in2" type="float" value="1" />
-    </subtract>
-    <multiply name="pore_multiply_float" type="float" xpos="-27.884058" ypos="-49.603447">
-      <input name="in1" type="float" nodename="pore_subtract_float_2" />
-      <input name="in2" type="float" interfacename="pore_weight" />
-    </multiply>
-    <add name="pore_add_float" type="float" xpos="-25.557972" ypos="-49.568966">
-      <input name="in1" type="float" nodename="pore_multiply_float" />
-      <input name="in2" type="float" value="1" />
-    </add>
-    <power name="pore_power_color3FA" type="color3" xpos="-24.057972" ypos="-49.293102">
-      <input name="in2" type="float" nodename="pore_add_float" />
-      <input name="in1" type="color3" interfacename="color" />
-    </power>
-    <output name="pore_color" type="color3" nodename="pore_power_color3FA"/>
+    <output name="ray_color" type="color3" nodename="raycolor_power" xpos="-23.449276" ypos="-57.948277" />
+    <output name="ray_weight" type="float" nodename="ray_weight_sum" xpos="-29.978260" ypos="-56.000000" />
   </nodegraph>
 
   <nodegraph name="NG_wood3d_util_roughness" nodedef="ND_wood3d_util_roughness">
-    <multiply name="rough_multiply_float_3" type="float" xpos="-69.079712" ypos="-52.258621">
+    <multiply name="rough_multiply3" type="float" xpos="-69.079712" ypos="-52.258621">
       <input name="in1" type="float" interfacename="ray_weight" />
       <input name="in2" type="float" interfacename="ray_roughness" />
     </multiply>
-    <clamp name="rough_clamp_float" type="float" xpos="-65.065216" ypos="-53.655174">
-      <input name="in" type="float" nodename="rough_add_float_2" />
+    <clamp name="rough_clamp" type="float" xpos="-65.065216" ypos="-53.655174">
+      <input name="in" type="float" nodename="rough_add2" />
     </clamp>
-    <add name="rough_add_float_2" type="float" xpos="-66.840576" ypos="-53.775864">
-      <input name="in2" type="float" nodename="rough_multiply_float_3" />
+    <add name="rough_add2" type="float" xpos="-66.840576" ypos="-53.775864">
+      <input name="in2" type="float" nodename="rough_multiply3" />
       <input name="in1" type="float" nodename="lobe_roughness" />
     </add>
-    <multiply name="rough_multiply_float" type="float" xpos="-74.695656" ypos="-51.017242">
+    <multiply name="rough_multiply1" type="float" xpos="-74.695656" ypos="-51.017242">
       <input name="in1" type="float" interfacename="roughness" />
-      <input name="in2" type="float" nodename="rough_subtract_float" />
+      <input name="in2" type="float" nodename="rrough_subtract" />
     </multiply>
-    <subtract name="rough_subtract_float" type="float" xpos="-77.463768" ypos="-50.879311">
+    <subtract name="rrough_subtract" type="float" xpos="-77.463768" ypos="-50.879311">
       <input name="in1" type="float" value="1" />
       <input name="in2" type="float" interfacename="earlywood_ratio" />
     </subtract>
-    <multiply name="rough_multiply_float_2" type="float" xpos="-77.311592" ypos="-52.275864">
+    <multiply name="rough_multiply2" type="float" xpos="-77.311592" ypos="-52.275864">
       <input name="in1" type="float" interfacename="earlywood_ratio" />
       <input name="in2" type="float" interfacename="groove_roughness" />
     </multiply>
-    <add name="rough_add_float" type="float" xpos="-72.449272" ypos="-51.879311">
-      <input name="in1" type="float" nodename="rough_multiply_float_2" />
-      <input name="in2" type="float" nodename="rough_multiply_float" />
+    <add name="rough_add1" type="float" xpos="-72.449272" ypos="-51.879311">
+      <input name="in1" type="float" nodename="rough_multiply2" />
+      <input name="in2" type="float" nodename="rough_multiply1" />
     </add>
     <ifequal name="lobe_roughness" type="float" xpos="-70.746376" ypos="-53.948277">
-      <input name="in2" type="float" nodename="rough_add_float" />
+      <input name="in2" type="float" nodename="rough_add1" />
       <input name="in1" type="float" interfacename="roughness" />
       <input name="value1" type="boolean" interfacename="use_groove_roughness" />
       <input name="value2" type="boolean" value="true" />
     </ifequal>
-    <output name="wood_roughness" type="float" xpos="-63.210144" ypos="-53.655174" nodename="rough_clamp_float" />
+    <output name="wood_roughness" type="float" xpos="-63.210144" ypos="-53.655174" nodename="rough_clamp" />
   </nodegraph>
   
   <nodegraph name="NG_wood3d_util_bump" nodedef="ND_wood3d_util_bump">
-    <normalmap name="normalmap" type="vector3" xpos="-63.876812" ypos="-32.396553">
+    <normalmap name="normalmap" type="vector3" xpos="-75.702896" ypos="-32.293102">
       <input name="in" type="vector3" nodename="heighttonormal_vector3" />
       <input name="scale" type="float" value="10" />
     </normalmap>
-    <heighttonormal name="heighttonormal_vector3" type="vector3" xpos="-66.811592" ypos="-32.396553">
-      <input name="in" type="float" nodename="bump_add_float" />
+    <heighttonormal name="heighttonormal_vector3" type="vector3" xpos="-77.963768" ypos="-32.293102">
+      <input name="in" type="float" nodename="bump_add" />
       <input name="scale" type="float" value="1" />
     </heighttonormal>
-    <multiply name="bump_multiply_float" type="float" xpos="-85.644928" ypos="-34.250000">
+    <multiply name="bump_multiply1" type="float" xpos="-85.702896" ypos="-34.327587">
       <input name="in2" type="float" interfacename="pore_bump_weight" />
       <input name="in1" type="float" interfacename="pore_depth" />
     </multiply>
-    <add name="bump_add_float" type="float" xpos="-69.500000" ypos="-32.482758">
+    <add name="bump_add" type="float" xpos="-79.217392" ypos="-32.258621">
       <input name="in1" type="float" nodename="bump_ifequal_floatB" />
       <input name="in2" type="float" nodename="bump_ifequal_floatB2" />
     </add>
-    <multiply name="bump_multiply_float_2" type="float" xpos="-83.173912" ypos="-33.146553">
-      <input name="in1" type="float" nodename="bump_multiply_float" />
+    <multiply name="bump_multiply2" type="float" xpos="-84.079712" ypos="-34.327587">
+      <input name="in1" type="float" nodename="bump_multiply1" />
       <input name="in2" type="float" value="-1" />
     </multiply>
-    <subtract name="bump_subtract_float_5" type="float" xpos="-75.260872" ypos="-29.215517">
+    <subtract name="bump_subtract5" type="float" xpos="-85.710144" ypos="-30.603449">
       <input name="in2" type="float" interfacename="earlywood_ratio" />
       <input name="in1" type="float" value="1" />
     </subtract>
-    <ifequal name="bump_ifequal_floatB" type="float" xpos="-77.159424" ypos="-33.129311">
+    <ifequal name="bump_ifequal_floatB" type="float" xpos="-82.028984" ypos="-34.500000">
       <input name="value1" type="boolean" interfacename="use_pores_bump" />
       <input name="value2" type="boolean" value="true" />
-      <input name="in1" type="float" nodename="bump_multiply_float_2" />
+      <input name="in1" type="float" nodename="bump_multiply2" />
     </ifequal>
-    <multiply name="bump_multiply_float_7" type="float" xpos="-72.637680" ypos="-28.258621">
-      <input name="in1" type="float" nodename="bump_subtract_float_5" />
+    <multiply name="bump_multiply7" type="float" xpos="-83.731888" ypos="-29.913794">
+      <input name="in1" type="float" nodename="bump_subtract5" />
       <input name="in2" type="float" interfacename="late_wood_bump_depth" />
     </multiply>
-    <ifequal name="bump_ifequal_floatB2" type="float" xpos="-71.463768" ypos="-30.758621">
+    <ifequal name="bump_ifequal_floatB2" type="float" xpos="-81.869568" ypos="-30.913794">
       <input name="value1" type="boolean" interfacename="use_late_wood_bump" />
       <input name="value2" type="boolean" value="true" />
-      <input name="in1" type="float" nodename="bump_multiply_float_7" />
+      <input name="in1" type="float" nodename="bump_multiply7" />
       <input name="in2" type="float" value="0" />
     </ifequal>
-    <output name="normal" type="vector3" nodename="normalmap" xpos="-62.166668" ypos="-32.137932" />
+    <output name="normal" type="vector3" nodename="normalmap" xpos="-74.463768" ypos="-32.137932" />
   </nodegraph>
 
   <nodegraph name="NG_wood3d" nodedef="ND_wood3d">
@@ -1405,12 +1385,7 @@
       <input name="earlywood_ratio" type="float" nodename="wood3d_ratio" />
       <input name="pore_bump_weight" type="float" nodename="pore_bump_weight" />
     </wood3d_util_bump>
-    <wood3d_util_pore_color name="wood3d_pore_color" type="color3" xpos="-41.442028" ypos="-48.568966">
-      <input name="pore_color_power" type="float" interfacename="pore_color_power" />
-      <input name="pore_weight" type="float" nodename="pore_weight" />
-      <input name="color" type="color3" nodename="wood_color_0" />
-    </wood3d_util_pore_color>
-    <wood3d_util_roughness name="wood3d_roughness" type="float" xpos="-25.652174" ypos="-43.465519">
+    <wood3d_util_roughness name="wood3d_roughness" type="float" xpos="-20.905798" ypos="-43.362068">
       <input name="use_groove_roughness" type="boolean" interfacename="use_groove_roughness" />
       <input name="groove_roughness" type="float" interfacename="groove_roughness" />
       <input name="earlywood_ratio" type="float" nodename="wood3d_ratio" />
@@ -1428,7 +1403,7 @@
       <input name="growth_perlin_frequencies" type="vector4" interfacename="growth_perlin_frequencies" />
       <input name="radius" type="float" nodename="radius" />
     </wood3d_util_growth_perlin>
-    <wood3d_util_ray name="wood3d_ray" type="multioutput" xpos="-33.449276" ypos="-50.879311">
+    <wood3d_util_ray name="wood3d_ray" type="multioutput" xpos="-28.702898" ypos="-50.775864">
       <input name="ray_seg_length_z" type="float" interfacename="ray_seg_length_z" />
       <input name="ray_ellipse_depth" type="float" interfacename="ray_ellipse_depth" />
       <input name="ray_color_power" type="float" interfacename="ray_color_power" />
@@ -1555,7 +1530,7 @@
       <input name="in2" type="float" nodename="latecolor_ratio" />
       <input name="in1" type="float" value="1" />
     </switch>
-    <multiply name="weighted_wood_color" type="color3" xpos="-25.565218" ypos="-47.603447">
+    <multiply name="weighted_wood_color" type="color3" xpos="-20.818840" ypos="-47.500000">
       <input name="in2" type="float" interfacename="diffuse_lobe_weight" />
       <input name="in1" type="color3" nodename="wood_color_2" />
     </multiply>
@@ -1574,16 +1549,16 @@
       <input name="position" type="vector3" nodename="wood_position" />
       <input name="wood_weight" type="float" nodename="pore_ratio" />
       <input name="seed" type="float" nodename="adjusted_seed" />
-      <input name="pore_cell_dim" type="float" nodename="pore_cell_dim_limited"/>
+      <input name="pore_cell_dim" type="float" nodename="pore_cell_dim_limited" />
       <input name="pore_radius" type="float" interfacename="pore_radius" />
     </wood3d_util_pore_impulse>
-    <ifequal name="wood_color_1" type="color3" xpos="-38.086956" ypos="-48.551723">
+    <ifequal name="wood_color_1" type="color3" xpos="-32.956520" ypos="-48.551723">
       <input name="value1" type="boolean" interfacename="use_pore_color" />
       <input name="value2" type="boolean" value="true" />
       <input name="in2" type="color3" nodename="wood_color_0" />
-      <input name="in1" type="color3" nodename="wood3d_pore_color" />
+      <input name="in1" type="color3" nodename="pore_power" />
     </ifequal>
-    <ifequal name="wood_color_2" type="color3" xpos="-29.231884" ypos="-48.534481">
+    <ifequal name="wood_color_2" type="color3" xpos="-24.485508" ypos="-48.431034">
       <input name="value1" type="boolean" interfacename="use_ray_color" />
       <input name="value2" type="boolean" value="true" />
       <input name="in2" type="color3" nodename="wood_color_1" />
@@ -1610,7 +1585,7 @@
       <input name="in1" type="color3" nodename="latecolor_perlin" />
       <input name="in2" type="color3" nodename="latecolor" />
     </ifequal>
-    <ifequal name="ray_roughness_weight" type="float" xpos="-29.362318" ypos="-43.051723">
+    <ifequal name="ray_roughness_weight" type="float" xpos="-24.615942" ypos="-42.948277">
       <input name="value1" type="boolean" interfacename="use_ray_color" />
       <input name="value2" type="boolean" value="true" />
       <input name="in1" type="float" output="ray_weight" nodename="wood3d_ray" />
@@ -1655,9 +1630,24 @@
       <input name="in2" type="vector3" nodename="wood_position_1" />
       <input name="in1" type="vector3" nodename="wood3d_fiber_perlin_distortion" />
     </ifequal>
-    <output name="diffuse_color" type="color3" nodename="weighted_wood_color" xpos="-22.978260" ypos="-47.568966" />
-    <output name="wood_roughness" type="float" nodename="wood3d_roughness" xpos="-23.282608" ypos="-42.810345" />
+    <power name="pore_power" type="color3" xpos="-36.086956" ypos="-48.568966">
+      <input name="in2" type="float" nodename="pore_add" />
+      <input name="in1" type="color3" nodename="wood_color_0" />
+    </power>
+    <add name="pore_add" type="float" xpos="-37.362320" ypos="-48.534481">
+      <input name="in1" type="float" nodename="pore_multiply" />
+      <input name="in2" type="float" value="1" />
+    </add>
+    <subtract name="pore_subtract" type="float" xpos="-40.847828" ypos="-48.551723">
+      <input name="in1" type="float" interfacename="pore_color_power" />
+      <input name="in2" type="float" value="1" />
+    </subtract>
+    <multiply name="pore_multiply" type="float" xpos="-39.137680" ypos="-48.551723">
+      <input name="in1" type="float" nodename="pore_subtract" />
+      <input name="in2" type="float" nodename="pore_weight" />
+    </multiply>
+    <output name="diffuse_color" type="color3" nodename="weighted_wood_color" xpos="-18.231884" ypos="-47.465519" />
+    <output name="wood_roughness" type="float" nodename="wood3d_roughness" xpos="-18.536232" ypos="-42.706898" />
     <output name="normal" type="vector3" nodename="wood3d_bump" xpos="-36.550724" ypos="-41.379311" />
   </nodegraph>
-
 </materialx>
