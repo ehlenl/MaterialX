@@ -312,14 +312,30 @@ void testUniqueNames(mx::GenContext& context, const std::string& stage)
     REQUIRE(sgNode1->getOutput()->getVariable() == "unique_names_out");
 }
 
-// Test ShaderGen performance 
-void shaderGenPerformanceTest(mx::GenContext& context)
+void loadDefaultDataLibrary()
 {
-    mx::DocumentPtr nodeLibrary = mx::createDocument();
     const mx::FileSearchPath libSearchPath(mx::getDefaultDataSearchPath());
 
     // Load the standard libraries.
-    loadLibraries({ "libraries" }, libSearchPath, nodeLibrary);
+    mx::FilePath libraryroot(libSearchPath.asString() + "/libraries");
+    std::vector<mx::DocumentPtr> documentList;
+    mx::StringVec libdocumentsPaths;
+    mx::StringVec liberrorLog;
+    mx::loadDocuments(libraryroot, libSearchPath, {}, {}, documentList, libdocumentsPaths, nullptr, &liberrorLog);
+
+    if (liberrorLog.size() == 0)
+        mx::standardDataLibrary->loadDataLibrary(documentList);
+}
+
+// Test ShaderGen performance 
+void shaderGenPerformanceTest(mx::GenContext& context)
+{
+    const mx::FileSearchPath libSearchPath(mx::getDefaultDataSearchPath());
+
+    // Load the standard libraries.
+    loadDefaultDataLibrary();
+
+    //loadLibraries({ "libraries" }, libSearchPath, nodeLibrary);
     context.registerSourceCodeSearchPath(libSearchPath);
 
     // Enable Color Management
@@ -328,10 +344,7 @@ void shaderGenPerformanceTest(mx::GenContext& context)
 
     REQUIRE(colorManagementSystem);
     if (colorManagementSystem)
-    {
         context.getShaderGenerator().setColorManagementSystem(colorManagementSystem);
-        colorManagementSystem->loadLibrary(nodeLibrary);
-    }
 
     // Enable Unit System
     mx::UnitSystemPtr unitSystem = mx::UnitSystem::create(context.getShaderGenerator().getTarget());
@@ -339,12 +352,11 @@ void shaderGenPerformanceTest(mx::GenContext& context)
     if (unitSystem)
     {
         context.getShaderGenerator().setUnitSystem(unitSystem);
-        unitSystem->loadLibrary(nodeLibrary);
         // Setup Unit converters
         unitSystem->setUnitConverterRegistry(mx::UnitConverterRegistry::create());
-        mx::UnitTypeDefPtr distanceTypeDef = nodeLibrary->getUnitTypeDef("distance");
+        mx::UnitTypeDefPtr distanceTypeDef = mx::standardDataLibrary->dataLibrary()->getUnitTypeDef("distance");
         unitSystem->getUnitConverterRegistry()->addUnitConverter(distanceTypeDef, mx::LinearUnitConverter::create(distanceTypeDef));
-        mx::UnitTypeDefPtr angleTypeDef = nodeLibrary->getUnitTypeDef("angle");
+        mx::UnitTypeDefPtr angleTypeDef = mx::standardDataLibrary->dataLibrary()->getUnitTypeDef("angle");
         unitSystem->getUnitConverterRegistry()->addUnitConverter(angleTypeDef, mx::LinearUnitConverter::create(angleTypeDef));
         context.getOptions().targetDistanceUnit = "meter";
     }
@@ -357,7 +369,6 @@ void shaderGenPerformanceTest(mx::GenContext& context)
     std::vector<mx::DocumentPtr> loadedDocuments;
     mx::StringVec documentsPaths;
     mx::StringVec errorLog;
-
     for (const auto& testRoot : testRootPaths)
     {
         mx::loadDocuments(testRoot, libSearchPath, {}, {}, loadedDocuments, documentsPaths,
@@ -372,7 +383,6 @@ void shaderGenPerformanceTest(mx::GenContext& context)
     std::shuffle(loadedDocuments.begin(), loadedDocuments.end(), rng);
     for (const auto& doc : loadedDocuments)
     {
-        doc->importLibrary(nodeLibrary);
         std::vector<mx::TypedElementPtr> elements = mx::findRenderableElements(doc);
 
         REQUIRE(elements.size() > 0);
@@ -389,6 +399,7 @@ void shaderGenPerformanceTest(mx::GenContext& context)
         REQUIRE(shader != nullptr);
         REQUIRE(shader->getSourceCode(mx::Stage::PIXEL).length() > 0);
     }
+
 }
 
 void ShaderGeneratorTester::checkImplementationUsage(const mx::StringSet& usedImpls,
@@ -519,7 +530,6 @@ void ShaderGeneratorTester::addColorManagement()
         else
         {
             _shaderGenerator->setColorManagementSystem(_colorManagementSystem);
-            _colorManagementSystem->loadLibrary(_dependLib);
         }
     }
 }
@@ -537,7 +547,6 @@ void ShaderGeneratorTester::addUnitSystem()
         else
         {
             _shaderGenerator->setUnitSystem(_unitSystem);
-            _unitSystem->loadLibrary(_dependLib);
             _unitSystem->setUnitConverterRegistry(mx::UnitConverterRegistry::create());
             mx::UnitTypeDefPtr distanceTypeDef = _dependLib->getUnitTypeDef("distance");
             _unitSystem->getUnitConverterRegistry()->addUnitConverter(distanceTypeDef, mx::LinearUnitConverter::create(distanceTypeDef));

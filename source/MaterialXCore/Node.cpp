@@ -7,6 +7,7 @@
 
 #include <MaterialXCore/Document.h>
 #include <MaterialXCore/Material.h>
+#include <MaterialXCore/Datalibrary.h>
 
 #include <deque>
 
@@ -74,8 +75,12 @@ NodeDefPtr Node::getNodeDef(const string& target, bool allowRoughMatch) const
     {
         return resolveNameReference<NodeDef>(getNodeDefString());
     }
-    vector<NodeDefPtr> nodeDefs = getDocument()->getMatchingNodeDefs(getQualifiedName(getCategory()));
-    vector<NodeDefPtr> secondary = getDocument()->getMatchingNodeDefs(getCategory());
+    
+   
+    // If a nodelibrary is not registered, use the document to locate nodedefs
+    ConstDocumentPtr datalibrarydoc = standardDataLibrary ? standardDataLibrary->dataLibrary() : getDocument();
+    vector<NodeDefPtr> nodeDefs = datalibrarydoc->getMatchingNodeDefs(getQualifiedName(getCategory()));
+    vector<NodeDefPtr> secondary = datalibrarydoc->getMatchingNodeDefs(getCategory());
     vector<NodeDefPtr> roughMatches;
     nodeDefs.insert(nodeDefs.end(), secondary.begin(), secondary.end());
     for (NodeDefPtr nodeDef : nodeDefs)

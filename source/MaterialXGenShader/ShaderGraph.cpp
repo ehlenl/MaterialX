@@ -196,12 +196,13 @@ void ShaderGraph::addDefaultGeomNode(ShaderInput* input, const GeomPropDef& geom
     const string geomNodeName = "geomprop_" + geomprop.getName();
     ShaderNode* node = getNode(geomNodeName);
 
+    ConstDocumentPtr datalibrarydoc = standardDataLibrary ? standardDataLibrary->dataLibrary() : _document;
     if (!node)
     {
         // Find the nodedef for the geometric node referenced by the geomprop. Use the type of the
         // input here and ignore the type of the geomprop. They are required to have the same type.
         string geomNodeDefName = "ND_" + geomprop.getGeomProp() + "_" + input->getType().getName();
-        NodeDefPtr geomNodeDef = _document->getNodeDef(geomNodeDefName);
+        NodeDefPtr geomNodeDef = datalibrarydoc->getNodeDef(geomNodeDefName);
         if (!geomNodeDef)
         {
             throw ExceptionShaderGenError("Could not find a nodedef named '" + geomNodeDefName +

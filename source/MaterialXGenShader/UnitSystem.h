@@ -17,6 +17,7 @@
 #include <MaterialXCore/Unit.h>
 
 #include <MaterialXCore/Document.h>
+#include <MaterialXCore/Datalibrary.h>
 
 MATERIALX_NAMESPACE_BEGIN
 
@@ -68,9 +69,6 @@ class MX_GENSHADER_API UnitSystem
     /// Returns the currently assigned unit converter registry
     virtual UnitConverterRegistryPtr getUnitConverterRegistry() const;
 
-    /// assign document with unit implementations replacing any previously loaded content.
-    virtual void loadLibrary(DocumentPtr document);
-
     /// Returns whether this unit system supports a provided transform
     bool supportsTransform(const UnitTransform& transform) const;
 
@@ -89,7 +87,6 @@ class MX_GENSHADER_API UnitSystem
 
   protected:
     UnitConverterRegistryPtr _unitRegistry;
-    DocumentPtr _document;
     string _target;
 };
 

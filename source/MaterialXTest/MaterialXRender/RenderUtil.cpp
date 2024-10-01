@@ -143,7 +143,6 @@ bool ShaderRenderTester::validate(const mx::FilePath optionsFilePath)
     createRenderer(log);
 
     mx::ColorManagementSystemPtr colorManagementSystem = mx::DefaultColorManagementSystem::create(_shaderGenerator->getTarget());
-    colorManagementSystem->loadLibrary(dependLib);
     _shaderGenerator->setColorManagementSystem(colorManagementSystem);
 
     // Setup Unit system and working space
@@ -154,7 +153,6 @@ bool ShaderRenderTester::validate(const mx::FilePath optionsFilePath)
     registry->addUnitConverter(distanceTypeDef, mx::LinearUnitConverter::create(distanceTypeDef));
     mx::UnitTypeDefPtr angleTypeDef = dependLib->getUnitTypeDef("angle");
     registry->addUnitConverter(angleTypeDef, mx::LinearUnitConverter::create(angleTypeDef));
-    _shaderGenerator->getUnitSystem()->loadLibrary(dependLib);
     _shaderGenerator->getUnitSystem()->setUnitConverterRegistry(registry);
 
     mx::GenContext context(_shaderGenerator);

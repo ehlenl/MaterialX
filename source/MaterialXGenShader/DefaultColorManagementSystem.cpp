@@ -46,16 +46,11 @@ const string& DefaultColorManagementSystem::getName() const
 
 NodeDefPtr DefaultColorManagementSystem::getNodeDef(const ColorSpaceTransform& transform) const
 {
-    if (!_document)
-    {
-        throw ExceptionShaderGenError("No library loaded for color management system");
-    }
-
     string sourceSpace = COLOR_SPACE_REMAP.count(transform.sourceSpace) ? COLOR_SPACE_REMAP.at(transform.sourceSpace) : transform.sourceSpace;
     string targetSpace = COLOR_SPACE_REMAP.count(transform.targetSpace) ? COLOR_SPACE_REMAP.at(transform.targetSpace) : transform.targetSpace;
     string nodeName = sourceSpace + "_to_" + targetSpace;
 
-    for (NodeDefPtr nodeDef : _document->getMatchingNodeDefs(nodeName))
+    for (NodeDefPtr nodeDef : standardDataLibrary->dataLibrary()->getMatchingNodeDefs(nodeName))
     {
         for (OutputPtr output : nodeDef->getOutputs())
         {

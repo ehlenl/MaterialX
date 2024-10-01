@@ -24,7 +24,6 @@ void bindPyUnitSystem(py::module& mod)
     py::class_<mx::UnitSystem, mx::UnitSystemPtr>(mod, "UnitSystem")
         .def_static("create", &mx::UnitSystem::create)
         .def("getName", &mx::UnitSystem::getName)
-        .def("loadLibrary", &mx::UnitSystem::loadLibrary)
         .def("supportsTransform", &mx::UnitSystem::supportsTransform)
         .def("setUnitConverterRegistry", &mx::UnitSystem::setUnitConverterRegistry)
         .def("getUnitConverterRegistry", &mx::UnitSystem::getUnitConverterRegistry);

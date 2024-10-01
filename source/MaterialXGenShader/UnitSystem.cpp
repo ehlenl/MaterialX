@@ -123,11 +123,6 @@ UnitSystem::UnitSystem(const string& target) :
 {
 }
 
-void UnitSystem::loadLibrary(DocumentPtr document)
-{
-    _document = document;
-}
-
 void UnitSystem::setUnitConverterRegistry(UnitConverterRegistryPtr registry)
 {
     _unitRegistry = registry;
@@ -145,13 +140,8 @@ UnitSystemPtr UnitSystem::create(const string& language)
 
 NodeDefPtr UnitSystem::getNodeDef(const UnitTransform& transform) const
 {
-    if (!_document)
-    {
-        throw ExceptionShaderGenError("No library loaded for unit system");
-    }
-
     const string MULTIPLY_NODE_NAME = "multiply";
-    for (NodeDefPtr nodeDef : _document->getMatchingNodeDefs(MULTIPLY_NODE_NAME))
+    for (NodeDefPtr nodeDef : standardDataLibrary->dataLibrary()->getMatchingNodeDefs(MULTIPLY_NODE_NAME))
     {
         for (OutputPtr output : nodeDef->getOutputs())
         {
@@ -183,7 +173,7 @@ ShaderNodePtr UnitSystem::createNode(ShaderGraph* parent, const UnitTransform& t
     }
 
     // Scalar unit conversion
-    UnitTypeDefPtr scalarTypeDef = _document->getUnitTypeDef(transform.unitType);
+    UnitTypeDefPtr scalarTypeDef = standardDataLibrary->dataLibrary()->getUnitTypeDef(transform.unitType);
     if (!_unitRegistry || !_unitRegistry->getUnitConverter(scalarTypeDef))
     {
         throw ExceptionTypeError("Unit registry unavaliable or undefined unit converter for: " + transform.unitType);

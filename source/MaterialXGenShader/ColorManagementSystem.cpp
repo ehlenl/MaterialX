@@ -30,17 +30,8 @@ ColorManagementSystem::ColorManagementSystem()
 {
 }
 
-void ColorManagementSystem::loadLibrary(DocumentPtr document)
-{
-    _document = document;
-}
-
 bool ColorManagementSystem::supportsTransform(const ColorSpaceTransform& transform) const
 {
-    if (!_document)
-    {
-        throw ExceptionShaderGenError("No library loaded for color management system");
-    }
     return getNodeDef(transform) != nullptr;
 }
 

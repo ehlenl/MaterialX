@@ -16,6 +16,7 @@
 #include <MaterialXGenShader/TypeDesc.h>
 
 #include <MaterialXCore/Document.h>
+#include <MaterialXCore/Datalibrary.h>
 
 MATERIALX_NAMESPACE_BEGIN
 
@@ -53,10 +54,6 @@ class MX_GENSHADER_API ColorManagementSystem
     /// Return the ColorManagementSystem name
     virtual const string& getName() const = 0;
 
-    /// Load a library of implementations from the provided document,
-    /// replacing any previously loaded content.
-    virtual void loadLibrary(DocumentPtr document);
-
     /// Returns whether this color management system supports a provided transform
     bool supportsTransform(const ColorSpaceTransform& transform) const;
 
@@ -71,8 +68,6 @@ class MX_GENSHADER_API ColorManagementSystem
     /// Returns a nodedef for a given transform
     virtual NodeDefPtr getNodeDef(const ColorSpaceTransform& transform) const = 0;
 
-  protected:
-    DocumentPtr _document;
 };
 
 MATERIALX_NAMESPACE_END

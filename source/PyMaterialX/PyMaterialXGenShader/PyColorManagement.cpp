@@ -52,7 +52,6 @@ void bindPyColorManagement(py::module& mod)
     py::class_<mx::ColorManagementSystem, PyColorManagementSystem, mx::ColorManagementSystemPtr>(mod, "ColorManagementSystem")
         .def(py::init<>())
         .def("getName", &mx::ColorManagementSystem::getName)
-        .def("loadLibrary", &mx::ColorManagementSystem::loadLibrary)
         .def("supportsTransform", &mx::ColorManagementSystem::supportsTransform);
 
     py::class_<mx::DefaultColorManagementSystem, mx::DefaultColorManagementSystemPtr, mx::ColorManagementSystem>(mod, "DefaultColorManagementSystem")

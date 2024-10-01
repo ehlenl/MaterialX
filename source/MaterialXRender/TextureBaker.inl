@@ -496,7 +496,6 @@ DocumentPtr TextureBaker<Renderer, ShaderGen>::bakeMaterialToDoc(DocumentPtr doc
     genContext.getOptions().targetDistanceUnit = _distanceUnit;
 
     DefaultColorManagementSystemPtr cms = DefaultColorManagementSystem::create(genContext.getShaderGenerator().getTarget());
-    cms->loadLibrary(doc);
     genContext.registerSourceCodeSearchPath(searchPath);
     genContext.getShaderGenerator().setColorManagementSystem(cms);
 
@@ -644,7 +643,6 @@ void TextureBaker<Renderer, ShaderGen>::setupUnitSystem(DocumentPtr unitDefiniti
     UnitConverterRegistryPtr registry = UnitConverterRegistry::create();
     registry->addUnitConverter(distanceTypeDef, LinearUnitConverter::create(distanceTypeDef));
     registry->addUnitConverter(angleTypeDef, LinearUnitConverter::create(angleTypeDef));
-    _generator->getUnitSystem()->loadLibrary(unitDefinitions);
     _generator->getUnitSystem()->setUnitConverterRegistry(registry);
 }
 
