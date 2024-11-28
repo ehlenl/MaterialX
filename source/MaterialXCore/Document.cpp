@@ -95,7 +95,7 @@ class Document::Cache
                     PortElementPtr portElem = elem->asA<PortElement>();
                     if (portElem)
                     {
-                        portElementMap.emplace(portElem->getQualifiedName(nodeName), portElem);
+                        portElementMap[portElem->getQualifiedName(nodeName)].push_back(portElem);
                     }
                 }
                 else
@@ -105,7 +105,7 @@ class Document::Cache
                         PortElementPtr portElem = elem->asA<PortElement>();
                         if (portElem)
                         {
-                            portElementMap.emplace(portElem->getQualifiedName(nodeGraphName), portElem);
+                            portElementMap[portElem->getQualifiedName(nodeGraphName)].push_back(portElem);
                         }
                     }
                 }
@@ -114,7 +114,7 @@ class Document::Cache
                     NodeDefPtr nodeDef = elem->asA<NodeDef>();
                     if (nodeDef)
                     {
-                        nodeDefMap.emplace(nodeDef->getQualifiedName(nodeString), nodeDef);
+                        nodeDefMap[nodeDef->getQualifiedName(nodeString)].push_back(nodeDef);
                     }
                 }
                 if (!nodeDefString.empty())
@@ -124,7 +124,7 @@ class Document::Cache
                     {
                         if (interface->isA<NodeGraph>())
                         {
-                            implementationMap.emplace(interface->getQualifiedName(nodeDefString), interface);
+                            implementationMap[interface->getQualifiedName(nodeDefString)].push_back(interface);
                         }
                         ImplementationPtr impl = interface->asA<Implementation>();
                         if (impl)
@@ -135,11 +135,11 @@ class Document::Cache
                             {
                                 NodeGraphPtr nodeGraph = impl->getDocument()->getNodeGraph(nodeGraphString);
                                 if (nodeGraph)
-                                    implementationMap.emplace(interface->getQualifiedName(nodeDefString), nodeGraph);
+                                    implementationMap[interface->getQualifiedName(nodeDefString)].push_back(nodeGraph);
                             }
                             else
                             {
-                                implementationMap.emplace(interface->getQualifiedName(nodeDefString), interface);
+                                implementationMap[interface->getQualifiedName(nodeDefString)].push_back(interface);
                             }
                         }
                     }
@@ -154,9 +154,9 @@ class Document::Cache
     weak_ptr<Document> doc;
     std::mutex mutex;
     bool valid;
-    std::unordered_multimap<string, PortElementPtr> portElementMap;
-    std::unordered_multimap<string, NodeDefPtr> nodeDefMap;
-    std::unordered_multimap<string, InterfaceElementPtr> implementationMap;
+    std::unordered_map<string, std::vector<PortElementPtr>> portElementMap;
+    std::unordered_map<string, std::vector<NodeDefPtr>> nodeDefMap;
+    std::unordered_map<string, std::vector<InterfaceElementPtr>> implementationMap;
 };
 
 //
@@ -304,16 +304,15 @@ vector<PortElementPtr> Document::getMatchingPorts(const string& nodeName) const
     // Refresh the cache.
     _cache->refresh();
 
-    // Find all port elements matching the given node name.
-    vector<PortElementPtr> ports;
-    auto keyRange = _cache->portElementMap.equal_range(nodeName);
-    for (auto it = keyRange.first; it != keyRange.second; ++it)
+    // Return all port elements matching the given node name.
+    if (_cache->portElementMap.count(nodeName))
     {
-        ports.push_back(it->second);
+        return _cache->portElementMap.at(nodeName);
     }
-
-    // Return the matches.
-    return ports;
+    else
+    {
+        return vector<PortElementPtr>();
+    }
 }
 
 ValuePtr Document::getGeomPropValue(const string& geomPropName, const string& geom) const
@@ -362,16 +361,15 @@ vector<NodeDefPtr> Document::getMatchingNodeDefs(const string& nodeName) const
     // Refresh the cache.
     _cache->refresh();
 
-    // Find all nodedefs matching the given node name.
-    vector<NodeDefPtr> nodeDefs;
-    auto keyRange = _cache->nodeDefMap.equal_range(nodeName);
-    for (auto it = keyRange.first; it != keyRange.second; ++it)
+    // Return all nodedefs matching the given node name.
+    if (_cache->nodeDefMap.count(nodeName))
     {
-        nodeDefs.push_back(it->second);
+        return _cache->nodeDefMap.at(nodeName);
     }
-
-    // Return the matches.
-    return nodeDefs;
+    else
+    {
+        return vector<NodeDefPtr>();
+    }
 }
 
 vector<InterfaceElementPtr> Document::getMatchingImplementations(const string& nodeDef) const
@@ -379,16 +377,15 @@ vector<InterfaceElementPtr> Document::getMatchingImplementations(const string& n
     // Refresh the cache.
     _cache->refresh();
 
-    // Find all implementations matching the given nodedef string.
-    vector<InterfaceElementPtr> implementations;
-    auto keyRange = _cache->implementationMap.equal_range(nodeDef);
-    for (auto it = keyRange.first; it != keyRange.second; ++it)
+    // Return all implementations matching the given nodedef string.
+    if (_cache->implementationMap.count(nodeDef))
     {
-        implementations.push_back(it->second);
+        return _cache->implementationMap.at(nodeDef);
     }
-
-    // Return the matches.
-    return implementations;
+    else
+    {
+        return vector<InterfaceElementPtr>();
+    }
 }
 
 bool Document::validate(string* message) const
@@ -492,12 +489,10 @@ void Document::upgradeVersion()
                     if (nodeDef->hasAttribute("shadertype"))
                     {
                         nodeDef->setType(SURFACE_SHADER_TYPE_STRING);
-                        nodeDef->removeAttribute("shadertype");
                     }
                     if (nodeDef->hasAttribute("shaderprogram"))
                     {
                         nodeDef->setNodeString(nodeDef->getAttribute("shaderprogram"));
-                        nodeDef->removeAttribute("shaderprogram");
                     }
                 }
                 else if (child->getCategory() == "shaderref")
@@ -751,8 +746,18 @@ void Document::upgradeVersion()
         // Remove legacy shader nodedefs.
         for (NodeDefPtr nodeDef : getNodeDefs())
         {
-            if (nodeDef->getType() == "surface")
+            if (nodeDef->hasAttribute("shadertype"))
             {
+                for (ElementPtr mat : getChildrenOfType<Element>("material"))
+                {
+                    for (ElementPtr shaderRef : mat->getChildrenOfType<Element>("shaderref"))
+                    {
+                        if (shaderRef->getAttribute(InterfaceElement::NODE_DEF_ATTRIBUTE) == nodeDef->getName())
+                        {
+                            shaderRef->removeAttribute(InterfaceElement::NODE_DEF_ATTRIBUTE);
+                        }
+                    }
+                }
                 removeNodeDef(nodeDef->getName());
             }
         }
@@ -1044,39 +1049,7 @@ void Document::upgradeVersion()
             }
         }
 
-        // Update atan2 interface and rotate3d interface
-        const string ATAN2 = "atan2";
-        const string IN1 = "in1";
-        const string IN2 = "in2";
-        const string ROTATE3D = "rotate3d";
-        const string AXIS = "axis";
-        const string INPUT_ONE = "1.0";
-
-        // Update nodedefs
-        bool upgradeAtan2Instances = false;
-        for (auto nodedef : getMatchingNodeDefs(ATAN2))
-        {
-            InputPtr input = nodedef->getInput(IN1);
-            InputPtr input2 = nodedef->getInput(IN2);
-            string inputValue = input->getValueString();
-            // Only flip value if nodedef value is the previous versions.
-            if (inputValue == INPUT_ONE)
-            {
-                input->setValueString(input2->getValueString());
-                input2->setValueString(inputValue);
-                upgradeAtan2Instances = true;
-            }
-        }
-        for (auto nodedef : getMatchingNodeDefs(ROTATE3D))
-        {
-            ElementPtr axis = nodedef->getChild(AXIS);
-            if (axis)
-            {
-                nodedef->changeChildCategory(axis, "input");
-            }
-        }
-
-        // Update BSDF interfaces
+        // Define BSDF node pairs.
         using StringPair = std::pair<string, string>;
         const StringPair DIELECTRIC_BRDF = { "dielectric_brdf", "dielectric_bsdf" };
         const StringPair DIELECTRIC_BTDF = { "dielectric_btdf", "dielectric_bsdf" };
@@ -1089,57 +1062,11 @@ void Document::upgradeVersion()
         const StringPair SUBSURFACE_BRDF = { "subsurface_brdf", "subsurface_bsdf" };
         const StringPair THIN_FILM_BRDF = { "thin_film_brdf", "thin_film_bsdf" };
 
-        const string SCATTER_MODE = "scatter_mode";
-        const string BSDF = "BSDF";
-        const string LAYER = "layer";
-        const string TOP = "top";
-        const string BASE = "base";
-        const string INTERIOR = "interior";
-        const string ARTISTIC_IOR = "artistic_ior";
-        const string COMPLEX_IOR = "complex_ior";
-        const string REFLECTIVITY = "reflectivity";
-        const string EDGE_COLOR = "edge_color";
-        const string IOR = "ior";
-        const string EXTINCTION = "extinction";
-        const string COLOR3 = "color3";
-        const string VECTOR3 = "vector3";
-        const string CONVERT = "convert";
-        const string IN = "in";
-
-        // Function for upgrading BSDF nodedef.
-        auto upgradeBsdfNodeDef = [SCATTER_MODE](NodeDefPtr nodedef, const string& newCategory, bool addScatterMode = false)
-        {
-            if (nodedef)
-            {
-                nodedef->setName(newCategory);
-                if (addScatterMode)
-                {
-                    InputPtr mode = nodedef->addInput(SCATTER_MODE, STRING_TYPE_STRING);
-                    mode->setIsUniform(true);
-                    mode->setValueString("R");
-                    mode->setAttribute("enum", "R,T,RT");
-                }
-            }
-        };
-
-        // Update nodedefs.
-        upgradeBsdfNodeDef(getNodeDef(DIELECTRIC_BRDF.first), DIELECTRIC_BRDF.second, true);
-        upgradeBsdfNodeDef(getNodeDef(GENERALIZED_SCHLICK_BRDF.first), GENERALIZED_SCHLICK_BRDF.second, true);
-        upgradeBsdfNodeDef(getNodeDef(CONDUCTOR_BRDF.first), CONDUCTOR_BRDF.second);
-        upgradeBsdfNodeDef(getNodeDef(SHEEN_BRDF.first), SHEEN_BRDF.second);
-        upgradeBsdfNodeDef(getNodeDef(DIFFUSE_BRDF.first), DIFFUSE_BRDF.second);
-        upgradeBsdfNodeDef(getNodeDef(BURLEY_DIFFUSE_BRDF.first), BURLEY_DIFFUSE_BRDF.second);
-        upgradeBsdfNodeDef(getNodeDef(DIFFUSE_BTDF.first), DIFFUSE_BTDF.second);
-        upgradeBsdfNodeDef(getNodeDef(SUBSURFACE_BRDF.first), SUBSURFACE_BRDF.second);
-        upgradeBsdfNodeDef(getNodeDef(THIN_FILM_BRDF.first), THIN_FILM_BRDF.second);
-        removeNodeDef(DIELECTRIC_BTDF.first);
-        removeNodeDef(COMPLEX_IOR);
-
         // Function for upgrading old nested layering setup
         // to new setup with layer operators.
-        auto upgradeBsdfLayering = [TOP, BASE, LAYER, BSDF](NodePtr node)
+        auto upgradeBsdfLayering = [](NodePtr node)
         {
-            InputPtr base = node->getInput(BASE);
+            InputPtr base = node->getInput("base");
             if (base)
             {
                 NodePtr baseNode = base->getConnectedNode();
@@ -1150,13 +1077,13 @@ void Document::upgradeVersion()
                     // so we don't need to update any connection references.
                     const string oldName = node->getName();
                     node->setName(oldName + "__layer_top");
-                    NodePtr layer = parent->addNode(LAYER, oldName, BSDF);
-                    InputPtr layerTop = layer->addInput(TOP, BSDF);
-                    InputPtr layerBase = layer->addInput(BASE, BSDF);
+                    NodePtr layer = parent->addNode("layer", oldName, "BSDF");
+                    InputPtr layerTop = layer->addInput("top", "BSDF");
+                    InputPtr layerBase = layer->addInput("base", "BSDF");
                     layerTop->setConnectedNode(node);
                     layerBase->setConnectedNode(baseNode);
                 }
-                node->removeInput(BASE);
+                node->removeInput("base");
             }
         };
 
@@ -1181,31 +1108,31 @@ void Document::upgradeVersion()
                 continue;
             }
             const string& nodeCategory = node->getCategory();
-            if (upgradeAtan2Instances && nodeCategory == ATAN2)
+            if (nodeCategory == "atan2")
             {
-                InputPtr input = node->getInput(IN1);
-                InputPtr input2 = node->getInput(IN2);
+                InputPtr input = node->getInput("in1");
+                InputPtr input2 = node->getInput("in2");
                 if (input && input2)
                 {
                     input->setName(EMPTY_STRING);
-                    input2->setName(IN1);
-                    input->setName(IN2);
+                    input2->setName("in1");
+                    input->setName("in2");
                 }
                 else
                 {
                     if (input)
                     {
-                        input->setName(IN2);
+                        input->setName("in2");
                     }
                     if (input2)
                     {
-                        input2->setName(IN1);
+                        input2->setName("in1");
                     }
                 }
             }
-            else if (nodeCategory == ROTATE3D)
+            else if (nodeCategory == "rotate3d")
             {
-                ElementPtr axis = node->getChild(AXIS);
+                ElementPtr axis = node->getChild("axis");
                 if (axis)
                 {
                     node->changeChildCategory(axis, "input");
@@ -1219,8 +1146,8 @@ void Document::upgradeVersion()
             else if (nodeCategory == DIELECTRIC_BTDF.first)
             {
                 node->setCategory(DIELECTRIC_BTDF.second);
-                node->removeInput(INTERIOR);
-                InputPtr mode = node->addInput(SCATTER_MODE, STRING_TYPE_STRING);
+                node->removeInput("interior");
+                InputPtr mode = node->addInput("scatter_mode", STRING_TYPE_STRING);
                 mode->setValueString("T");
             }
             else if (nodeCategory == GENERALIZED_SCHLICK_BRDF.first)
@@ -1244,32 +1171,32 @@ void Document::upgradeVersion()
 
                 // Create an artistic_ior node to convert from artistic to physical parameterization.
                 GraphElementPtr parent = node->getParent()->asA<GraphElement>();
-                NodePtr artisticIor = parent->addNode(ARTISTIC_IOR, node->getName() + "__artistic_ior", "multioutput");
-                OutputPtr artisticIor_ior = artisticIor->addOutput(IOR, COLOR3);
-                OutputPtr artisticIor_extinction = artisticIor->addOutput(EXTINCTION, COLOR3);
+                NodePtr artisticIor = parent->addNode("artistic_ior", node->getName() + "__artistic_ior", "multioutput");
+                OutputPtr artisticIor_ior = artisticIor->addOutput("ior", "color3");
+                OutputPtr artisticIor_extinction = artisticIor->addOutput("extinction", "color3");
 
                 // Copy values and connections from conductor node to artistic_ior node.
-                InputPtr reflectivity = node->getInput(REFLECTIVITY);
+                InputPtr reflectivity = node->getInput("reflectivity");
                 if (reflectivity)
                 {
-                    InputPtr artisticIor_reflectivity = artisticIor->addInput(REFLECTIVITY, COLOR3);
+                    InputPtr artisticIor_reflectivity = artisticIor->addInput("reflectivity", "color3");
                     copyAttributes(reflectivity, artisticIor_reflectivity);
                 }
-                InputPtr edge_color = node->getInput(EDGE_COLOR);
+                InputPtr edge_color = node->getInput("edge_color");
                 if (edge_color)
                 {
-                    InputPtr artisticIor_edge_color = artisticIor->addInput(EDGE_COLOR, COLOR3);
+                    InputPtr artisticIor_edge_color = artisticIor->addInput("edge_color", "color3");
                     copyAttributes(edge_color, artisticIor_edge_color);
                 }
 
                 // Update the parameterization on the conductor node
                 // and connect it to the artistic_ior node.
-                node->removeInput(REFLECTIVITY);
-                node->removeInput(EDGE_COLOR);
-                InputPtr ior = node->addInput(IOR, COLOR3);
+                node->removeInput("reflectivity");
+                node->removeInput("edge_color");
+                InputPtr ior = node->addInput("ior", "color3");
                 ior->setNodeName(artisticIor->getName());
                 ior->setOutputString(artisticIor_ior->getName());
-                InputPtr extinction = node->addInput(EXTINCTION, COLOR3);
+                InputPtr extinction = node->addInput("extinction", "color3");
                 extinction->setNodeName(artisticIor->getName());
                 extinction->setOutputString(artisticIor_extinction->getName());
             }
@@ -1289,17 +1216,17 @@ void Document::upgradeVersion()
             {
                 node->setCategory(SUBSURFACE_BRDF.second);
             }
-            else if (nodeCategory == ARTISTIC_IOR)
+            else if (nodeCategory == "artistic_ior")
             {
-                OutputPtr ior = node->getOutput(IOR);
+                OutputPtr ior = node->getOutput("ior");
                 if (ior)
                 {
-                    ior->setType(COLOR3);
+                    ior->setType("color3");
                 }
-                OutputPtr extinction = node->getOutput(EXTINCTION);
+                OutputPtr extinction = node->getOutput("extinction");
                 if (extinction)
                 {
-                    extinction->setType(COLOR3);
+                    extinction->setType("color3");
                 }
             }
 
@@ -1310,18 +1237,18 @@ void Document::upgradeVersion()
             // since we can't modify the graph while traversing it.
             for (InputPtr input : node->getInputs())
             {
-                if (input->getOutputString() == IOR && input->getType() == VECTOR3)
+                if (input->getOutputString() == "ior" && input->getType() == "vector3")
                 {
                     NodePtr connectedNode = input->getConnectedNode();
-                    if (connectedNode && connectedNode->getCategory() == ARTISTIC_IOR)
+                    if (connectedNode && connectedNode->getCategory() == "artistic_ior")
                     {
                         artisticIorConnections.push_back(input);
                     }
                 }
-                else if (input->getOutputString() == EXTINCTION && input->getType() == VECTOR3)
+                else if (input->getOutputString() == "extinction" && input->getType() == "vector3")
                 {
                     NodePtr connectedNode = input->getConnectedNode();
-                    if (connectedNode && connectedNode->getCategory() == ARTISTIC_IOR)
+                    if (connectedNode && connectedNode->getCategory() == "artistic_ior")
                     {
                         artisticExtConnections.push_back(input);
                     }
@@ -1335,10 +1262,10 @@ void Document::upgradeVersion()
             NodePtr artisticIorNode = input->getConnectedNode();
             ElementPtr node = input->getParent();
             GraphElementPtr parent = node->getParent()->asA<GraphElement>();
-            NodePtr convert = parent->addNode(CONVERT, node->getName() + "__convert_ior", VECTOR3);
-            InputPtr convertInput = convert->addInput(IN, COLOR3);
+            NodePtr convert = parent->addNode("convert", node->getName() + "__convert_ior", "vector3");
+            InputPtr convertInput = convert->addInput("in", "color3");
             convertInput->setNodeName(artisticIorNode->getName());
-            convertInput->setOutputString(IOR);
+            convertInput->setOutputString("ior");
             input->setNodeName(convert->getName());
             input->removeAttribute(PortElement::OUTPUT_ATTRIBUTE);
         }
@@ -1347,10 +1274,10 @@ void Document::upgradeVersion()
             NodePtr artisticIorNode = input->getConnectedNode();
             ElementPtr node = input->getParent();
             GraphElementPtr parent = node->getParent()->asA<GraphElement>();
-            NodePtr convert = parent->addNode(CONVERT, node->getName() + "__convert_extinction", VECTOR3);
-            InputPtr convertInput = convert->addInput(IN, COLOR3);
+            NodePtr convert = parent->addNode("convert", node->getName() + "__convert_extinction", "vector3");
+            InputPtr convertInput = convert->addInput("in", "color3");
             convertInput->setNodeName(artisticIorNode->getName());
-            convertInput->setOutputString(EXTINCTION);
+            convertInput->setOutputString("extinction");
             input->setNodeName(convert->getName());
             input->removeAttribute(PortElement::OUTPUT_ATTRIBUTE);
         }

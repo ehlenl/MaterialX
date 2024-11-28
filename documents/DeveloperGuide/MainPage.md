@@ -1,6 +1,6 @@
 # MaterialX Overview
 
-MaterialX is an open standard for transfer of rich material and look-development content between applications and renderers.  Originated at Lucasfilm in 2012, MaterialX has been used by Industrial Light & Magic (ILM) in feature films such as _Star Wars: The Force Awakens_ and real-time experiences such as _Trials on Tatooine_, and it remains the central material format for new ILM productions.
+MaterialX is an open standard for representing rich material and look-development content in computer graphics, enabling its platform-independent description and exchange across applications and renderers.  Launched at [Industrial Light & Magic](https://www.ilm.com/) in 2012, MaterialX has been a key technology in their feature films and real-time experiences since _Star Wars: The Force Awakens_ and _Millennium Falcon: Smugglers Run_.  The project was released as open source in 2017, with companies including Sony Pictures Imageworks, Pixar, Autodesk, Adobe, and SideFX contributing to its ongoing development.  In 2021, MaterialX became the seventh hosted project of the [Academy Software Foundation](https://www.aswf.io/).
 
 ### Quick Start for Developers
 
@@ -58,9 +58,24 @@ Building the `install` target of your project will install the MaterialX C++ and
 
 ### MaterialX Versioning
 
-The MaterialX codebase uses a modified semantic versioning system where the *major* and *minor* versions match that of the corresponding MaterialX [specification](https://www.materialx.org/Specification.html), and the *build* version represents engineering advances within that specification version.  MaterialX documents are similarly marked with the specification version they were authored in, and they are valid to load into any MaterialX codebase with an equal or higher specification version.
+The MaterialX codebase uses a modified semantic versioning system where the *major* and *minor* versions match that of the corresponding MaterialX [specification](https://github.com/AcademySoftwareFoundation/MaterialX/blob/main/documents/Specification/MaterialX.Specification.md), and the *build* version represents engineering advances within that specification version.  MaterialX documents are similarly marked with the specification version they were authored in, and they are valid to load into any MaterialX codebase with an equal or higher specification version.
 
-Upgrading of MaterialX documents from earlier versions is handled at import time by the Document::upgradeVersion method, which applies the syntax and node interface upgrades that have occurred in previous specification revisions.  This allows the syntax conventions of MaterialX and the names and interfaces of nodes to evolve over time, without invalidating documents from earlier versions.
+Upgrading of MaterialX documents from earlier versions is handled at import time by the `Document::upgradeVersion` method, which applies the syntax and node interface upgrades that have occurred in previous specification revisions.  This allows the syntax conventions of MaterialX and the names and interfaces of nodes to evolve over time, without invalidating documents from earlier versions.
+
+#### MaterialX API Changes
+
+The following rules describe the categories of changes to the [MaterialX API](https://materialx.org/docs/api/classes.html) that are allowed in version upgrades:
+
+- In *build* version upgrades, only non-breaking changes to the MaterialX API are allowed.  For any API call that is modified in a build version upgrade, backwards compatibility should be maintained using deprecated C++ and Python wrappers for the original API call.
+- In *minor* and *major* version upgrades, breaking changes to the MaterialX API are allowed, though their benefit should be carefully weighed against their cost.  Any breaking changes to API calls should be highlighted in the release notes for the new version.
+
+#### MaterialX Data Library Changes
+
+The following rules describe the categories of changes to the [MaterialX Data Libraries](https://github.com/AcademySoftwareFoundation/MaterialX/tree/main/libraries) that are allowed in version upgrades:
+
+- In *build* version upgrades, only additive changes and fixes to the MaterialX data libraries are allowed.  Additive changes are allowed to introduce new nodes, node versions, and node inputs with backwards-compatible default values.  Data library fixes are allowed to update a node implementation to improve its alignment with the specification, without making any changes to its name or interface.
+- In *minor* version upgrades, changes to the names and interfaces of MaterialX nodes are allowed, with the requirement that version upgrade logic be used to maintain the validity and visual interpretation of documents from earlier versions.
+- In *major* version upgrades, changes to the syntax rules of MaterialX documents are allowed, with the requirement that version upgrade logic be used to maintain the validity and visual interpretation of documents from earlier versions.  These changes usually require synchronized updates to both the MaterialX API and data libraries.
 
 ### Additional Links
 

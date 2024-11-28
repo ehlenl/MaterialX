@@ -288,7 +288,10 @@ void MdlShaderGeneratorTester::compileSource(const std::vector<mx::FilePath>& so
         std::string iblFile = (rootPath / "resources/lights/san_giuseppe_bridge.hdr").asString();
         renderCommand += " --hdr \"" + iblFile + "\" --hdr_rotate 90";
         // set scene
-        renderCommand += " --uv_scale 0.5 1.0 --uv_offset 0.0 0.0 --uv_repeat --uv_flip";
+        renderCommand += " --uv_scale 0.5 1.0 --uv_offset 0.0 0.0 --uv_repeat";
+        renderCommand += " --uv_flip"; // this will flip the v coordinate of the vertices, which flips all the
+                                       // UV operations. In contrast, the fileTextureVerticalFlip option will
+                                       // only flip the image access nodes.
         renderCommand += " --camera 0 0 3 0 0 0 --fov 45";
 
         // set the material
@@ -324,11 +327,11 @@ void MdlShaderGeneratorTester::compileSource(const std::vector<mx::FilePath>& so
         mx::FilePath outputImageName = moduleToTestPath / (imageFilename + extension);
 
         renderCommand += " -o " + outputImageName.asString();
-        mx::FilePath logFile = moduleToTestPath / (moduleToTest + ".mdl_render_errors.txt");
-        renderCommand += " > " + logFile.asString() + " 2>&1";
-
+        mx::FilePath logFile = moduleToTestPath / (moduleToTest + ".mdl_render_log.txt");
+        renderCommand += " --log_file " + logFile.asString();
+        mx::FilePath errorLogFile = moduleToTestPath / (moduleToTest + ".mdl_render_errors.txt");
         int returnValue = std::system(renderCommand.c_str());
-        std::ifstream logStream(logFile);
+        std::ifstream logStream(errorLogFile);
         mx::StringVec result;
         std::string line;
         bool writeLogCode = false;
@@ -354,6 +357,7 @@ TEST_CASE("GenShader: MDL Shader Generation", "[genmdl]")
     mx::FilePathVec testRootPaths;
     testRootPaths.push_back(searchPath.find("resources/Materials/TestSuite"));
     testRootPaths.push_back(searchPath.find("resources/Materials/Examples/StandardSurface"));
+    testRootPaths.push_back(searchPath.find("resources/Materials/Examples/OpenPbr"));
 
     const mx::FilePath logPath("genmdl_mdl_generate_test.txt");
 
@@ -365,6 +369,25 @@ TEST_CASE("GenShader: MDL Shader Generation", "[genmdl]")
 
     mx::GenOptions genOptions;
     genOptions.targetColorSpaceOverride = "lin_rec709";
+
+    // Flipping the texture lookups for the test renderer only.
+    // This is because OSL testrender does not allow to change the UV layout of their sphere (yet) and the MaterialX test suite
+    // adopts the OSL behavior in order to produce comparable results. This means that raw texture coordinates, or procedurals
+    // that use the texture coordinates, do not match what might be expected when reading the MaterialX spec:
+    //    "[...] the image is mapped onto the geometry based on geometry UV coordinates, with the lower-left corner of an image 
+    //     mapping to the (0,0) UV coordinate [...]"
+    // This means for MDL: here, and only here in the test suite, we flip the UV coordinates of mesh using the `--uv_flip` option
+    // of the renderer, and to correct the image orientation, we apply `fileTextureVerticalFlip`.
+    // In regular MDL integrations this is not needed because MDL and MaterialX define the texture space equally with the origin
+    // at the bottom left.
+    genOptions.fileTextureVerticalFlip = true;
+
     mx::FilePath optionsFilePath = searchPath.find("resources/Materials/TestSuite/_options.mtlx");
+
+    // Specify the MDL target version to be the latest which is also the default.
+    mx::GenMdlOptionsPtr genMdlOptions = std::make_shared<mx::GenMdlOptions>();
+    genMdlOptions->targetVersion = mx::GenMdlOptions::MdlVersion::MDL_LATEST;
+    tester.addUserData(mx::GenMdlOptions::GEN_CONTEXT_USER_DATA_KEY, genMdlOptions);
+
     tester.validate(genOptions, optionsFilePath);
 }

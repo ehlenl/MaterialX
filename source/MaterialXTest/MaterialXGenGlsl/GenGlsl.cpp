@@ -119,6 +119,17 @@ TEST_CASE("GenShader: Bind Light Shaders", "[genglsl]")
     REQUIRE_NOTHROW(mx::HwShaderGenerator::bindLightShader(*spotLightShader, 66, context));
 }
 
+#ifdef MATERIALX_BUILD_BENCHMARK_TESTS
+TEST_CASE("GenShader: Performance Test", "[genglsl]")
+{
+    mx::GenContext context(mx::GlslShaderGenerator::create());
+    BENCHMARK("Load documents, validate and generate shader") 
+    {
+        return GenShaderUtil::shaderGenPerformanceTest(context);
+    };
+}
+#endif
+
 enum class GlslType
 {
     Glsl400,
@@ -147,6 +158,7 @@ static void generateGlslCode(GlslType type = GlslType::Glsl400)
     mx::FilePathVec testRootPaths;
     testRootPaths.push_back(searchPath.find("resources/Materials/TestSuite"));
     testRootPaths.push_back(searchPath.find("resources/Materials/Examples/StandardSurface"));
+    testRootPaths.push_back(searchPath.find("resources/Materials/Examples/OpenPbr"));
 
     const mx::FilePath logPath("genglsl_" + GlslTypeToString(type) + "_generate_test.txt");
 
