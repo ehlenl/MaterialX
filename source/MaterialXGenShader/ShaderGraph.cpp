@@ -654,6 +654,8 @@ void ShaderGraph::applyInputTransforms(ConstNodePtr node, ShaderNodePtr shaderNo
                     }
                 }
 
+                ShaderInput* shaderInput = shaderNode->getInput(input->getName());
+                shaderInput->setColorSpace(sourceColorSpace);
                 ShaderOutput* shaderOutput = shaderNode->getOutput();
                 populateColorTransformMap(colorManagementSystem, shaderOutput, sourceColorSpace, targetColorSpace, false);
                 populateUnitTransformMap(unitSystem, shaderOutput, input, targetDistanceUnit, false);
