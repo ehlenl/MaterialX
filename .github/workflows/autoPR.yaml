@@ -15,9 +15,6 @@ jobs:
       with:
         ref: main
 
-    - name: Set up GitHub CLI
-      uses: actions/setup-gh-cli@v1
-
     - name: Create new branch
       run: |
         NEW_BRANCH="new-branch-$(date +'%Y%m%d')"
