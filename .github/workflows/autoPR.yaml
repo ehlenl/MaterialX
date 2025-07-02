@@ -31,4 +31,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh pr create --title "Merge $NEW_BRANCH into adsk_contrib/dev" --body "Auto-created PR to merge $NEW_BRANCH into adsk_contrib/dev" --head $NEW_BRANCH --base adsk_contrib/dev --reviewer "ehlenl"
+        gh pr create --title "Merge $MERGE_BRANCH into adsk_contrib/dev" --body "Auto-created PR to merge $NEW_BRANCH into adsk_contrib/dev" --head $NEW_BRANCH --base adsk_contrib/dev --reviewer "ehlenl"
