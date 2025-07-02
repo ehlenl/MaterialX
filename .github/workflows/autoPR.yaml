@@ -8,6 +8,9 @@ on:
 jobs:
   create-branch-and-pr:
     runs-on: ubuntu-latest
+    env:
+      MERGE_BRANCH: new-branch-${{ github.run_number }}  # Define the new branch name globally.
+
 
     steps:
     - name: Checkout main branch
@@ -17,19 +20,21 @@ jobs:
 
     - name: Create new branch
       run: |
-        NEW_BRANCH="new-branch-${{ github.run_number }}"
-        git checkout -b $NEW_BRANCH
+        git checkout -b $MERGE_BRANCH
 
     - name: Push new branch
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        NEW_BRANCH="new-branch-${{ github.run_number }}"
-        git push origin $NEW_BRANCH
+        git push origin $MERGE_BRANCH
 
     - name: Create pull request to adsk_contrib/dev
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        NEW_BRANCH="new-branch-${{ github.run_number }}"
-        gh pr create --title "Merge $NEW_BRANCH into adsk_contrib/dev" --body "Auto-created PR to merge $NEW_BRANCH into adsk_contrib/dev" --head $NEW_BRANCH --base adsk_contrib/dev
+        gh pr create \
+          --title "Merge $NEW_BRANCH into adsk_contrib/dev" \
+          --body "Auto-created PR to merge $NEW_BRANCH into adsk_contrib/dev" \
+          --head $NEW_BRANCH \
+          --base adsk_contrib/dev \
+          --reviewer "ehlenl"
