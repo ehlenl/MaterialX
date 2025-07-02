@@ -9,8 +9,7 @@ jobs:
   create-branch-and-pr:
     runs-on: ubuntu-latest
     env:
-      MERGE_BRANCH: new-branch-${{ github.run_number }}  # Define the new branch name globally.
-
+      MERGE_BRANCH: merge-branch-${{ github.run_number }}  # Define the new branch name globally.
 
     steps:
     - name: Checkout main branch
@@ -36,5 +35,5 @@ jobs:
           --title "Merge $NEW_BRANCH into adsk_contrib/dev" \
           --body "Auto-created PR to merge $NEW_BRANCH into adsk_contrib/dev" \
           --head $NEW_BRANCH \
-          --base adsk_contrib/dev \
+          --base "adsk_contrib/dev" \
           --reviewer "ehlenl"
