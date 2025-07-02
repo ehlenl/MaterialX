@@ -26,8 +26,7 @@ jobs:
       uses: peter-evans/create-pull-request@v7
       with:
         commit-message: Merge main into adsk_contrib/dev
-        branch: adsk_contrib/dev
-        base: merge-main-to-dev-fix-${{ github.run_number }}
+        branch: merge-main-to-dev-fix-${{ github.run_number }}
         title: Merge main into adsk_contrib/dev
         body: Proposed merge between `main` and `adsk_contrib/dev`
         reviewers: ashwinbhat,zicher3d,ppenenko  # List of users
