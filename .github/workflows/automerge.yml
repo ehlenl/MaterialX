@@ -9,10 +9,10 @@ jobs:
   merge:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout main branch
+    - name: Checkout adsk_contrib/dev branch
       uses: actions/checkout@v2
       with:
-        ref: main 
+        ref: adsk_contrib/dev 
         fetch-depth: 0
 
     - name: Set up Git user
@@ -20,14 +20,37 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
+    - name: Checkout main branch
+      run: |
+        git fetch origin main:main
+        git checkout main
 
+    - name: Try to merge main into adsk_contrib/dev
+      run: |
+        git checkout adsk_contrib/dev
+        git merge main
+        git push origin adsk_contrib/dev
 
-    - name: Open Pull Request
-      uses: peter-evans/create-pull-request@v7
+    - name: Handle conflicts and create auxiliary branch
+      if: ${{ failure() }}
+      run: |
+        git status
+        git merge --abort
+        git fetch origin
+        git checkout main && echo "Checkout main"
+        git checkout -b merge-main-to-dev-fix-${{ github.run_number }}
+        git add .
+        git commit --allow-empty -m "Auto merge main into adsk_contrib/dev"
+        git push origin merge-main-to-dev-fix-${{ github.run_number }}
+
+    - name: Open Pull Request if merge fails
+      if: ${{ failure() }}
+      uses: peter-evans/create-pull-request@v5
       with:
-        commit-message: Merge main into adsk_contrib/dev
-        branch: adsk_contrib/dev/merge
+        commit-message: Merge main into adsk_contrib/dev with conflicts resolved
+        branch: adsk_contrib/dev
+        base: merge-main-to-dev-fix-${{ github.run_number }}
         title: Merge main into adsk_contrib/dev
-        body: Proposed merge between `main` and `adsk_contrib/dev`
-        reviewers: ashwinbhat,zicher3d,ppenenko  # List of users
-        labels: merge
+        body: Handling merge conflicts between `main` and `adsk_contrib/dev`
+        reviewers: ehlenl  # List of users
+        labels: merge-conflicts
