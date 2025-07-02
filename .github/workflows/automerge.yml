@@ -25,32 +25,21 @@ jobs:
         git fetch origin main:main
         git checkout main
 
-    - name: Try to merge main into adsk_contrib/dev
-      run: |
-        git checkout adsk_contrib/dev
-        git merge main
-        git push origin adsk_contrib/dev
-
-    - name: Handle conflicts and create auxiliary branch
-      if: ${{ failure() }}
+    - name: Create auxiliary branch
       run: |
         git status
-        git merge --abort
-        git fetch origin
-        git checkout main && echo "Checkout main"
         git checkout -b merge-main-to-dev-fix-${{ github.run_number }}
         git add .
         git commit --allow-empty -m "Auto merge main into adsk_contrib/dev"
         git push origin merge-main-to-dev-fix-${{ github.run_number }}
 
-    - name: Open Pull Request if merge fails
-      if: ${{ failure() }}
+    - name: Open Pull Request
       uses: peter-evans/create-pull-request@v5
       with:
-        commit-message: Merge main into adsk_contrib/dev with conflicts resolved
+        commit-message: Merge main into adsk_contrib/dev
         branch: adsk_contrib/dev
         base: merge-main-to-dev-fix-${{ github.run_number }}
         title: Merge main into adsk_contrib/dev
-        body: Handling merge conflicts between `main` and `adsk_contrib/dev`
+        body: Proposed merge between `main` and `adsk_contrib/dev`
         reviewers: ashwinbhat,zicher3d,ppenenko  # List of users
-        labels: merge-conflicts
+        labels: merge
