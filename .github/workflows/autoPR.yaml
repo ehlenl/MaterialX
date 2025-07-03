@@ -20,7 +20,7 @@ jobs:
     - name: Merge into existing branch
       run: | 
         # Check if the merge branch already exist
-        if git checkout $MERGE_BRANCH; then
+        if git ls-remote --heads origin refs/heads/$MERGE_BRANCH; then
             echo "Merge main into the existing $MERGE_BRANCH"
             git merge main
         else
