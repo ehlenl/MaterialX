@@ -20,17 +20,17 @@ jobs:
     - name: Merge into existing branch
       run: |
         git checkout $MERGE_BRANCH
-        git merge main
-        git push origin $MERGE_BRANCH
         
-
-    - name: Create a new branch
-      if: ${{ failure() }}
-      run: |
-        git checkout main
-        git checkout -b $MERGE_BRANCH
-        git push origin $MERGE_BRANCH
-        
+        # Check the return value of the last executed command
+        if [ $? -eq 0 ]; then
+            echo "Merge main into the existing $MERGE_BRANCH"
+            git merge main
+        else
+            echo "Create new branch $MERGE_BRANCH"
+            git checkout -b $MERGE_BRANCH
+            
+        fi
+        git push origin $MERGE_BRANCH    
 
     - name: Create pull request to adsk_contrib/dev
       env:
