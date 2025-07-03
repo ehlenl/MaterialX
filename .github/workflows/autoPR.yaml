@@ -9,7 +9,7 @@ jobs:
   create-branch-and-pr:
     runs-on: ubuntu-latest
     env:
-      MERGE_BRANCH: merge-branch-${{ github.run_number }}  # Define the new branch name globally.
+      MERGE_BRANCH: adsk-merge-branch
 
     steps:
     - name: Checkout main branch
@@ -17,13 +17,20 @@ jobs:
       with:
         ref: main
 
-    - name: Create new branch
+    - name: Merge into existing branch
       run: |
-        git checkout -b $MERGE_BRANCH
-
-    - name: Push new branch
-      run: |
+        git checkout $MERGE_BRANCH
+        git merge main
         git push origin $MERGE_BRANCH
+        
+
+    - name: Create a new branch
+      if: ${{ failure() }}
+      run: |
+        git checkout main
+        git checkout -b $MERGE_BRANCH
+        git push origin $MERGE_BRANCH
+        
 
     - name: Create pull request to adsk_contrib/dev
       env:
