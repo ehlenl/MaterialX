@@ -19,25 +19,25 @@ jobs:
         fetch-depth: 0
 
     - name: Merge into existing branch
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: | 
         # Check if the merge branch already exist
         if git checkout $MERGE_BRANCH; then
             echo "Merge main into the existing $MERGE_BRANCH"
             git merge main
+            echo "push to $MERGE_BRANCH"
+            git push origin $MERGE_BRANCH 
         else
             echo "Create new branch $MERGE_BRANCH"
             git checkout -b $MERGE_BRANCH
+            echo "push to $MERGE_BRANCH"
+            git push origin $MERGE_BRANCH 
+            echo "Create mrege PR"
+            gh pr create \
+                --title "Merge $MERGE_BRANCH into adsk_contrib/dev" \
+                --body "Auto-created PR to merge $MERGE_BRANCH into adsk_contrib/dev" \
+                --head $MERGE_BRANCH \
+                --base adsk_contrib/dev \
+                --reviewer "ehlenl"
         fi
-        echo "push to $MERGE_BRANCH"
-        git push origin $MERGE_BRANCH    
-
-    - name: Create pull request to adsk_contrib/dev
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        gh pr create \
-        --title "Merge $MERGE_BRANCH into adsk_contrib/dev" \
-        --body "Auto-created PR to merge $MERGE_BRANCH into adsk_contrib/dev" \
-        --head $MERGE_BRANCH \
-        --base adsk_contrib/dev \
-        --reviewer "ehlenl"
