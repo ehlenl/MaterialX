@@ -16,18 +16,19 @@ jobs:
       uses: actions/checkout@v2
       with:
         ref: main
+        fetch-depth: 0
 
     - name: Merge into existing branch
       run: | 
         # Check if the merge branch already exist
-        if git ls-remote --exit-code --heads origin refs/heads/$MERGE_BRANCH; then
+        if git checkout $MERGE_BRANCH; then
             echo "Merge main into the existing $MERGE_BRANCH"
             git merge main
         else
             echo "Create new branch $MERGE_BRANCH"
             git checkout -b $MERGE_BRANCH
-            
         fi
+        echo "push to $MERGE_BRANCH"
         git push origin $MERGE_BRANCH    
 
     - name: Create pull request to adsk_contrib/dev
